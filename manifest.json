@@ -1,53 +1,208 @@
 {
-  "generated": "2024-11-15T00:00:00.000Z",
-  "tags": ["3D", "analogue", "animation", "branding", "editorial", "generative", "identity", "interactive", "live", "music", "personal", "photography", "portrait", "sci-fi", "series", "type"],
+  "generated": "2026-05-31T22:00:33.998Z",
+  "tags": [
+    "2D",
+    "3D",
+    "Blender",
+    "Environment",
+    "Graphic Design",
+    "Illustration",
+    "Multimodal",
+    "Photorealism",
+    "Trepidation"
+  ],
   "works": [
     {
-      "id": "neon_drift",
-      "primaryMedia": "neon_drift.mp4",
-      "allMedia": ["neon_drift.mp4"],
-      "type": "video",
-      "title": "Neon Drift",
-      "description": "A study in motion and light — rendered over three sleepless nights with a custom shader pipeline. The city breathes here; every frame is a heartbeat.\n\nExplored the intersection of brutalist architecture and organic light diffusion. The colour palette draws from Tokyo's Shinjuku ward at 3am.",
-      "tags": ["animation", "sci-fi", "3D", "personal"],
-      "featured": true,
+      "id": "Trepidation_Rooms",
+      "primaryMedia": "Trepidation_Rooms_01.png",
+      "allMedia": [
+        "Trepidation_Rooms_01.png",
+        "Trepidation_Rooms_02.png"
+      ],
+      "type": "image",
+      "title": "Trepidation Rooms",
+      "description": "Some area concepts for my personal Trepidation project. These are created with a large focus on brutalist shape language.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Trepidation"
+      ],
+      "featured": false,
+      "date": "2026-05",
+      "link": ""
+    },
+    {
+      "id": "Grungy_Shower",
+      "primaryMedia": "Grungy_Shower.png",
+      "allMedia": [
+        "Grungy_Shower.png"
+      ],
+      "type": "image",
+      "title": "Grungy Shower",
+      "description": "An attempt at photorealism. Every material in this scene is procedural, even the shower head and drain.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Photorealism"
+      ],
+      "featured": false,
+      "date": "2026-02",
+      "link": ""
+    },
+    {
+      "id": "MagazineTwo",
+      "primaryMedia": "MagazineTwo_01.png",
+      "allMedia": [
+        "MagazineTwo_01.png",
+        "MagazineTwo_02.png",
+        "MagazineTwo_03.png",
+        "MagazineTwo_04.png",
+        "MagazineTwo_05.png",
+        "MagazineTwo_06.png"
+      ],
+      "type": "image",
+      "title": "Misc. Covers",
+      "description": "My forte into graphic design. General covers of something. A magazine? A poster? Who knows.\n\nFor most of these, I simply browsed stock photo websites for images I felt I could work with. Some ideas developed on my own, which I 3D modeled a bit for.\n\nThese have been bundled for convenience, but the dates I finished each of them vary. The text within them usually reveals the true date I finished them.",
+      "tags": [
+        "2D",
+        "Graphic Design",
+        "Multimodal"
+      ],
+      "featured": false,
+      "date": "2025-11",
+      "link": ""
+    },
+    {
+      "id": "Gummy",
+      "primaryMedia": "Gummy.png",
+      "allMedia": [
+        "Gummy.png"
+      ],
+      "type": "image",
+      "title": "Gummy Art",
+      "description": "Took a stab at something like an album cover (an album called 'gummy', apparently).\n\nIt was fun to make but it doesn't look as delicious as it could be.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2025-02",
+      "link": ""
+    },
+    {
+      "id": "Colleague_Face",
+      "primaryMedia": "Colleague_Face_01.png",
+      "allMedia": [
+        "Colleague_Face_01.png",
+        "Colleague_Face_02.png"
+      ],
+      "type": "image",
+      "title": "Colleague Face",
+      "description": "A render of a scene from my Trepidation project. Sculpted manually with 99% procedural materials (the LED panel wall in the back uses an image texture. That's it).\n\n2nd image excludes the graphics.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Graphic Design",
+        "Trepidation"
+      ],
+      "featured": false,
       "date": "2024-11",
       "link": ""
     },
     {
-      "id": "bone_structure",
-      "primaryMedia": "bone_structure_01.jpg",
-      "allMedia": ["bone_structure_01.jpg", "bone_structure_02.jpg", "bone_structure_03.jpg", "bone_structure_04.jpg", "bone_structure_05.jpg"],
+      "id": "MagazineOne",
+      "primaryMedia": "MagazineOne_01.png",
+      "allMedia": [
+        "MagazineOne_01.png",
+        "MagazineOne_02.png"
+      ],
       "type": "image",
-      "title": "Bone Structure",
-      "description": "A series of five studies exploring organic form through a minimalist lens. Shot on 35mm, scanned, then processed through a custom colour grading pipeline.\n\nThe light source is a single bare bulb. Nothing else.",
-      "tags": ["photography", "portrait", "analogue", "series"],
+      "title": "Misc. Cover",
+      "description": "Another honing of graphic design.\n\nThe model was downloaded from Mixamo, but I remade all the materials to appear more photorealistic.\n\n2nd image was a work in progress export.",
+      "tags": [
+        "2D",
+        "3D",
+        "Blender",
+        "Graphic Design"
+      ],
       "featured": false,
-      "date": "2024-08",
+      "date": "2024-09",
       "link": ""
     },
     {
-      "id": "collapse_equation",
-      "primaryMedia": "collapse_equation.mp4",
-      "allMedia": ["collapse_equation.mp4", "collapse_equation_02.mp4", "collapse_equation_03.mp4"],
-      "type": "video",
-      "title": "The Collapse Equation",
-      "description": "Generative music visualiser — the waveform drives the geometry in real time. Built with a custom WebGL renderer and live audio input.\n\nPremiered at MUTEK Montréal 2024. Runtime: 12 minutes.",
-      "tags": ["generative", "music", "live", "interactive"],
+      "id": "Procedural_Land",
+      "primaryMedia": "Procedural_Land_01.png",
+      "allMedia": [
+        "Procedural_Land_01.png",
+        "Procedural_Land_02.png"
+      ],
+      "type": "image",
+      "title": "Procedural Land",
+      "description": "A messy attempt at a vast expanse. The ground is a single material with a thouroughly subdivided plane. The clouds are also procedural.\n\nThe 2nd image was my first render. Had to play around with a lot of the values to get something I was happy with, It also lacks any post-processing.\n\nI forsee a remake of this shader material, something far more elaborate which could account for multiple biome types.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Environment"
+      ],
       "featured": false,
-      "date": "2024-06",
-      "link": "https://vimeo.com/example"
+      "date": "2024-09",
+      "link": ""
     },
     {
-      "id": "soft_infrastructure",
-      "primaryMedia": "soft_infrastructure.jpg",
-      "allMedia": ["soft_infrastructure.jpg"],
+      "id": "Scientist_Winged",
+      "primaryMedia": "Scientist_Winged_01.png",
+      "allMedia": [
+        "Scientist_Winged_01.png",
+        "Scientist_Winged_02.jpg"
+      ],
       "type": "image",
-      "title": "Soft Infrastructure",
-      "description": "Brand identity for a fictional civic data cooperative. The visual language borrows from 1970s systems diagrams and rewires them for a world of distributed trust.\n\nDelivered: wordmark, type system, colour palette, motion guidelines, and environmental applications.",
-      "tags": ["branding", "identity", "type", "editorial"],
+      "title": "Winged Scientist",
+      "description": "A non-canon depiction of a character from my Trepidation project.\n\nThis artwork originally existed only as linework from a few years prior. I felt like drawing without wanting to think of a pose so I dug this up, dusted it off, and cleaned it up.\n\nThe cityscape in the background was made in blender with a shader to simulate black outlines. After rendering, I did a lot of work to fix the colors and materials to have it fit in with the rest of the scene. The rings around the planet were also rendered in 3D, but as a separate layer from the cityscape. Everything else was done in 2D.\n\nThe entire artwork, from start to finish, was inspired by 'Reaper Hank' by Rhunyc on Newgrounds.",
+      "tags": [
+        "2D",
+        "Blender",
+        "Multimodal",
+        "Trepidation",
+        "Illustration"
+      ],
       "featured": false,
-      "date": "2024-03",
+      "date": "2024-04",
+      "link": ""
+    },
+    {
+      "id": "Skull_Art",
+      "primaryMedia": "Skull_Art_01.png",
+      "allMedia": [
+        "Skull_Art_01.png",
+        "Skull_Art_02.png"
+      ],
+      "type": "image",
+      "title": "Skulls",
+      "description": "Stylized designs possibly fit for an album cover.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2024-04",
+      "link": ""
+    },
+    {
+      "id": "Spiderman",
+      "primaryMedia": "Spiderman.png",
+      "allMedia": [
+        "Spiderman.png"
+      ],
+      "type": "image",
+      "title": "Spiderman 2099",
+      "description": "Made a week before the release of Spider-Man: Across the Spider-Verse, because I liked the concept of the character. I knew nothing about him expect that he was probably the villian. After coming out of the theatre seeing him in action, I noticed about a dozen inaccuracies with my depiction of him. But, I never brought myself to alter the final piece.\n\nThe hexagons in the background were made in blender, the lots of filters and effects and edits were made to match it with the subject. I think it help sell the movie's aesthetic of 2D and 3D styles clashing.",
+      "tags": [
+        "2D",
+        "Illustration",
+        "Multimodal"
+      ],
+      "featured": false,
+      "date": "2023-06",
       "link": ""
     }
   ]
