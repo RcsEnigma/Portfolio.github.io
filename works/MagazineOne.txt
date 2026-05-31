@@ -1,0 +1,15 @@
+[title]
+Misc. Cover
+
+[description]
+Another honing of graphic design.
+
+The model was downloaded from Mixamo, but I remade all the materials to appear more photorealistic.
+
+2nd image was a work in progress export.
+
+[tags]
+2D, 3D, Blender, Graphic Design
+
+[date]
+2024-09

@@ -1,0 +1,11 @@
+[title]
+Trepidation Rooms
+
+[description]
+Some area concepts for my personal Trepidation project. These are created with a large focus on brutalist shape language.
+
+[tags]
+3D, Blender, Trepidation
+
+[date]
+2026-05

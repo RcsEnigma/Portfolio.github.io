@@ -1,0 +1,11 @@
+[title]
+Grungy Shower
+
+[description]
+An attempt at photorealism. Every material in this scene is procedural, even the shower head and drain.
+
+[tags]
+3D, Blender, Photorealism
+
+[date]
+2026-02

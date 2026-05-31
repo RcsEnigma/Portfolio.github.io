@@ -1,0 +1,13 @@
+[title]
+Colleague Face
+
+[description]
+A render of a scene from my Trepidation project. Sculpted manually with 99% procedural materials (the LED panel wall in the back uses an image texture. That's it).
+
+2nd image excludes the graphics.
+
+[tags]
+3D, Blender, Graphic Design, Trepidation
+
+[date]
+2024-11

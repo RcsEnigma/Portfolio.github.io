@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & Base ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0e0e0e;
+    --surface:   #161616;
+    --border:    #2a2a2a;
+    --text:      #e8e4dc;
+    --muted:     #6b6860;
+    --accent:    #c8b89a;
+    --accent2:   #7a9e8a;
+    --tag-bg:    #1e1e1e;
+    --tag-active:#c8b89a;
+    --tag-text:  #8a8278;
+    --overlay:   rgba(10,10,10,0.92);
+    --radius:    3px;
+    --mono:      'DM Mono', monospace;
+    --serif:     'Libre Baskerville', Georgia, serif;
+    --transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    cursor: default;
+  }
+
+  /* ── Header ───────────────────────────────────────────────── */
+  #site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+
+  #wordmark {
+    font-family: var(--mono);
+    font-weight: 300;
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  #wordmark:hover { opacity: 0.65; }
+
+  #site-nav {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .nav-link {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  .nav-link:hover, .nav-link.active { color: var(--text); }
+
+  /* ── Carousel ─────────────────────────────────────────────── */
+  #carousel-section {
+    position: relative;
+    width: 100%;
+    height: clamp(300px, 52vw, 680px);
+    overflow: hidden;
+    background: #000;
+  }
+
+  .carousel-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1.1s ease;
+    display: flex;
+    align-items: flex-end;
+  }
+  .carousel-slide.active { opacity: 1; }
+
+  .carousel-slide img,
+  .carousel-slide video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.55);
+  }
+
+  /* placeholder gradient when no real media */
+  .carousel-slide .media-placeholder {
+    position: absolute;
+    inset: 0;
+    filter: brightness(0.55);
+  }
+
+  .carousel-caption {
+    position: relative;
+    z-index: 2;
+    padding: 2.5rem 3rem;
+    max-width: 680px;
+  }
+
+  .carousel-tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .carousel-title {
+    font-size: clamp(1.8rem, 4vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 0.75rem;
+  }
+
+  .carousel-desc {
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.62);
+    max-width: 480px;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .carousel-controls {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 2.5rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 3;
+  }
+
+  .carousel-dot {
+    width: 24px;
+    height: 2px;
+    background: rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .carousel-dot.active { background: var(--accent); width: 40px; }
+
+  /* ── Works Section ────────────────────────────────────────── */
+  #works-section {
+    padding: 3rem 2.5rem 5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* ── Filter Bar ───────────────────────────────────────────── */
+  #filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 2.5rem;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 0.5rem;
+  }
+
+  .filter-tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    color: var(--tag-text);
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: all 0.18s;
+  }
+  .filter-tag:hover { border-color: var(--muted); color: var(--text); }
+  .filter-tag.active {
+    background: var(--tag-active);
+    border-color: var(--tag-active);
+    color: #0e0e0e;
+  }
+
+  /* ── Grid ─────────────────────────────────────────────────── */
+  #works-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2px;
+    grid-auto-rows: 280px;
+    grid-auto-flow: dense;
+  }
+
+  .grid-item {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface);
+    cursor: pointer;
+    border-radius: var(--radius);
+  }
+
+  /* Aspect ratio sizing — assigned in JS based on media aspect */
+  .grid-item[data-span="wide"]       { grid-column: span 2; }
+  .grid-item[data-span="tall"]       { grid-row: span 2; }
+  .grid-item[data-span="large"]      { grid-column: span 2; grid-row: span 2; }
+  .grid-item[data-span="ultrawide"]  { grid-column: span 3; }
+
+  .grid-item img,
+  .grid-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition), filter var(--transition);
+    display: block;
+  }
+
+  .grid-item:hover img,
+  .grid-item:hover video {
+    transform: scale(1.04);
+    filter: brightness(0.35);
+  }
+
+  /* Placeholder when no actual file exists (demo mode) */
+  .grid-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: filter var(--transition);
+  }
+
+  .grid-item:hover .grid-placeholder {
+    filter: brightness(0.35);
+  }
+
+  /* Hover overlay */
+  .grid-hover-info {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.2rem;
+    opacity: 0;
+    transition: opacity var(--transition);
+    pointer-events: none;
+  }
+  .grid-item:hover .grid-hover-info { opacity: 1; }
+
+  .grid-hover-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 0.3rem;
+  }
+
+  .grid-hover-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .grid-hover-tag {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .grid-hover-tag::after { content: ","; }
+  .grid-hover-tag:last-child::after { content: ""; }
+
+  .multi-badge {
+    position: absolute;
+    top: 0.7rem;
+    right: 0.7rem;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    padding: 0.2rem 0.45rem;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.08em;
+    border-radius: 2px;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Hidden items */
+  .grid-item.hidden {
+    display: none;
+  }
+
+  /* ── Modal ────────────────────────────────────────────────── */
+  #modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(6px);
+  }
+  #modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    max-width: 1100px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    transform: translateY(16px);
+    transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+  }
+  #modal-overlay.open #modal { transform: translateY(0); }
+
+  @media (max-width: 780px) {
+    #modal { grid-template-columns: 1fr; }
+  }
+
+  /* Media pane */
+  #modal-media-pane {
+    position: relative;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 340px;
+  }
+
+  #modal-media-pane img,
+  #modal-media-pane video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    max-height: 70vh;
+  }
+
+  #modal-media-nav {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .modal-media-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .modal-media-dot.active {
+    background: var(--accent);
+    transform: scale(1.3);
+  }
+
+  .modal-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+    z-index: 2;
+  }
+  .modal-arrow:hover { background: rgba(0,0,0,0.7); }
+  #modal-prev { left: 0.75rem; }
+  #modal-next { right: 0.75rem; }
+
+  /* Info pane */
+  #modal-info-pane {
+    padding: 2.2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  #modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  #modal-date {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  #modal-description {
+    font-size: 0.88rem;
+    color: rgba(232,228,220,0.72);
+    line-height: 1.75;
+    white-space: pre-line;
+  }
+
+  #modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .modal-tag {
+    font-family: var(--mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    border-radius: var(--radius);
+  }
+
+  #modal-link {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: var(--accent2);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent2);
+    padding-bottom: 1px;
+    width: fit-content;
+    transition: opacity 0.2s;
+  }
+  #modal-link:hover { opacity: 0.65; }
+
+  #modal-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    z-index: 10;
+    transition: background 0.2s;
+  }
+  #modal-close:hover { background: rgba(255,255,255,0.12); }
+
+  /* ── Static pages (About / Contact) ──────────────────────── */
+  .static-page {
+    display: none;
+    max-width: 680px;
+    margin: 6rem auto;
+    padding: 0 2.5rem;
+  }
+  .static-page.active { display: block; }
+
+  .static-page h1 {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+  }
+  .static-page p {
+    font-size: 0.92rem;
+    line-height: 1.9;
+    color: rgba(232,228,220,0.72);
+    margin-bottom: 1rem;
+  }
+  .static-page a {
+    color: var(--accent2);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent2);
+  }
+
+  /* ── Footer ───────────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer span {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ── Demo placeholder gradients ───────────────────────────── */
+  .demo-grad-1 { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%); }
+  .demo-grad-2 { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 50%, #1a0a0a 100%); }
+  .demo-grad-3 { background: linear-gradient(135deg, #0a1a0e 0%, #102a18 50%, #0d2010 100%); }
+  .demo-grad-4 { background: linear-gradient(135deg, #1a1508 0%, #2a2010 50%, #1a1508 100%); }
+
+  .demo-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.15);
+    text-transform: uppercase;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────────────── -->
+<header id="site-header">
+  <a id="wordmark" href="#" onclick="showPage('home')">AJ Ambrozic</a>
+  <nav id="site-nav">
+    <a class="nav-link active" onclick="showPage('home')">Work</a>
+    <a class="nav-link" onclick="showPage('about')">About</a>
+    <a class="nav-link" onclick="showPage('contact')">Contact</a>
+  </nav>
+</header>
+
+<!-- ── FEATURED CAROUSEL ──────────────────────────────────────────── -->
+<section id="carousel-section" style="display:none">
+  <div id="carousel-track"></div>
+  <div class="carousel-controls" id="carousel-dots"></div>
+</section>
+
+<!-- ── WORKS (home) ───────────────────────────────────────────────── -->
+<main id="home-page">
+  <section id="works-section">
+    <div id="filter-bar">
+      <span class="filter-label">Filter —</span>
+      <button class="filter-tag active" data-tag="all">All</button>
+    </div>
+    <div id="works-grid"></div>
+  </section>
+</main>
+
+<!-- ── ABOUT ──────────────────────────────────────────────────────── -->
+<div class="static-page" id="about-page">
+  <h1>About</h1>
+  <p>A multidisciplinary studio working across motion, identity, and interactive systems. Founded in 2019, we collaborate with artists, institutions, and brands to make work that is precise, strange, and lasting.</p>
+  <p>Based between Montréal and Berlin. Currently open to new projects starting Q2 2025.</p>
+  <p>— Edit this section in <code>index.html</code> under <code>#about-page</code>.</p>
+</div>
+
+<!-- ── CONTACT ────────────────────────────────────────────────────── -->
+<div class="static-page" id="contact-page">
+  <h1>Contact</h1>
+  <p>For project inquiries, collaborations, or press:<br>
+  <a href="mailto:hello@studio.example">hello@studio.example</a></p>
+  <p>Instagram: <a href="#">@studio.handle</a><br>
+  Are.na: <a href="#">studio-handle</a></p>
+  <p>— Edit this section in <code>index.html</code> under <code>#contact-page</code>.</p>
+</div>
+
+<!-- ── MODAL ──────────────────────────────────────────────────────── -->
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div id="modal">
+    <div id="modal-media-pane">
+      <button id="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-arrow" id="modal-prev" onclick="stepMedia(-1)">‹</button>
+      <div id="modal-media-content"></div>
+      <button class="modal-arrow" id="modal-next" onclick="stepMedia(1)">›</button>
+      <div id="modal-media-nav"></div>
+    </div>
+    <div id="modal-info-pane">
+      <div>
+        <div id="modal-date"></div>
+        <h2 id="modal-title"></h2>
+      </div>
+      <p id="modal-description"></p>
+      <div id="modal-tags"></div>
+      <a id="modal-link" href="#" target="_blank" rel="noopener" style="display:none">View external ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────── -->
+<footer>
+  <span id="footer-count"></span>
+  <span>Run <code>node generate-manifest.js</code> after adding works</span>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
+let manifest = null;
+let activeFilters = new Set(["all"]);
+let carouselIndex = 0;
+let carouselTimer = null;
+let modalWork = null;
+let modalMediaIndex = 0;
+
+// Demo gradient palette cycling
+const DEMO_GRADS = ["demo-grad-1","demo-grad-2","demo-grad-3","demo-grad-4"];
+
+// ═══════════════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════════════
+async function boot() {
+  try {
+    const res = await fetch("manifest.json?" + Date.now());
+    manifest = await res.json();
+  } catch (e) {
+    console.warn("manifest.json not found — showing demo data");
+    manifest = getDemoManifest();
+  }
+
+  buildFilterBar();
+  buildCarousel();
+  buildGrid();
+  updateFooter();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════════
+function showPage(page) {
+  document.getElementById("home-page").style.display   = page === "home"    ? "" : "none";
+  document.getElementById("carousel-section").style.display = page === "home" && manifest?.works?.some(w=>w.featured) ? "" : "none";
+
+  document.querySelectorAll(".static-page").forEach(el => el.classList.remove("active"));
+  if (page !== "home") {
+    const el = document.getElementById(page + "-page");
+    if (el) el.classList.add("active");
+  }
+
+  document.querySelectorAll(".nav-link").forEach(a => {
+    a.classList.toggle("active", a.textContent.toLowerCase().includes(page === "home" ? "work" : page));
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  FILTER BAR
+// ═══════════════════════════════════════════════════════════════════
+function buildFilterBar() {
+  const bar = document.getElementById("filter-bar");
+  // Clear everything after the first two children (label + "All" button)
+  while (bar.children.length > 2) bar.removeChild(bar.lastChild);
+
+  (manifest.tags || []).forEach(tag => {
+    const btn = document.createElement("button");
+    btn.className = "filter-tag";
+    btn.dataset.tag = tag;
+    btn.textContent = tag;
+    btn.onclick = () => toggleFilter(tag);
+    bar.appendChild(btn);
+  });
+
+  document.querySelector('.filter-tag[data-tag="all"]').onclick = () => toggleFilter("all");
+}
+
+function toggleFilter(tag) {
+  if (tag === "all") {
+    activeFilters = new Set(["all"]);
+  } else {
+    activeFilters.delete("all");
+    if (activeFilters.has(tag)) {
+      activeFilters.delete(tag);
+      if (activeFilters.size === 0) activeFilters.add("all");
+    } else {
+      activeFilters.add(tag);
+    }
+  }
+  document.querySelectorAll(".filter-tag").forEach(btn => {
+    btn.classList.toggle("active", activeFilters.has(btn.dataset.tag));
+  });
+  filterGrid();
+}
+
+function filterGrid() {
+  document.querySelectorAll(".grid-item").forEach(item => {
+    if (activeFilters.has("all")) {
+      item.classList.remove("hidden");
+      return;
+    }
+    const tags = JSON.parse(item.dataset.tags || "[]");
+    const visible = tags.some(t => activeFilters.has(t));
+    item.classList.toggle("hidden", !visible);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  CAROUSEL
+// ═══════════════════════════════════════════════════════════════════
+function buildCarousel() {
+  const featured = manifest.works.filter(w => w.featured);
+  const section = document.getElementById("carousel-section");
+  const track = document.getElementById("carousel-track");
+  const dots = document.getElementById("carousel-dots");
+
+  if (!featured.length) { section.style.display = "none"; return; }
+  section.style.display = "";
+
+  track.innerHTML = "";
+  dots.innerHTML = "";
+
+  featured.forEach((work, i) => {
+    const slide = document.createElement("div");
+    slide.className = "carousel-slide" + (i === 0 ? " active" : "");
+
+    // Media
+    const mediaEl = createMediaEl(work.primaryMedia, work.type, true);
+    if (mediaEl) {
+      slide.appendChild(mediaEl);
+    } else {
+      const ph = document.createElement("div");
+      ph.className = "media-placeholder " + DEMO_GRADS[i % DEMO_GRADS.length];
+      slide.appendChild(ph);
+    }
+
+    // Caption
+    const cap = document.createElement("div");
+    cap.className = "carousel-caption";
+    const firstLine = work.description ? work.description.split("\n")[0] : "";
+    cap.innerHTML = `
+      <div class="carousel-tag">${work.tags.slice(0,2).join(" · ")}</div>
+      <div class="carousel-title">${esc(work.title)}</div>
+      <div class="carousel-desc">${esc(firstLine)}</div>
+    `;
+    cap.style.cursor = "pointer";
+    cap.onclick = () => openModal(work);
+    slide.appendChild(cap);
+    track.appendChild(slide);
+
+    // Dot
+    const dot = document.createElement("div");
+    dot.className = "carousel-dot" + (i === 0 ? " active" : "");
+    dot.onclick = () => goCarousel(i);
+    dots.appendChild(dot);
+  });
+
+  clearInterval(carouselTimer);
+  if (featured.length > 1) {
+    carouselTimer = setInterval(() => goCarousel((carouselIndex + 1) % featured.length), 5000);
+  }
+}
+
+function goCarousel(idx) {
+  const slides = document.querySelectorAll(".carousel-slide");
+  const dotEls = document.querySelectorAll(".carousel-dot");
+  slides.forEach((s, i) => s.classList.toggle("active", i === idx));
+  dotEls.forEach((d, i) => d.classList.toggle("active", i === idx));
+  carouselIndex = idx;
+  clearInterval(carouselTimer);
+  if (slides.length > 1) {
+    carouselTimer = setInterval(() => goCarousel((carouselIndex + 1) % slides.length), 5000);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  GRID
+// ═══════════════════════════════════════════════════════════════════
+
+// Deterministic span assignment based on work id
+function getSpan(work, index) {
+  // Use a simple hash of the id to pick a span
+  const hash = [...work.id].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const options = ["normal","normal","normal","wide","tall","wide","normal","normal","tall","normal"];
+  return options[(hash + index) % options.length];
+}
+
+function buildGrid() {
+  const grid = document.getElementById("works-grid");
+  grid.innerHTML = "";
+
+  manifest.works.forEach((work, i) => {
+    const item = document.createElement("div");
+    item.className = "grid-item";
+    item.dataset.tags = JSON.stringify(work.tags);
+    item.dataset.id = work.id;
+
+    const span = getSpan(work, i);
+    if (span !== "normal") item.dataset.span = span;
+
+    // Media
+    const mediaEl = createMediaEl(work.primaryMedia, work.type, false);
+    if (mediaEl) {
+      item.appendChild(mediaEl);
+    } else {
+      const ph = document.createElement("div");
+      ph.className = "grid-placeholder " + DEMO_GRADS[i % DEMO_GRADS.length];
+      const lbl = document.createElement("div");
+      lbl.className = "demo-content";
+      lbl.textContent = work.id.replace(/_/g," ");
+      ph.appendChild(lbl);
+      item.appendChild(ph);
+    }
+
+    // Multi badge
+    if (work.allMedia && work.allMedia.length > 1) {
+      const badge = document.createElement("div");
+      badge.className = "multi-badge";
+      badge.textContent = `1 / ${work.allMedia.length}`;
+      item.appendChild(badge);
+    }
+
+    // Hover info
+    const hoverInfo = document.createElement("div");
+    hoverInfo.className = "grid-hover-info";
+    const tagsHtml = work.tags.map(t => `<span class="grid-hover-tag">${esc(t)}</span>`).join("");
+    hoverInfo.innerHTML = `
+      <div class="grid-hover-title">${esc(work.title)}</div>
+      <div class="grid-hover-tags">${tagsHtml}</div>
+    `;
+    item.appendChild(hoverInfo);
+
+    item.onclick = () => openModal(work);
+    grid.appendChild(item);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════════════════════
+function openModal(work) {
+  modalWork = work;
+  modalMediaIndex = 0;
+
+  document.getElementById("modal-title").textContent = work.title;
+  document.getElementById("modal-description").textContent = work.description || "";
+  document.getElementById("modal-date").textContent = work.date || "";
+
+  const tagsEl = document.getElementById("modal-tags");
+  tagsEl.innerHTML = work.tags.map(t => `<span class="modal-tag">${esc(t)}</span>`).join("");
+
+  const linkEl = document.getElementById("modal-link");
+  if (work.link) {
+    linkEl.href = work.link;
+    linkEl.style.display = "";
+  } else {
+    linkEl.style.display = "none";
+  }
+
+  // Media nav dots
+  const navEl = document.getElementById("modal-media-nav");
+  navEl.innerHTML = "";
+  if (work.allMedia && work.allMedia.length > 1) {
+    work.allMedia.forEach((_, i) => {
+      const dot = document.createElement("div");
+      dot.className = "modal-media-dot" + (i === 0 ? " active" : "");
+      dot.onclick = () => setModalMedia(i);
+      navEl.appendChild(dot);
+    });
+  }
+
+  // Arrows
+  const showArrows = work.allMedia && work.allMedia.length > 1;
+  document.getElementById("modal-prev").style.display = showArrows ? "" : "none";
+  document.getElementById("modal-next").style.display = showArrows ? "" : "none";
+
+  renderModalMedia();
+
+  const overlay = document.getElementById("modal-overlay");
+  overlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function renderModalMedia() {
+  const content = document.getElementById("modal-media-content");
+  content.innerHTML = "";
+  content.style.cssText = "width:100%;height:100%;display:flex;align-items:center;justify-content:center;";
+
+  if (!modalWork) return;
+  const src = modalWork.allMedia?.[modalMediaIndex] || modalWork.primaryMedia;
+  const type = getMediaType(src) || modalWork.type;
+
+  const el = createMediaEl(src, type, false);
+  if (el) {
+    el.style.maxHeight = "70vh";
+    el.style.width = "100%";
+    el.style.objectFit = "contain";
+    content.appendChild(el);
+  } else {
+    // Demo placeholder
+    const ph = document.createElement("div");
+    ph.className = DEMO_GRADS[modalMediaIndex % DEMO_GRADS.length];
+    ph.style.cssText = "width:100%;height:400px;display:flex;align-items:center;justify-content:center;";
+    ph.innerHTML = `<div style="font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.2);letter-spacing:.1em;text-transform:uppercase;">${src}</div>`;
+    content.appendChild(ph);
+  }
+
+  // Update dots
+  document.querySelectorAll(".modal-media-dot").forEach((d, i) => {
+    d.classList.toggle("active", i === modalMediaIndex);
+  });
+}
+
+function setModalMedia(idx) {
+  modalMediaIndex = idx;
+  renderModalMedia();
+}
+
+function stepMedia(dir) {
+  if (!modalWork?.allMedia) return;
+  modalMediaIndex = (modalMediaIndex + dir + modalWork.allMedia.length) % modalWork.allMedia.length;
+  renderModalMedia();
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+  modalWork = null;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById("modal-overlay")) closeModal();
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModal();
+  if (e.key === "ArrowLeft" && modalWork) stepMedia(-1);
+  if (e.key === "ArrowRight" && modalWork) stepMedia(1);
+});
+
+// ═══════════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function getMediaType(filename) {
+  if (!filename) return null;
+  const ext = filename.split(".").pop().toLowerCase();
+  if (["jpg","jpeg","png","gif","webp","avif","svg"].includes(ext)) return "image";
+  if (["mp4","webm","mov","ogg"].includes(ext)) return "video";
+  return null;
+}
+
+function createMediaEl(src, type, autoplay) {
+  if (!src) return null;
+  const path = "works/" + src;
+
+  if (type === "video") {
+    const v = document.createElement("video");
+    v.src = path;
+    v.muted = true;
+    v.loop = true;
+    v.playsInline = true;
+    if (autoplay) v.autoplay = true;
+    // Try to play on hover for grid items
+    return v;
+  } else if (type === "image") {
+    const img = document.createElement("img");
+    img.src = path;
+    img.alt = src;
+    img.loading = "lazy";
+    return img;
+  }
+  return null;
+}
+
+function esc(str) {
+  return String(str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function updateFooter() {
+  const count = manifest?.works?.length || 0;
+  document.getElementById("footer-count").textContent = `${count} work${count !== 1 ? "s" : ""}`;
+}
+
+// Video hover-play for grid items
+document.addEventListener("mouseover", e => {
+  const item = e.target.closest(".grid-item");
+  if (!item) return;
+  const v = item.querySelector("video");
+  if (v) v.play().catch(()=>{});
+});
+document.addEventListener("mouseout", e => {
+  const item = e.target.closest(".grid-item");
+  if (!item) return;
+  const v = item.querySelector("video");
+  if (v) { v.pause(); v.currentTime = 0; }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+//  DEMO MANIFEST (fallback if manifest.json fetch fails in file://)
+// ═══════════════════════════════════════════════════════════════════
+function getDemoManifest() {
+  return {
+    tags: ["3D","analogue","animation","branding","editorial","generative","identity","interactive","live","music","personal","photography","portrait","sci-fi","series","type"],
+    works: [
+      { id:"neon_drift", primaryMedia:null, allMedia:[null], type:"video", title:"Neon Drift", description:"A study in motion and light — rendered over three sleepless nights with a custom shader pipeline. The city breathes here; every frame is a heartbeat.\n\nExplored the intersection of brutalist architecture and organic light diffusion.", tags:["animation","sci-fi","3D","personal"], featured:true, date:"2024-11", link:"" },
+      { id:"bone_structure", primaryMedia:null, allMedia:[null,null,null,null,null], type:"image", title:"Bone Structure", description:"A series of five studies exploring organic form through a minimalist lens. Shot on 35mm, scanned, then processed through a custom colour grading pipeline.\n\nThe light source is a single bare bulb. Nothing else.", tags:["photography","portrait","analogue","series"], featured:false, date:"2024-08", link:"" },
+      { id:"collapse_equation", primaryMedia:null, allMedia:[null,null,null], type:"video", title:"The Collapse Equation", description:"Generative music visualiser — the waveform drives the geometry in real time. Built with a custom WebGL renderer and live audio input.\n\nPremiered at MUTEK Montréal 2024. Runtime: 12 minutes.", tags:["generative","music","live","interactive"], featured:false, date:"2024-06", link:"https://vimeo.com/example" },
+      { id:"soft_infrastructure", primaryMedia:null, allMedia:[null], type:"image", title:"Soft Infrastructure", description:"Brand identity for a fictional civic data cooperative. The visual language borrows from 1970s systems diagrams and rewires them for a world of distributed trust.", tags:["branding","identity","type","editorial"], featured:false, date:"2024-03", link:"" },
+      { id:"meridian", primaryMedia:null, allMedia:[null], type:"image", title:"Meridian", description:"A long-exposure study of natural light across 72 hours. Every image taken from the same vantage point, same focal length.", tags:["photography","personal","analogue"], featured:false, date:"2023-11", link:"" },
+      { id:"strata_iv", primaryMedia:null, allMedia:[null,null], type:"video", title:"Strata IV", description:"The fourth iteration of an ongoing series exploring geological time through animation.", tags:["animation","3D","series"], featured:false, date:"2023-09", link:"" },
+    ]
+  };
+}
+
+// ── Init ────────────────────────────────────────────────────────────
+boot();
+</script>
+</body>
+</html>

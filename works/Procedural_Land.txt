@@ -1,0 +1,15 @@
+[title]
+Procedural Land
+
+[description]
+A messy attempt at a vast expanse. The ground is a single material with a thouroughly subdivided plane. The clouds are also procedural.
+
+The 2nd image was my first render. Had to play around with a lot of the values to get something I was happy with, It also lacks any post-processing.
+
+I forsee a remake of this shader material, something far more elaborate which could account for multiple biome types.
+
+[tags]
+3D, Blender, Environment
+
+[date]
+2024-09

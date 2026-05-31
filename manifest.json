@@ -1,0 +1,54 @@
+{
+  "generated": "2024-11-15T00:00:00.000Z",
+  "tags": ["3D", "analogue", "animation", "branding", "editorial", "generative", "identity", "interactive", "live", "music", "personal", "photography", "portrait", "sci-fi", "series", "type"],
+  "works": [
+    {
+      "id": "neon_drift",
+      "primaryMedia": "neon_drift.mp4",
+      "allMedia": ["neon_drift.mp4"],
+      "type": "video",
+      "title": "Neon Drift",
+      "description": "A study in motion and light — rendered over three sleepless nights with a custom shader pipeline. The city breathes here; every frame is a heartbeat.\n\nExplored the intersection of brutalist architecture and organic light diffusion. The colour palette draws from Tokyo's Shinjuku ward at 3am.",
+      "tags": ["animation", "sci-fi", "3D", "personal"],
+      "featured": true,
+      "date": "2024-11",
+      "link": ""
+    },
+    {
+      "id": "bone_structure",
+      "primaryMedia": "bone_structure_01.jpg",
+      "allMedia": ["bone_structure_01.jpg", "bone_structure_02.jpg", "bone_structure_03.jpg", "bone_structure_04.jpg", "bone_structure_05.jpg"],
+      "type": "image",
+      "title": "Bone Structure",
+      "description": "A series of five studies exploring organic form through a minimalist lens. Shot on 35mm, scanned, then processed through a custom colour grading pipeline.\n\nThe light source is a single bare bulb. Nothing else.",
+      "tags": ["photography", "portrait", "analogue", "series"],
+      "featured": false,
+      "date": "2024-08",
+      "link": ""
+    },
+    {
+      "id": "collapse_equation",
+      "primaryMedia": "collapse_equation.mp4",
+      "allMedia": ["collapse_equation.mp4", "collapse_equation_02.mp4", "collapse_equation_03.mp4"],
+      "type": "video",
+      "title": "The Collapse Equation",
+      "description": "Generative music visualiser — the waveform drives the geometry in real time. Built with a custom WebGL renderer and live audio input.\n\nPremiered at MUTEK Montréal 2024. Runtime: 12 minutes.",
+      "tags": ["generative", "music", "live", "interactive"],
+      "featured": false,
+      "date": "2024-06",
+      "link": "https://vimeo.com/example"
+    },
+    {
+      "id": "soft_infrastructure",
+      "primaryMedia": "soft_infrastructure.jpg",
+      "allMedia": ["soft_infrastructure.jpg"],
+      "type": "image",
+      "title": "Soft Infrastructure",
+      "description": "Brand identity for a fictional civic data cooperative. The visual language borrows from 1970s systems diagrams and rewires them for a world of distributed trust.\n\nDelivered: wordmark, type system, colour palette, motion guidelines, and environmental applications.",
+      "tags": ["branding", "identity", "type", "editorial"],
+      "featured": false,
+      "date": "2024-03",
+      "link": ""
+    }
+  ]
+}

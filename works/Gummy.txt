@@ -1,0 +1,13 @@
+[title]
+Gummy Art
+
+[description]
+Took a stab at something like an album cover (an album called 'gummy', apparently).
+
+It was fun to make but it doesn't look as delicious as it could be.
+
+[tags]
+3D, Blender
+
+[date]
+2025-02
