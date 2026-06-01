@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-01T04:26:46.095Z",
+  "generated": "2026-06-01T04:53:08.943Z",
   "tags": [
     "2D",
     "3D",
@@ -9,6 +9,7 @@
     "Illustration",
     "Multimodal",
     "Photorealism",
+    "Pixel",
     "Trepidation"
   ],
   "works": [
@@ -205,6 +206,28 @@
       ],
       "featured": false,
       "date": "2023-06",
+      "link": ""
+    },
+    {
+      "id": "Pixel_Combat_Sprites",
+      "primaryMedia": "Pixel_Combat_Sprites_01.png",
+      "allMedia": [
+        "Pixel_Combat_Sprites_01.png",
+        "Pixel_Combat_Sprites_02.png",
+        "Pixel_Combat_Sprites_03.png",
+        "Pixel_Combat_Sprites_04.png",
+        "Pixel_Combat_Sprites_05.png",
+        "Pixel_Combat_Sprites_06.png"
+      ],
+      "type": "image",
+      "title": "Pixel Combat Sprites",
+      "description": "An extensive stylization of mine. Insipred from the works of Mostaza (6th image). \n\nThis collection of sci-fi guns was a direct response to the initial collection I made 2 years prior (2nd image). I was not satisfied with the majority of designs from the original collection, but I would rather make new designs over remaking the old ones.\n\nI've made a lot of sprites with this stylization.",
+      "tags": [
+        "2D",
+        "Pixel"
+      ],
+      "featured": false,
+      "date": "2023-04",
       "link": ""
     }
   ]
