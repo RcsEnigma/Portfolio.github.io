@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-31T22:00:33.998Z",
+  "generated": "2026-06-01T04:26:46.095Z",
   "tags": [
     "2D",
     "3D",
@@ -94,11 +94,12 @@
       "primaryMedia": "Colleague_Face_01.png",
       "allMedia": [
         "Colleague_Face_01.png",
-        "Colleague_Face_02.png"
+        "Colleague_Face_02.png",
+        "Colleague_Face_03.png"
       ],
       "type": "image",
       "title": "Colleague Face",
-      "description": "A render of a scene from my Trepidation project. Sculpted manually with 99% procedural materials (the LED panel wall in the back uses an image texture. That's it).\n\n2nd image excludes the graphics.",
+      "description": "A render of a scene from my Trepidation project. Sculpted manually with 99% procedural materials (the LED panel wall in the back uses an image texture. That's it).\n\nThis piece involved use of almost every tab within the blender suite, which seriously tested my familarities and capability within the software. Although procedural, I still had to work with UVs on the character's skin and undershirt. The seam edges of the undershirt were done with geometry nodes, as well. \n\n2nd image excludes the graphics.\n\n3rd image was the initial render, for the sake of framing.\n\n4th video was a lackluster animation I whipped up a while later. Because the character was sculpted, I couldn't animate them at all; I had no further expectations and moved on to new projects.",
       "tags": [
         "3D",
         "Blender",
@@ -153,11 +154,12 @@
       "primaryMedia": "Scientist_Winged_01.png",
       "allMedia": [
         "Scientist_Winged_01.png",
-        "Scientist_Winged_02.jpg"
+        "Scientist_Winged_02.png",
+        "Scientist_Winged_03.jpg"
       ],
       "type": "image",
       "title": "Winged Scientist",
-      "description": "A non-canon depiction of a character from my Trepidation project.\n\nThis artwork originally existed only as linework from a few years prior. I felt like drawing without wanting to think of a pose so I dug this up, dusted it off, and cleaned it up.\n\nThe cityscape in the background was made in blender with a shader to simulate black outlines. After rendering, I did a lot of work to fix the colors and materials to have it fit in with the rest of the scene. The rings around the planet were also rendered in 3D, but as a separate layer from the cityscape. Everything else was done in 2D.\n\nThe entire artwork, from start to finish, was inspired by 'Reaper Hank' by Rhunyc on Newgrounds.",
+      "description": "A non-canon depiction of a character from my Trepidation project.\n\nThis artwork originally existed only as linework and messy colors from two years prior (2nd image). I felt like drawing but didn't want to think of a pose so I dug this up, dusted it off, and cleaned it up.\n\nThe cityscape in the background was made in blender with a shader to simulate black outlines. After rendering, I did a lot of work to fix the colors and materials to have it fit in with the rest of the scene. The rings around the planet were also rendered in 3D, but as a separate layer from the cityscape. Everything else was done in 2D.\n\nThe entire artwork, from start to finish, was inspired by 'Reaper Hank' by Rhunyc on Newgrounds (3rd image).",
       "tags": [
         "2D",
         "Blender",
