@@ -1,0 +1,5 @@
+go to folder navigation bar and delete everything and type "cmd" and enter
+
+type "node generate-manifest.js" 
+
+done. push changes in github and website should update
