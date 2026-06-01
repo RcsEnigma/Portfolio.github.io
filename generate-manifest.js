@@ -1,194 +1,227 @@
 /**
  * generate-manifest.js
- * Run this once after adding new files to /works:
+ * Run after adding files to /works:
  *   node generate-manifest.js
  *
- * It scans /works for media + .txt pairs and writes manifest.json
- * which the website reads automatically.
+ * Reads image dimensions natively (no npm needed) to assign
+ * correct grid spans — landscape → wide, portrait → tall, etc.
  */
 
-const fs = require("fs");
+const fs   = require("fs");
 const path = require("path");
 
-const WORKS_DIR = path.join(__dirname, "works");
-const MANIFEST_PATH = path.join(__dirname, "manifest.json");
+const WORKS_DIR    = path.join(__dirname, "works");
+const MANIFEST_OUT = path.join(__dirname, "manifest.json");
 
-const MEDIA_EXTENSIONS = new Set([
-  ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".svg",
-  ".mp4", ".webm", ".mov", ".ogg"
-]);
+const IMAGE_EXT = new Set([".jpg",".jpeg",".png",".gif",".webp",".avif",".svg"]);
+const VIDEO_EXT = new Set([".mp4",".webm",".mov",".ogg"]);
+const MEDIA_EXT = new Set([...IMAGE_EXT, ...VIDEO_EXT]);
 
-const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".svg"]);
-const VIDEO_EXTENSIONS = new Set([".mp4", ".webm", ".mov", ".ogg"]);
-
-// ── Parse a .txt file into structured fields ────────────────────────────────
-function parseTxt(content) {
-  const result = {
-    title: "",
-    description: "",
-    tags: [],
-    featured: false,
-    extraMedia: [],
-    date: "",
-    link: "",
-  };
-
-  // Normalise line endings
-  const lines = content.replace(/\r\n/g, "\n").split("\n");
-
-  let currentKey = null;
-  let buffer = [];
+// ── Parse a .txt file ────────────────────────────────────────
+function parseTxt(raw) {
+  const out = { title:"", description:"", tags:[], featured:false, extraMedia:[], date:"", link:"" };
+  const lines = raw.replace(/\r\n/g,"\n").split("\n");
+  let key = null, buf = [];
 
   const flush = () => {
-    if (!currentKey) return;
-    const value = buffer.join("\n").trim();
-    switch (currentKey) {
-      case "title":       result.title = value; break;
-      case "description": result.description = value; break;
-      case "date":        result.date = value; break;
-      case "link":        result.link = value; break;
+    if (!key) return;
+    const val = buf.join("\n").trim();
+    switch (key) {
+      case "title":       out.title       = val; break;
+      case "description": out.description = val; break;
+      case "date":        out.date        = val; break;
+      case "link":        out.link        = val; break;
       case "tags":
-        result.tags = value
-          .split(/[\n,]+/)
-          .map((t) => t.trim())
-          .filter(Boolean);
-        break;
+        out.tags = val.split(/[\n,]+/).map(t=>t.trim()).filter(Boolean); break;
       case "featured":
-        result.featured = /^(true|yes|1)$/i.test(value);
-        break;
+        out.featured = /^(true|yes|1)$/i.test(val); break;
       case "extra":
-        result.extraMedia = value
-          .split(/[\n,]+/)
-          .map((t) => t.trim())
-          .filter(Boolean);
-        break;
+        out.extraMedia = val.split(/[\n,]+/).map(t=>t.trim()).filter(Boolean); break;
     }
-    buffer = [];
-    currentKey = null;
+    buf = []; key = null;
   };
 
   for (const line of lines) {
-    const keyMatch = line.match(/^\[(\w+)\]\s*$/i);
-    if (keyMatch) {
-      flush();
-      currentKey = keyMatch[1].toLowerCase();
-    } else {
-      buffer.push(line);
-    }
+    const m = line.match(/^\[(\w+)\]\s*$/i);
+    if (m) { flush(); key = m[1].toLowerCase(); }
+    else   { buf.push(line); }
   }
   flush();
-
-  return result;
+  return out;
 }
 
-// ── Detect aspect ratio bucket from filename hint or default ────────────────
-function mediaType(filename) {
-  const ext = path.extname(filename).toLowerCase();
-  if (VIDEO_EXTENSIONS.has(ext)) return "video";
-  if (IMAGE_EXTENSIONS.has(ext)) return "image";
-  return "unknown";
+// ── Read image dimensions without any npm packages ───────────
+function readDimensions(filepath) {
+  const ext = path.extname(filepath).toLowerCase();
+  if (!IMAGE_EXT.has(ext) || ext === ".svg" || ext === ".avif") return null;
+
+  try {
+    // JPEGs can have large EXIF blocks before the SOF marker, read more
+    const size = (ext === ".jpg" || ext === ".jpeg") ? 65536 : 128;
+    const buf  = Buffer.alloc(size);
+    const fd   = fs.openSync(filepath, "r");
+    const read = fs.readSync(fd, buf, 0, size, 0);
+    fs.closeSync(fd);
+    const d = buf.slice(0, read);
+
+    if (ext === ".png") {
+      // Signature: 89 50 4E 47 — width @ 16, height @ 20 (big-endian uint32)
+      if (d[0]===0x89 && d[1]===0x50 && d.length >= 24)
+        return { w: d.readUInt32BE(16), h: d.readUInt32BE(20) };
+    }
+
+    if (ext === ".gif") {
+      // Header: 47 49 46 — width @ 6, height @ 8 (little-endian uint16)
+      if (d[0]===0x47 && d[1]===0x49 && d.length >= 10)
+        return { w: d.readUInt16LE(6), h: d.readUInt16LE(8) };
+    }
+
+    if (ext === ".jpg" || ext === ".jpeg") {
+      // Walk JPEG segments looking for SOF markers
+      let i = 2;
+      while (i < d.length - 10) {
+        if (d[i] !== 0xFF) break;
+        const m = d[i+1];
+        const isSOF = (m >= 0xC0 && m <= 0xC3) || (m >= 0xC5 && m <= 0xC7) ||
+                      (m >= 0xC9 && m <= 0xCB) || (m >= 0xCD && m <= 0xCF);
+        if (isSOF) return { w: d.readUInt16BE(i+7), h: d.readUInt16BE(i+5) };
+        const segLen = d.readUInt16BE(i+2);
+        if (segLen < 2) break;
+        i += 2 + segLen;
+      }
+    }
+
+    if (ext === ".webp") {
+      // RIFF????WEBP
+      if (d.toString("ascii",0,4)==="RIFF" && d.toString("ascii",8,12)==="WEBP") {
+        const chunk = d.toString("ascii",12,16);
+        if (chunk === "VP8 " && d.length >= 30)
+          return { w:(d[26]|d[27]<<8)&0x3FFF, h:(d[28]|d[29]<<8)&0x3FFF };
+        if (chunk === "VP8L" && d.length >= 25) {
+          const bits = d.readUInt32LE(21);
+          return { w:(bits&0x3FFF)+1, h:((bits>>14)&0x3FFF)+1 };
+        }
+        if (chunk === "VP8X" && d.length >= 34)
+          return {
+            w: 1+(d[24]|d[25]<<8|d[26]<<16),
+            h: 1+(d[27]|d[28]<<8|d[29]<<16)
+          };
+      }
+    }
+  } catch(_) { /* file missing or unreadable */ }
+  return null;
 }
 
-// ── Strip trailing digits + possible separator from a base name ─────────────
-// e.g. "cityscape_01" → "cityscape", "project2" → "project"
-function stripTrailingNumber(base) {
+// ── Derive grid span from aspect ratio ───────────────────────
+function deriveSpan(ar, type) {
+  if (!ar) return type === "video" ? "wide" : "normal";
+  if (ar > 2.2)  return "ultrawide";
+  if (ar > 1.45) return "wide";   // landscape
+  if (ar < 0.70) return "tall";   // portrait
+  return "normal";                 // roughly square
+}
+
+// ── Strip trailing number/separator from base name ───────────
+// e.g. "project_01" → "project",  "frame3" → "frame"
+function canonical(base) {
   return base.replace(/[-_\s]*\d+$/, "");
 }
 
-// ── Main ────────────────────────────────────────────────────────────────────
-function buildManifest() {
+function mediaType(filename) {
+  const ext = path.extname(filename).toLowerCase();
+  if (VIDEO_EXT.has(ext)) return "video";
+  if (IMAGE_EXT.has(ext)) return "image";
+  return "unknown";
+}
+
+// ── Main ─────────────────────────────────────────────────────
+function build() {
   if (!fs.existsSync(WORKS_DIR)) {
-    console.error("⚠  /works directory not found. Creating it...");
+    console.warn("⚠  /works not found — creating it.");
     fs.mkdirSync(WORKS_DIR);
   }
 
-  const files = fs.readdirSync(WORKS_DIR).filter((f) => {
-    const fullPath = path.join(WORKS_DIR, f);
-    return fs.statSync(fullPath).isFile();
-  });
+  const files = fs.readdirSync(WORKS_DIR).filter(f =>
+    fs.statSync(path.join(WORKS_DIR, f)).isFile());
 
-  // Group media files by their "canonical base name" (stripping trailing numbers)
-  // and collect txt files separately.
-  const txtMap = {};      // base → txt content
-  const mediaGroups = {}; // canonicalBase → [filename, ...]
+  const txtMap    = {};   // base → raw txt string
+  const groups    = {};   // canonicalBase → [filename, ...]
 
-  for (const file of files) {
-    const ext = path.extname(file).toLowerCase();
-    const base = path.basename(file, ext);
+  for (const f of files) {
+    const ext  = path.extname(f).toLowerCase();
+    const base = path.basename(f, ext);
 
-    if (ext === ".txt") {
-      txtMap[base] = fs.readFileSync(path.join(WORKS_DIR, file), "utf8");
-      continue;
-    }
+    if (ext === ".txt") { txtMap[base] = fs.readFileSync(path.join(WORKS_DIR, f), "utf8"); continue; }
+    if (!MEDIA_EXT.has(ext)) continue;
 
-    if (!MEDIA_EXTENSIONS.has(ext)) continue;
-
-    const canonical = stripTrailingNumber(base);
-    if (!mediaGroups[canonical]) mediaGroups[canonical] = [];
-    // Keep original filename; sort later
-    mediaGroups[canonical].push(file);
+    const canon = canonical(base);
+    (groups[canon] = groups[canon] || []).push(f);
   }
 
-  // For every canonical group, find the matching txt (exact base, or canonical)
   const entries = [];
 
-  for (const [canonical, mediaFiles] of Object.entries(mediaGroups)) {
-    // Try exact match first (for files without a number suffix),
-    // then stripped canonical.
-    const txtContent =
-      txtMap[canonical] ??
-      txtMap[mediaFiles[0] && path.basename(mediaFiles[0], path.extname(mediaFiles[0]))] ??
+  for (const [canon, mediaFiles] of Object.entries(groups)) {
+    // Find matching .txt: try canonical name, then the exact base of each file
+    const txtRaw =
+      txtMap[canon] ??
+      mediaFiles.map(f => txtMap[path.basename(f, path.extname(f))]).find(Boolean) ??
       null;
 
-    const meta = txtContent
-      ? parseTxt(txtContent)
-      : { title: canonical, description: "", tags: [], featured: false, extraMedia: [], date: "", link: "" };
+    const meta = txtRaw
+      ? parseTxt(txtRaw)
+      : { title:canon, description:"", tags:[], featured:false, extraMedia:[], date:"", link:"" };
 
-    // Sort primary media: non-numbered file first, then numbered ascending
-    const sortedMedia = [...mediaFiles].sort((a, b) => {
-      const aBase = path.basename(a, path.extname(a));
-      const bBase = path.basename(b, path.extname(b));
-      const aNum = parseInt(aBase.match(/(\d+)$/)?.[1] ?? "0", 10);
-      const bNum = parseInt(bBase.match(/(\d+)$/)?.[1] ?? "0", 10);
-      return aNum - bNum;
+    // Sort: non-numbered first, then ascending
+    const sorted = [...mediaFiles].sort((a,b) => {
+      const na = parseInt(path.basename(a,path.extname(a)).match(/(\d+)$/)?.[1] ?? "0");
+      const nb = parseInt(path.basename(b,path.extname(b)).match(/(\d+)$/)?.[1] ?? "0");
+      return na - nb;
     });
 
-    // Merge extra media declared in txt
-    const allMedia = [
-      ...sortedMedia,
-      ...meta.extraMedia.filter((m) => !sortedMedia.includes(m)),
-    ];
+    const allMedia = [...sorted, ...meta.extraMedia.filter(m => !sorted.includes(m))];
+    const primary  = allMedia[0];
+    const type     = mediaType(primary);
+
+    // Read dimensions from the primary media file
+    const dims = readDimensions(path.join(WORKS_DIR, primary));
+    const ar   = dims ? parseFloat((dims.w / dims.h).toFixed(3)) : null;
 
     entries.push({
-      id: canonical,
-      primaryMedia: allMedia[0],
+      id:           canon,
+      primaryMedia: primary,
       allMedia,
-      type: mediaType(allMedia[0]),
-      title: meta.title || canonical,
-      description: meta.description,
-      tags: meta.tags,
-      featured: meta.featured,
-      date: meta.date,
-      link: meta.link,
+      type,
+      title:        meta.title || canon,
+      description:  meta.description,
+      tags:         meta.tags,
+      featured:     meta.featured,
+      date:         meta.date,
+      link:         meta.link,
+      aspectRatio:  ar,
+      gridSpan:     deriveSpan(ar, type),
     });
   }
 
-  // Sort: featured first, then by date desc, then alpha
-  entries.sort((a, b) => {
+  // Sort: featured first, then by date desc, then alphabetical
+  entries.sort((a,b) => {
     if (a.featured !== b.featured) return a.featured ? -1 : 1;
     if (a.date && b.date) return b.date.localeCompare(a.date);
     return a.title.localeCompare(b.title);
   });
 
-  // Collect all tags
-  const allTags = [...new Set(entries.flatMap((e) => e.tags))].sort();
-
+  const allTags = [...new Set(entries.flatMap(e => e.tags))].sort();
   const manifest = { generated: new Date().toISOString(), tags: allTags, works: entries };
-  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2));
 
-  console.log(`✅  manifest.json written — ${entries.length} work(s), ${allTags.length} tag(s)`);
-  console.log("    Works:", entries.map((e) => `"${e.title}"`).join(", "));
-  console.log("    Tags:", allTags.join(", ") || "(none)");
+  fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifest, null, 2));
+
+  console.log(`\n✅  manifest.json — ${entries.length} work(s), ${allTags.length} tag(s)\n`);
+  for (const e of entries) {
+    const span = e.gridSpan.padEnd(10);
+    const ar   = e.aspectRatio ? `${e.aspectRatio} ar` : "no dims";
+    const feat = e.featured ? " ★" : "";
+    console.log(`  ${span} ${e.title}${feat}  (${ar}, ${e.allMedia.length} file(s))`);
+  }
+  console.log();
 }
 
-buildManifest();
+build();
