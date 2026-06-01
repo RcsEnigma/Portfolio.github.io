@@ -1,0 +1,16 @@
+[title]
+Translation
+
+[description]
+Executing a concept for my Trepidation project. Working out how to handle the text was fun, the project overall was not too difficult.
+
+I later rewrote this scene, so this animation is not too accurate anymore. I may remake it.
+
+[tags]
+3D, Blender, Trepidation, Animation
+
+[featured]
+true
+
+[date]
+2025-09
