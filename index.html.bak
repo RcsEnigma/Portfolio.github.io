@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portfolio</title>
+<title>AJ Ambrozic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
   /* ── Reset & Base ─────────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -614,19 +614,19 @@
 <!-- ── ABOUT ──────────────────────────────────────────────────────── -->
 <div class="static-page" id="about-page">
   <h1>About</h1>
-  <p>A multidisciplinary studio working across motion, identity, and interactive systems. Founded in 2019, we collaborate with artists, institutions, and brands to make work that is precise, strange, and lasting.</p>
-  <p>Based between Montréal and Berlin. Currently open to new projects starting Q2 2025.</p>
-  <p>— Edit this section in <code>index.html</code> under <code>#about-page</code>.</p>
+  <p>blah</p>
+  <p>blah</p>
+  <p>blah</p>
 </div>
 
 <!-- ── CONTACT ────────────────────────────────────────────────────── -->
 <div class="static-page" id="contact-page">
   <h1>Contact</h1>
-  <p>For project inquiries, collaborations, or press:<br>
+  <p>blah<br>
   <a href="mailto:hello@studio.example">hello@studio.example</a></p>
   <p>Instagram: <a href="#">@studio.handle</a><br>
-  Are.na: <a href="#">studio-handle</a></p>
-  <p>— Edit this section in <code>index.html</code> under <code>#contact-page</code>.</p>
+  blah: <a href="#">studio-handle</a></p>
+  <p>blah</p>
 </div>
 
 <!-- ── MODAL ──────────────────────────────────────────────────────── -->
@@ -654,7 +654,7 @@
 <!-- ── FOOTER ─────────────────────────────────────────────────────── -->
 <footer>
   <span id="footer-count"></span>
-  <span>Run <code>node generate-manifest.js</code> after adding works</span>
+  <span>blah blah blah</span>
 </footer>
 
 <script>
