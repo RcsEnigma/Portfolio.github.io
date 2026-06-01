@@ -273,7 +273,9 @@ body {
   opacity: 0; transition: opacity 0.42s ease;
   pointer-events: none;
 }
-.modal-slot.active { opacity: 1; pointer-events: all; }
+.modal-slot.active { opacity: 1; }
+/* Only allow interaction when the modal is actually open */
+#modal-overlay.open .modal-slot.active { pointer-events: all; }
 
 .modal-slot img {
   max-width: 100%; max-height: 100%;
@@ -566,7 +568,7 @@ footer span {
 
   <!-- Image stage -->
   <div id="modal-stage">
-    <div id="modal-slot-a" class="modal-slot active"></div>
+    <div id="modal-slot-a" class="modal-slot"></div>
     <div id="modal-slot-b" class="modal-slot"></div>
     <div id="modal-spinner"></div>
     <button class="modal-arrow" id="modal-prev" onclick="stepMedia(-1)">‹</button>
@@ -931,8 +933,8 @@ function renderModalMedia() {
 
   function swap() {
     showSpinner(false);
-    fromEl.classList.remove("active"); fromEl.style.pointerEvents = "none";
-    toEl.classList.add("active");      toEl.style.pointerEvents   = "all";
+    fromEl.classList.remove("active");
+    toEl.classList.add("active");
     currentSlot = nextId;
     updateModalDots();
   }
@@ -1012,6 +1014,7 @@ function closeModal() {
   document.getElementById("modal-overlay").classList.remove("open");
   document.body.style.overflow = "";
   document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
+  document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
   modalWork = null; infoPanelOpen = false;
   document.getElementById("modal-info-panel").classList.remove("open");
   document.getElementById("modal-info-btn").classList.remove("mbtn-on");
