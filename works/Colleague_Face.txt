@@ -4,7 +4,13 @@ Colleague Face
 [description]
 A render of a scene from my Trepidation project. Sculpted manually with 99% procedural materials (the LED panel wall in the back uses an image texture. That's it).
 
+This piece involved use of almost every tab within the blender suite, which seriously tested my familarities and capability within the software. Although procedural, I still had to work with UVs on the character's skin and undershirt. The seam edges of the undershirt were done with geometry nodes, as well. 
+
 2nd image excludes the graphics.
+
+3rd image was the initial render, for the sake of framing.
+
+4th video was a lackluster animation I whipped up a while later. Because the character was sculpted, I couldn't animate them at all; I had no further expectations and moved on to new projects.
 
 [tags]
 3D, Blender, Graphic Design, Trepidation
