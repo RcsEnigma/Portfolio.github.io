@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-01T20:26:44.736Z",
+  "generated": "2026-06-02T19:42:55.010Z",
   "tags": [
     "2D",
     "3D",
@@ -14,27 +14,6 @@
     "Trepidation"
   ],
   "works": [
-    {
-      "id": "Translation",
-      "primaryMedia": "Translation.mp4",
-      "allMedia": [
-        "Translation.mp4"
-      ],
-      "type": "video",
-      "title": "Translation",
-      "description": "Executing a concept for my Trepidation project. Working out how to handle the text was fun, the project overall was not too difficult.\n\nI later rewrote this scene, so this animation is not too accurate anymore. I may remake it.",
-      "tags": [
-        "3D",
-        "Blender",
-        "Trepidation",
-        "Animation"
-      ],
-      "featured": true,
-      "date": "2025-09",
-      "link": "",
-      "aspectRatio": null,
-      "gridSpan": "wide"
-    },
     {
       "id": "Trepidation_Rooms",
       "primaryMedia": "Trepidation_Rooms_01.png",
@@ -74,7 +53,7 @@
       "date": "2026-02",
       "link": "",
       "aspectRatio": 0.781,
-      "gridSpan": "normal"
+      "gridSpan": "tall"
     },
     {
       "id": "MagazineTwo",
@@ -99,7 +78,28 @@
       "date": "2025-11",
       "link": "",
       "aspectRatio": 0.773,
-      "gridSpan": "normal"
+      "gridSpan": "tall"
+    },
+    {
+      "id": "Translation",
+      "primaryMedia": "Translation.mp4",
+      "allMedia": [
+        "Translation.mp4"
+      ],
+      "type": "video",
+      "title": "Translation",
+      "description": "Executing a concept for my Trepidation project. Working out how to handle the text was fun, the project overall was not too difficult.\n\nI later rewrote this scene, so this animation is not too accurate anymore. I may remake it.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Trepidation",
+        "Animation"
+      ],
+      "featured": true,
+      "date": "2025-09",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide"
     },
     {
       "id": "Gummy",
@@ -126,7 +126,8 @@
       "allMedia": [
         "Colleague_Face_01.png",
         "Colleague_Face_02.png",
-        "Colleague_Face_03.png"
+        "Colleague_Face_03.png",
+        "Colleague_Face_04.mkv"
       ],
       "type": "image",
       "title": "Colleague Face",
@@ -163,7 +164,7 @@
       "date": "2024-09",
       "link": "",
       "aspectRatio": 0.773,
-      "gridSpan": "normal"
+      "gridSpan": "tall"
     },
     {
       "id": "Procedural_Land",
@@ -199,7 +200,6 @@
       "description": "A non-canon depiction of a character from my Trepidation project.\n\nThis artwork originally existed only as linework and messy colors from two years prior (2nd image). I felt like drawing but didn't want to think of a pose so I dug this up, dusted it off, and cleaned it up.\n\nThe cityscape in the background was made in blender with a shader to simulate black outlines. After rendering, I did a lot of work to fix the colors and materials to have it fit in with the rest of the scene. The rings around the planet were also rendered in 3D, but as a separate layer from the cityscape. Everything else was done in 2D.\n\nThe entire artwork, from start to finish, was inspired by 'Reaper Hank' by Rhunyc on Newgrounds (3rd image).",
       "tags": [
         "2D",
-        "Blender",
         "Multimodal",
         "Trepidation",
         "Illustration"

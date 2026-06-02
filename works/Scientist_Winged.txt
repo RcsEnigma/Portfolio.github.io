@@ -11,7 +11,7 @@ The cityscape in the background was made in blender with a shader to simulate bl
 The entire artwork, from start to finish, was inspired by 'Reaper Hank' by Rhunyc on Newgrounds (3rd image).
 
 [tags]
-2D, Blender, Multimodal, Trepidation, Illustration
+2D, Multimodal, Trepidation, Illustration
 
 [date]
 2024-04
