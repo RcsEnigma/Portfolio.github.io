@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-02T19:42:55.010Z",
+  "generated": "2026-06-03T22:59:53.086Z",
   "tags": [
     "2D",
     "3D",
@@ -56,19 +56,14 @@
       "gridSpan": "tall"
     },
     {
-      "id": "MagazineTwo",
-      "primaryMedia": "MagazineTwo_01.png",
+      "id": "MagazineSix",
+      "primaryMedia": "MagazineSix.png",
       "allMedia": [
-        "MagazineTwo_01.png",
-        "MagazineTwo_02.png",
-        "MagazineTwo_03.png",
-        "MagazineTwo_04.png",
-        "MagazineTwo_05.png",
-        "MagazineTwo_06.png"
+        "MagazineSix.png"
       ],
       "type": "image",
-      "title": "Misc. Covers",
-      "description": "My forte into graphic design. General covers of something. A magazine? A poster? Who knows.\n\nFor most of these, I simply browsed stock photo websites for images I felt I could work with. Some ideas developed on my own, which I 3D modeled a bit for.\n\nThese have been bundled for convenience, but the dates I finished each of them vary. The text within them usually reveals the true date I finished them.",
+      "title": "Cover 09",
+      "description": "I wanted to make a purple-dominant design. This stock photo did the trick.\n\n\"PROPHECY\" text made in blender.",
       "tags": [
         "2D",
         "Graphic Design",
@@ -76,6 +71,64 @@
       ],
       "featured": false,
       "date": "2025-11",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall"
+    },
+    {
+      "id": "MagazineSeven",
+      "primaryMedia": "MagazineSeven.png",
+      "allMedia": [
+        "MagazineSeven.png"
+      ],
+      "type": "image",
+      "title": "Cover 08",
+      "description": "A more risque design. Was interested in a sci-fi tattoo, the back is an attractive canvas. \n\nRendered in blender, text added in post.",
+      "tags": [
+        "2D",
+        "Graphic Design",
+        "Multimodal"
+      ],
+      "featured": false,
+      "date": "2025-10",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall"
+    },
+    {
+      "id": "MagazineFour",
+      "primaryMedia": "MagazineFour.png",
+      "allMedia": [
+        "MagazineFour.png"
+      ],
+      "type": "image",
+      "title": "Cover 06",
+      "description": "Found a stock photo I liked and honed some ideas I had.",
+      "tags": [
+        "2D",
+        "Graphic Design"
+      ],
+      "featured": false,
+      "date": "2025-09",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall"
+    },
+    {
+      "id": "MagazineThree",
+      "primaryMedia": "MagazineThree.png",
+      "allMedia": [
+        "MagazineThree.png"
+      ],
+      "type": "image",
+      "title": "Cover 03",
+      "description": "Browsed for some stock photos to dress up.\n\nThis design is one of only a few that does not include additional information like the date or signature.",
+      "tags": [
+        "2D",
+        "Graphic Design"
+      ],
+      "featured": false,
+      "date": "2025-09",
       "link": "",
       "aspectRatio": 0.773,
       "gridSpan": "tall"
@@ -100,6 +153,45 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide"
+    },
+    {
+      "id": "MagazineFive",
+      "primaryMedia": "MagazineFive.png",
+      "allMedia": [
+        "MagazineFive.png"
+      ],
+      "type": "image",
+      "title": "Cover 05",
+      "description": "Another graphic design exploration. The graffiti was quite fun to make.",
+      "tags": [
+        "2D",
+        "Graphic Design"
+      ],
+      "featured": false,
+      "date": "2025-08",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall"
+    },
+    {
+      "id": "MagazineTwo",
+      "primaryMedia": "MagazineTwo.png",
+      "allMedia": [
+        "MagazineTwo.png"
+      ],
+      "type": "image",
+      "title": "Cover 04",
+      "description": "One of my fortes into graphic design. The ribcage and tendrils were hastily rendered in blender, all text and icons were added in post.",
+      "tags": [
+        "2D",
+        "Graphic Design",
+        "Multimodal"
+      ],
+      "featured": false,
+      "date": "2025-08",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall"
     },
     {
       "id": "Gummy",

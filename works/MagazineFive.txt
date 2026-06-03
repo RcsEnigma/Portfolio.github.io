@@ -1,0 +1,11 @@
+[title]
+Cover 05
+
+[description]
+Another graphic design exploration. The graffiti was quite fun to make.
+
+[tags]
+2D, Graphic Design
+
+[date]
+2025-08
