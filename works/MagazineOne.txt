@@ -9,7 +9,7 @@ The model was downloaded from Mixamo, but I remade all the materials to appear m
 2nd image was a work in progress export.
 
 [tags]
-2D, 3D, Blender, Graphic Design
+2D, 3D, Blender, Graphic Design, Multimodal
 
 [date]
 2026-03

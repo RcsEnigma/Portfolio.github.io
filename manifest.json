@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-04T00:03:20.094Z",
+  "generated": "2026-06-04T04:03:13.761Z",
   "tags": [
     "2D",
     "3D",
@@ -14,6 +14,31 @@
     "Trepidation"
   ],
   "works": [
+    {
+      "id": "PosterOne",
+      "primaryMedia": "PosterOne_01.png",
+      "allMedia": [
+        "PosterOne_01.png",
+        "PosterOne_02.png",
+        "PosterOne_03.png",
+        "PosterOne_04.png",
+        "PosterOne_05.png",
+        "PosterOne_06.png"
+      ],
+      "type": "image",
+      "title": "Minimalist Posters",
+      "description": "A stab at a corporate-minimalist style.\n\nThe QR-code-style glyphs come from the language I've designed for my Trepidation project. These simple posters are designs I can easily paste into established scenes to give the feel I'm looking for.",
+      "tags": [
+        "2D",
+        "Graphic Design",
+        "Trepidation"
+      ],
+      "featured": false,
+      "date": "2026-05",
+      "link": "",
+      "aspectRatio": 0.562,
+      "gridSpan": "tall"
+    },
     {
       "id": "Trepidation_Rooms",
       "primaryMedia": "Trepidation_Rooms_01.png",
@@ -49,7 +74,8 @@
         "2D",
         "3D",
         "Blender",
-        "Graphic Design"
+        "Graphic Design",
+        "Multimodal"
       ],
       "featured": false,
       "date": "2026-03",

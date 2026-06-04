@@ -1,0 +1,13 @@
+[title]
+Minimalist Posters
+
+[description]
+A stab at a corporate-minimalist style.
+
+The QR-code-style glyphs come from the language I've designed for my Trepidation project. These simple posters are designs I can easily paste into established scenes to give the feel I'm looking for.
+
+[tags]
+2D, Graphic Design, Trepidation
+
+[date]
+2026-05
