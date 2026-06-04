@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-03T22:59:53.086Z",
+  "generated": "2026-06-04T00:03:20.094Z",
   "tags": [
     "2D",
     "3D",
@@ -36,6 +36,28 @@
       "gridSpan": "wide"
     },
     {
+      "id": "MagazineOne",
+      "primaryMedia": "MagazineOne_01.png",
+      "allMedia": [
+        "MagazineOne_01.png",
+        "MagazineOne_02.png"
+      ],
+      "type": "image",
+      "title": "Cover 11",
+      "description": "Another honing of graphic design.\n\nThe model was downloaded from Mixamo, but I remade all the materials to appear more photorealistic.\n\n2nd image was a work in progress export.",
+      "tags": [
+        "2D",
+        "3D",
+        "Blender",
+        "Graphic Design"
+      ],
+      "featured": false,
+      "date": "2026-03",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall"
+    },
+    {
       "id": "Grungy_Shower",
       "primaryMedia": "Grungy_Shower.png",
       "allMedia": [
@@ -57,9 +79,10 @@
     },
     {
       "id": "MagazineSix",
-      "primaryMedia": "MagazineSix.png",
+      "primaryMedia": "MagazineSix_01.png",
       "allMedia": [
-        "MagazineSix.png"
+        "MagazineSix_01.png",
+        "MagazineSix_02.jpg"
       ],
       "type": "image",
       "title": "Cover 09",
@@ -76,30 +99,11 @@
       "gridSpan": "tall"
     },
     {
-      "id": "MagazineSeven",
-      "primaryMedia": "MagazineSeven.png",
-      "allMedia": [
-        "MagazineSeven.png"
-      ],
-      "type": "image",
-      "title": "Cover 08",
-      "description": "A more risque design. Was interested in a sci-fi tattoo, the back is an attractive canvas. \n\nRendered in blender, text added in post.",
-      "tags": [
-        "2D",
-        "Graphic Design",
-        "Multimodal"
-      ],
-      "featured": false,
-      "date": "2025-10",
-      "link": "",
-      "aspectRatio": 0.773,
-      "gridSpan": "tall"
-    },
-    {
       "id": "MagazineFour",
-      "primaryMedia": "MagazineFour.png",
+      "primaryMedia": "MagazineFour_01.png",
       "allMedia": [
-        "MagazineFour.png"
+        "MagazineFour_01.png",
+        "MagazineFour_02.jpg"
       ],
       "type": "image",
       "title": "Cover 06",
@@ -116,9 +120,10 @@
     },
     {
       "id": "MagazineThree",
-      "primaryMedia": "MagazineThree.png",
+      "primaryMedia": "MagazineThree_01.png",
       "allMedia": [
-        "MagazineThree.png"
+        "MagazineThree_01.png",
+        "MagazineThree_02.jpg"
       ],
       "type": "image",
       "title": "Cover 03",
@@ -156,9 +161,10 @@
     },
     {
       "id": "MagazineFive",
-      "primaryMedia": "MagazineFive.png",
+      "primaryMedia": "MagazineFive_01.png",
       "allMedia": [
-        "MagazineFive.png"
+        "MagazineFive_01.png",
+        "MagazineFive_02.jpg"
       ],
       "type": "image",
       "title": "Cover 05",
@@ -237,28 +243,6 @@
       "gridSpan": "normal"
     },
     {
-      "id": "MagazineOne",
-      "primaryMedia": "MagazineOne_01.png",
-      "allMedia": [
-        "MagazineOne_01.png",
-        "MagazineOne_02.png"
-      ],
-      "type": "image",
-      "title": "Misc. Cover",
-      "description": "Another honing of graphic design.\n\nThe model was downloaded from Mixamo, but I remade all the materials to appear more photorealistic.\n\n2nd image was a work in progress export.",
-      "tags": [
-        "2D",
-        "3D",
-        "Blender",
-        "Graphic Design"
-      ],
-      "featured": false,
-      "date": "2024-09",
-      "link": "",
-      "aspectRatio": 0.773,
-      "gridSpan": "tall"
-    },
-    {
       "id": "Procedural_Land",
       "primaryMedia": "Procedural_Land_01.png",
       "allMedia": [
@@ -278,6 +262,25 @@
       "link": "",
       "aspectRatio": 1.896,
       "gridSpan": "wide"
+    },
+    {
+      "id": "Skull_ArtOne",
+      "primaryMedia": "Skull_ArtOne.png",
+      "allMedia": [
+        "Skull_ArtOne.png"
+      ],
+      "type": "image",
+      "title": "Skull 01",
+      "description": "A Stylized design possibly fit for an album cover.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2024-05",
+      "link": "",
+      "aspectRatio": 1,
+      "gridSpan": "normal"
     },
     {
       "id": "Scientist_Winged",
@@ -303,15 +306,14 @@
       "gridSpan": "wide"
     },
     {
-      "id": "Skull_Art",
-      "primaryMedia": "Skull_Art_01.png",
+      "id": "Skull_ArtTwo",
+      "primaryMedia": "Skull_ArtTwo.png",
       "allMedia": [
-        "Skull_Art_01.png",
-        "Skull_Art_02.png"
+        "Skull_ArtTwo.png"
       ],
       "type": "image",
-      "title": "Skulls",
-      "description": "Stylized designs possibly fit for an album cover.",
+      "title": "Skull 02",
+      "description": "A stylized design possibly fit for an album cover.",
       "tags": [
         "3D",
         "Blender"

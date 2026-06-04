@@ -1,5 +1,5 @@
 [title]
-Misc. Cover
+Cover 11
 
 [description]
 Another honing of graphic design.
@@ -12,4 +12,4 @@ The model was downloaded from Mixamo, but I remade all the materials to appear m
 2D, 3D, Blender, Graphic Design
 
 [date]
-2024-09
+2026-03

@@ -1,0 +1,11 @@
+[title]
+Skull 02
+
+[description]
+A stylized design possibly fit for an album cover.
+
+[tags]
+3D, Blender
+
+[date]
+2024-04

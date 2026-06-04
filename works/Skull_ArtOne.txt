@@ -1,0 +1,11 @@
+[title]
+Skull 01
+
+[description]
+A Stylized design possibly fit for an album cover.
+
+[tags]
+3D, Blender
+
+[date]
+2024-05
