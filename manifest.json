@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-06T05:56:30.502Z",
+  "generated": "2026-06-06T06:07:02.869Z",
   "tags": [
     "2D",
     "3D",
@@ -40,6 +40,27 @@
       "gridSpan": "tall"
     },
     {
+      "id": "Trepidation_Rooms",
+      "primaryMedia": "Trepidation_Rooms_01.png",
+      "allMedia": [
+        "Trepidation_Rooms_01.png",
+        "Trepidation_Rooms_02.png"
+      ],
+      "type": "image",
+      "title": "Trepidation Rooms",
+      "description": "Some area concepts for my personal Trepidation project. These are created with a large focus on brutalist shape language.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Trepidation"
+      ],
+      "featured": false,
+      "date": "2026-05",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide"
+    },
+    {
       "id": "MagazineOne",
       "primaryMedia": "MagazineOne_01.png",
       "allMedia": [
@@ -60,6 +81,26 @@
       "date": "2026-03",
       "link": "",
       "aspectRatio": 0.773,
+      "gridSpan": "tall"
+    },
+    {
+      "id": "Grungy_Shower",
+      "primaryMedia": "Grungy_Shower.png",
+      "allMedia": [
+        "Grungy_Shower.png"
+      ],
+      "type": "image",
+      "title": "Grungy Shower",
+      "description": "An attempt at photorealism. Every material in this scene is procedural, even the shower head and drain.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Photorealism"
+      ],
+      "featured": false,
+      "date": "2026-02",
+      "link": "",
+      "aspectRatio": 0.781,
       "gridSpan": "tall"
     },
     {
@@ -124,6 +165,27 @@
       "gridSpan": "tall"
     },
     {
+      "id": "Translation",
+      "primaryMedia": "Translation.mp4",
+      "allMedia": [
+        "Translation.mp4"
+      ],
+      "type": "video",
+      "title": "Translation",
+      "description": "Executing a concept for my Trepidation project. Working out how to handle the text was fun, the project overall was not too difficult.\n\nI later rewrote this scene, so this animation is not too accurate anymore. I may remake it.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Trepidation",
+        "Animation"
+      ],
+      "featured": true,
+      "date": "2025-09",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide"
+    },
+    {
       "id": "MagazineFive",
       "primaryMedia": "MagazineFive_01.png",
       "allMedia": [
@@ -164,6 +226,25 @@
       "gridSpan": "tall"
     },
     {
+      "id": "Gummy",
+      "primaryMedia": "Gummy.png",
+      "allMedia": [
+        "Gummy.png"
+      ],
+      "type": "image",
+      "title": "Gummy Art",
+      "description": "Took a stab at something like an album cover (an album called 'gummy', apparently).\n\nIt was fun to make but it doesn't look as delicious as it could be.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2025-02",
+      "link": "",
+      "aspectRatio": 1,
+      "gridSpan": "normal"
+    },
+    {
       "id": "Colleague_Face",
       "primaryMedia": "Colleague_Face_01.png",
       "allMedia": [
@@ -183,138 +264,6 @@
       ],
       "featured": false,
       "date": "2024-11",
-      "link": "",
-      "aspectRatio": 1,
-      "gridSpan": "normal"
-    },
-    {
-      "id": "Creeping_Shade",
-      "primaryMedia": "Creeping_Shade_01.png",
-      "allMedia": [
-        "Creeping_Shade_01.png",
-        "Creeping_Shade_02.png"
-      ],
-      "type": "image",
-      "title": "Creeping_Shade",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
-      "link": "",
-      "aspectRatio": 1.054,
-      "gridSpan": "normal"
-    },
-    {
-      "id": "Dimension_Jumper",
-      "primaryMedia": "Dimension_Jumper_01.png",
-      "allMedia": [
-        "Dimension_Jumper_01.png",
-        "Dimension_Jumper_02.png"
-      ],
-      "type": "image",
-      "title": "Dimension_Jumper",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
-      "link": "",
-      "aspectRatio": 1.047,
-      "gridSpan": "normal"
-    },
-    {
-      "id": "Fossil_Walker",
-      "primaryMedia": "Fossil_Walker_01.png",
-      "allMedia": [
-        "Fossil_Walker_01.png",
-        "Fossil_Walker_02.png"
-      ],
-      "type": "image",
-      "title": "Fossil_Walker",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
-      "link": "",
-      "aspectRatio": 1.058,
-      "gridSpan": "normal"
-    },
-    {
-      "id": "Trepidation_Rooms",
-      "primaryMedia": "Trepidation_Rooms_01.png",
-      "allMedia": [
-        "Trepidation_Rooms_01.png",
-        "Trepidation_Rooms_02.png"
-      ],
-      "type": "image",
-      "title": "Trepidation Rooms",
-      "description": "Some area concepts for my personal Trepidation project. These are created with a large focus on brutalist shape language.",
-      "tags": [
-        "3D",
-        "Blender",
-        "Trepidation"
-      ],
-      "featured": false,
-      "date": "2026-05",
-      "link": "",
-      "aspectRatio": 1.778,
-      "gridSpan": "wide"
-    },
-    {
-      "id": "Grungy_Shower",
-      "primaryMedia": "Grungy_Shower.png",
-      "allMedia": [
-        "Grungy_Shower.png"
-      ],
-      "type": "image",
-      "title": "Grungy Shower",
-      "description": "An attempt at photorealism. Every material in this scene is procedural, even the shower head and drain.",
-      "tags": [
-        "3D",
-        "Blender",
-        "Photorealism"
-      ],
-      "featured": false,
-      "date": "2026-02",
-      "link": "",
-      "aspectRatio": 0.781,
-      "gridSpan": "tall"
-    },
-    {
-      "id": "Translation",
-      "primaryMedia": "Translation.mp4",
-      "allMedia": [
-        "Translation.mp4"
-      ],
-      "type": "video",
-      "title": "Translation",
-      "description": "Executing a concept for my Trepidation project. Working out how to handle the text was fun, the project overall was not too difficult.\n\nI later rewrote this scene, so this animation is not too accurate anymore. I may remake it.",
-      "tags": [
-        "3D",
-        "Blender",
-        "Trepidation",
-        "Animation"
-      ],
-      "featured": true,
-      "date": "2025-09",
-      "link": "",
-      "aspectRatio": null,
-      "gridSpan": "wide"
-    },
-    {
-      "id": "Gummy",
-      "primaryMedia": "Gummy.png",
-      "allMedia": [
-        "Gummy.png"
-      ],
-      "type": "image",
-      "title": "Gummy Art",
-      "description": "Took a stab at something like an album cover (an album called 'gummy', apparently).\n\nIt was fun to make but it doesn't look as delicious as it could be.",
-      "tags": [
-        "3D",
-        "Blender"
-      ],
-      "featured": false,
-      "date": "2025-02",
       "link": "",
       "aspectRatio": 1,
       "gridSpan": "normal"
@@ -444,23 +393,6 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide"
-    },
-    {
-      "id": "Pyroclastic_Elemental",
-      "primaryMedia": "Pyroclastic_Elemental_01.png",
-      "allMedia": [
-        "Pyroclastic_Elemental_01.png",
-        "Pyroclastic_Elemental_02.png"
-      ],
-      "type": "image",
-      "title": "Pyroclastic_Elemental",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
-      "link": "",
-      "aspectRatio": 1.088,
-      "gridSpan": "normal"
     }
   ]
 }
