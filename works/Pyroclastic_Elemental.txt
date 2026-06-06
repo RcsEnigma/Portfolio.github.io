@@ -1,0 +1,15 @@
+[title]
+Pyroclastic Elemental
+
+[description]
+Character art for a card in my TCG Concept, Exul Omnium.
+
+This card's abilities dictate the card can only stay alive for two turns, but every fire type it defeats extends that timer by one turn. It has a 50% to deal bonus damage to surrounding enemies, and it also explodes on death.
+
+It's working name was "Fire Elemental".
+
+[tags]
+2D, Illustration, Exul Omnium
+
+[date]
+2023-09

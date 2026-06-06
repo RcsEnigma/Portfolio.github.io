@@ -1,0 +1,15 @@
+[title]
+Fossil Walker
+
+[description]
+Character art for a card in my TCG Concept, Exul Omnium.
+
+This card's abilities allow give the player a 40% chance to destroy a random card from the player's hand whenever it deals damage. It also takes more-than-usual damage from enemies.
+
+This card features an experimental 'Glass' design which shows off more of the card art.
+
+[tags]
+2D, Illustration, Exul Omnium
+
+[date]
+2024-02

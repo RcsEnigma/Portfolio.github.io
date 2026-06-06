@@ -1,0 +1,15 @@
+[title]
+Creeping Shade
+
+[description]
+Character art for a card in my TCG Concept, Exul Omnium.
+
+This card's abilities give it an 80% chance to deal overkill damage to nearby enemies.
+
+It's working name was "Shade Watcher".
+
+[tags]
+2D, Illustration, Exul Omnium
+
+[date]
+2023-05
