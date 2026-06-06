@@ -2,7 +2,7 @@
 Creeping Shade
 
 [description]
-Character art for a card in my TCG Concept, Exul Omnium.
+Character art for a card in my TCG Concept, Exul Omnium. Sticky sickly smoke suspending a skeleton inside it.
 
 This card's abilities give it an 80% chance to deal overkill damage to nearby enemies.
 

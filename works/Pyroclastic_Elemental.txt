@@ -2,7 +2,7 @@
 Pyroclastic Elemental
 
 [description]
-Character art for a card in my TCG Concept, Exul Omnium.
+Character art for a card in my TCG Concept, Exul Omnium. A living plume of fire. It has two eyes looking forward, which maybe didn't turn out too well.
 
 This card's abilities dictate the card can only stay alive for two turns, but every fire type it defeats extends that timer by one turn. It has a 50% to deal bonus damage to surrounding enemies, and it also explodes on death.
 

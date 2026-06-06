@@ -2,7 +2,7 @@
 Dimension Jumper
 
 [description]
-Character art for a card in my TCG Concept, Exul Omnium.
+Character art for a card in my TCG Concept, Exul Omnium. Some kind of alien that can easily slip between dimensional spaces. It has four eyes, which may not be too clear.
 
 This card's abilities allow it to freely travel between your controlled lands, and upon death it has a 1/3 chance to respawn in any of those lands.
 
