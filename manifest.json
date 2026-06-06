@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-06T04:02:20.001Z",
+  "generated": "2026-06-06T04:11:58.024Z",
   "tags": [
     "2D",
     "3D",
@@ -369,8 +369,8 @@
       "featured": false,
       "date": "2024-02",
       "link": "",
-      "aspectRatio": 0.796,
-      "gridSpan": "tall"
+      "aspectRatio": 1.058,
+      "gridSpan": "normal"
     },
     {
       "id": "Pyroclastic_Elemental",
@@ -390,8 +390,8 @@
       "featured": false,
       "date": "2023-09",
       "link": "",
-      "aspectRatio": 0.827,
-      "gridSpan": "tall"
+      "aspectRatio": 1.088,
+      "gridSpan": "normal"
     },
     {
       "id": "Spiderman",
@@ -431,7 +431,7 @@
       "featured": false,
       "date": "2023-05",
       "link": "",
-      "aspectRatio": 0.926,
+      "aspectRatio": 1.054,
       "gridSpan": "normal"
     },
     {
