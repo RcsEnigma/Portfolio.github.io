@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-06T01:23:56.563Z",
+  "generated": "2026-06-06T03:37:57.998Z",
   "tags": [
     "2D",
     "3D",
@@ -270,6 +270,27 @@
       "gridSpan": "normal"
     },
     {
+      "id": "Procedural_Land",
+      "primaryMedia": "Procedural_Land_01.png",
+      "allMedia": [
+        "Procedural_Land_01.png",
+        "Procedural_Land_02.png"
+      ],
+      "type": "image",
+      "title": "Procedural Land",
+      "description": "A messy attempt at a vast expanse. The ground is a single material with a thouroughly subdivided plane. The clouds are also procedural.\n\nThe 2nd image was my first render. Had to play around with a lot of the values to get something I was happy with, It also lacks any post-processing.\n\nI forsee a remake of this shader material, something far more elaborate which could account for multiple biome types.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Environment"
+      ],
+      "featured": false,
+      "date": "2024-09",
+      "link": "",
+      "aspectRatio": 1.896,
+      "gridSpan": "wide"
+    },
+    {
       "id": "Skull_ArtOne",
       "primaryMedia": "Skull_ArtOne.png",
       "allMedia": [
@@ -312,131 +333,6 @@
       "gridSpan": "wide"
     },
     {
-      "id": "Creeping_Shade",
-      "primaryMedia": "Creeping_Shade_02.png",
-      "allMedia": [
-        "Creeping_Shade_02.png"
-      ],
-      "type": "image",
-      "title": "Creeping Shade",
-      "description": "Character art for a card in my TCG Concept, Exul Omnium.\n\nThis card's abilities give it an 80% chance to deal overkill damage to nearby enemies.\n\nIt's working name was \"Shade Watcher\".",
-      "tags": [
-        "2D",
-        "Illustration",
-        "Exul Omnium"
-      ],
-      "featured": false,
-      "date": "2023-05",
-      "link": "",
-      "aspectRatio": 0.714,
-      "gridSpan": "tall"
-    },
-    {
-      "id": "Creeping_Shade_01.PNG",
-      "primaryMedia": "Creeping_Shade_01.PNG",
-      "allMedia": [
-        "Creeping_Shade_01.PNG"
-      ],
-      "type": "image",
-      "title": "Creeping_Shade_01.PNG",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
-      "link": "",
-      "aspectRatio": 0.926,
-      "gridSpan": "normal"
-    },
-    {
-      "id": "Dimension_Jumper",
-      "primaryMedia": "Dimension_Jumper_02.png",
-      "allMedia": [
-        "Dimension_Jumper_02.png"
-      ],
-      "type": "image",
-      "title": "Dimension Jumper",
-      "description": "Character art for a card in my TCG Concept, Exul Omnium.\n\nThis card's abilities allow it to freely travel between your controlled lands, and upon death it has a 1/3 chance to respawn in any of those lands.",
-      "tags": [
-        "2D",
-        "Illustration",
-        "Exul Omnium"
-      ],
-      "featured": false,
-      "date": "2023-05",
-      "link": "",
-      "aspectRatio": 0.714,
-      "gridSpan": "tall"
-    },
-    {
-      "id": "Dimension_Jumper_01.PNG",
-      "primaryMedia": "Dimension_Jumper_01.PNG",
-      "allMedia": [
-        "Dimension_Jumper_01.PNG"
-      ],
-      "type": "image",
-      "title": "Dimension_Jumper_01.PNG",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
-      "link": "",
-      "aspectRatio": 1.047,
-      "gridSpan": "normal"
-    },
-    {
-      "id": "Fossil_Walker",
-      "primaryMedia": "Fossil_Walker_02.png",
-      "allMedia": [
-        "Fossil_Walker_02.png"
-      ],
-      "type": "image",
-      "title": "Fossil_Walker",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
-      "link": "",
-      "aspectRatio": 0.714,
-      "gridSpan": "tall"
-    },
-    {
-      "id": "Fossil_Walker_01.PNG",
-      "primaryMedia": "Fossil_Walker_01.PNG",
-      "allMedia": [
-        "Fossil_Walker_01.PNG"
-      ],
-      "type": "image",
-      "title": "Fossil_Walker_01.PNG",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
-      "link": "",
-      "aspectRatio": 0.796,
-      "gridSpan": "tall"
-    },
-    {
-      "id": "Procedural_Land",
-      "primaryMedia": "Procedural_Land_01.png",
-      "allMedia": [
-        "Procedural_Land_01.png",
-        "Procedural_Land_02.png"
-      ],
-      "type": "image",
-      "title": "Procedural Land",
-      "description": "A messy attempt at a vast expanse. The ground is a single material with a thouroughly subdivided plane. The clouds are also procedural.\n\nThe 2nd image was my first render. Had to play around with a lot of the values to get something I was happy with, It also lacks any post-processing.\n\nI forsee a remake of this shader material, something far more elaborate which could account for multiple biome types.",
-      "tags": [
-        "3D",
-        "Blender",
-        "Environment"
-      ],
-      "featured": false,
-      "date": "2024-09",
-      "link": "",
-      "aspectRatio": 1.896,
-      "gridSpan": "wide"
-    },
-    {
       "id": "Skull_ArtTwo",
       "primaryMedia": "Skull_ArtTwo.png",
       "allMedia": [
@@ -456,9 +352,31 @@
       "gridSpan": "normal"
     },
     {
-      "id": "Pyroclastic_Elemental",
-      "primaryMedia": "Pyroclastic_Elemental_02.png",
+      "id": "Fossil_Walker",
+      "primaryMedia": "Fossil_Walker_01.png",
       "allMedia": [
+        "Fossil_Walker_01.png",
+        "Fossil_Walker_02.png"
+      ],
+      "type": "image",
+      "title": "Fossil Walker",
+      "description": "Character art for a card in my TCG Concept, Exul Omnium.\n\nThis card's abilities allow give the player a 40% chance to destroy a random card from the player's hand whenever it deals damage. It also takes more-than-usual damage from enemies.\n\nThis card features an experimental 'Glass' design which shows off more of the card art.",
+      "tags": [
+        "2D",
+        "Illustration",
+        "Exul Omnium"
+      ],
+      "featured": false,
+      "date": "2024-02",
+      "link": "",
+      "aspectRatio": 0.796,
+      "gridSpan": "tall"
+    },
+    {
+      "id": "Pyroclastic_Elemental",
+      "primaryMedia": "Pyroclastic_Elemental_01.png",
+      "allMedia": [
+        "Pyroclastic_Elemental_01.png",
         "Pyroclastic_Elemental_02.png"
       ],
       "type": "image",
@@ -472,8 +390,70 @@
       "featured": false,
       "date": "2023-09",
       "link": "",
-      "aspectRatio": 0.714,
+      "aspectRatio": 0.827,
       "gridSpan": "tall"
+    },
+    {
+      "id": "Spiderman",
+      "primaryMedia": "Spiderman.png",
+      "allMedia": [
+        "Spiderman.png"
+      ],
+      "type": "image",
+      "title": "Spiderman 2099",
+      "description": "Made a week before the release of Spider-Man: Across the Spider-Verse, because I liked the concept of the character. I knew nothing about him expect that he was probably the villian. After coming out of the theatre seeing him in action, I noticed about a dozen inaccuracies with my depiction of him. But, I never brought myself to alter the final piece.\n\nThe hexagons in the background were made in blender, the lots of filters and effects and edits were made to match it with the subject. I think it help sell the movie's aesthetic of 2D and 3D styles clashing.",
+      "tags": [
+        "2D",
+        "Illustration",
+        "Multimodal"
+      ],
+      "featured": false,
+      "date": "2023-06",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide"
+    },
+    {
+      "id": "Creeping_Shade",
+      "primaryMedia": "Creeping_Shade_01.png",
+      "allMedia": [
+        "Creeping_Shade_01.png",
+        "Creeping_Shade_02.png"
+      ],
+      "type": "image",
+      "title": "Creeping Shade",
+      "description": "Character art for a card in my TCG Concept, Exul Omnium.\n\nThis card's abilities give it an 80% chance to deal overkill damage to nearby enemies.\n\nIt's working name was \"Shade Watcher\".",
+      "tags": [
+        "2D",
+        "Illustration",
+        "Exul Omnium"
+      ],
+      "featured": false,
+      "date": "2023-05",
+      "link": "",
+      "aspectRatio": 0.926,
+      "gridSpan": "normal"
+    },
+    {
+      "id": "Dimension_Jumper",
+      "primaryMedia": "Dimension_Jumper_01.png",
+      "allMedia": [
+        "Dimension_Jumper_01.png",
+        "Dimension_Jumper_02.png"
+      ],
+      "type": "image",
+      "title": "Dimension Jumper",
+      "description": "Character art for a card in my TCG Concept, Exul Omnium.\n\nThis card's abilities allow it to freely travel between your controlled lands, and upon death it has a 1/3 chance to respawn in any of those lands.",
+      "tags": [
+        "2D",
+        "Illustration",
+        "Exul Omnium"
+      ],
+      "featured": false,
+      "date": "2023-05",
+      "link": "",
+      "aspectRatio": 1.047,
+      "gridSpan": "normal"
     },
     {
       "id": "Pixel_Combat_Sprites",
@@ -495,42 +475,6 @@
       ],
       "featured": false,
       "date": "2023-04",
-      "link": "",
-      "aspectRatio": 1.778,
-      "gridSpan": "wide"
-    },
-    {
-      "id": "Pyroclastic_Elemental_01.PNG",
-      "primaryMedia": "Pyroclastic_Elemental_01.PNG",
-      "allMedia": [
-        "Pyroclastic_Elemental_01.PNG"
-      ],
-      "type": "image",
-      "title": "Pyroclastic_Elemental_01.PNG",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
-      "link": "",
-      "aspectRatio": 0.827,
-      "gridSpan": "tall"
-    },
-    {
-      "id": "Spiderman",
-      "primaryMedia": "Spiderman.png",
-      "allMedia": [
-        "Spiderman.png"
-      ],
-      "type": "image",
-      "title": "Spiderman 2099",
-      "description": "Made a week before the release of Spider-Man: Across the Spider-Verse, because I liked the concept of the character. I knew nothing about him expect that he was probably the villian. After coming out of the theatre seeing him in action, I noticed about a dozen inaccuracies with my depiction of him. But, I never brought myself to alter the final piece.\n\nThe hexagons in the background were made in blender, the lots of filters and effects and edits were made to match it with the subject. I think it help sell the movie's aesthetic of 2D and 3D styles clashing.",
-      "tags": [
-        "2D",
-        "Illustration",
-        "Multimodal"
-      ],
-      "featured": false,
-      "date": "2023-06",
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide"
