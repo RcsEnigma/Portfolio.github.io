@@ -118,8 +118,9 @@ function build() {
   const txtMap = {}, groups = {};
 
   for (const f of files) {
-    const ext  = path.extname(f).toLowerCase();
-    const base = path.basename(f, ext);
+    const origExt = path.extname(f);           // original case, e.g. '.PNG' or '.png'
+    const ext     = origExt.toLowerCase();      // normalised for set lookups
+    const base    = path.basename(f, origExt); // strip using ORIGINAL case so 'file.PNG' → 'file'
     if (ext === ".txt") { txtMap[base] = fs.readFileSync(path.join(WORKS_DIR,f),"utf8"); continue; }
     if (!MEDIA_EXT.has(ext)) continue;
     const canon = canonical(base);
