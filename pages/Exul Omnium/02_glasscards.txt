@@ -8,7 +8,7 @@ Glass Cards
 Glass cards are designs that can rarely replace the conventional card look. The border becomes transparent, making the card art even more prominent. Previously white text becomes gold.
 
 [media]
-CardDisplay.mkv
+02_ShinyDesign.gif
 
 [background]
 #E41414

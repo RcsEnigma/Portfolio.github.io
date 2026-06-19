@@ -5,10 +5,10 @@ full-bleed
 EXUL OMNIUM
 
 [text]
-
+blah blah blah
 
 [media]
-CardDisplay.mkv
+01_CardDisplay.mkv
 
 [background]
 #E41414
