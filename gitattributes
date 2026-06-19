@@ -1,0 +1,27 @@
+# Normalise line endings for text files
+* text=auto
+
+# Binary media — never modify, never diff as text
+*.png    binary
+*.PNG    binary
+*.jpg    binary
+*.JPG    binary
+*.jpeg   binary
+*.JPEG   binary
+*.gif    binary
+*.GIF    binary
+*.webp   binary
+*.WEBP   binary
+*.avif   binary
+*.svg    binary
+
+*.mp4    binary
+*.MP4    binary
+*.webm   binary
+*.WEBM   binary
+*.mov    binary
+*.MOV    binary
+*.mkv    binary
+*.MKV    binary
+*.ogg    binary
+*.OGG    binary
