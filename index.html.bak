@@ -569,7 +569,7 @@ footer span {
 <!-- ── FOOTER ────────────────────────────────────────────────── -->
 <footer>
   <span id="footer-count"></span>
-  <span>Run node generate-manifest.js after adding works</span>
+  <span>Blah Blah Blah</span>
 </footer>
 
 <script>
