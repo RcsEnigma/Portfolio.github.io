@@ -1,0 +1,14 @@
+[type]
+image-left
+
+[title]
+Glass Cards
+
+[text]
+Glass cards are designs that can rarely replace the conventional card look. The border becomes transparent, making the card art even more prominent. Previously white text becomes gold.
+
+[media]
+CardDisplay.mkv
+
+[background]
+#E41414

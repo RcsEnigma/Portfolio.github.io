@@ -1,0 +1,105 @@
+/* ================================================================
+   theme.css
+   Shared variables, reset, header & footer for auto-generated
+   subpages (loaded by every /pages/<slug>/ stub via /theme.css).
+
+   Note: index.html keeps its own copy of these same rules inline
+   so the main gallery never depends on this file loading correctly.
+   If you change colors/fonts here, mirror the change in index.html
+   too if you want both to stay visually identical.
+   ================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0e0e0e;
+  --surface:  #161616;
+  --border:   #2a2a2a;
+  --text:     #e8e4dc;
+  --muted:    #6b6860;
+  --accent:   #c8b89a;
+  --accent2:  #7a9e8a;
+  --tag-bg:   #1e1e1e;
+  --tag-text: #8a8278;
+  --radius:   3px;
+  --mono:     Consolas, Monaco, monospace;
+  --sans:     'Roboto', sans-serif;
+  --ease:     cubic-bezier(0.22, 1, 0.36, 1);
+  --trans:    0.35s var(--ease);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 15px; line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+#site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  padding: 0 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+#wordmark {
+  font-family: var(--mono); font-size: 0.8rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); text-decoration: none; transition: opacity 0.2s;
+}
+#wordmark:hover { opacity: 0.6; }
+
+#site-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  flex: 1; margin-left: 2.5rem;
+}
+#nav-left, #nav-right { display: flex; gap: 2rem; align-items: center; }
+
+.nav-link {
+  font-family: var(--mono); font-size: 0.72rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none; transition: color 0.2s; cursor: pointer;
+}
+.nav-link:hover, .nav-link.active { color: var(--text); }
+
+/* ── Footer ───────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border); padding: 1.5rem 2.5rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+footer span, footer .nav-link {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase;
+}
+footer .nav-link:hover { color: var(--text); }
+
+/* ── Page heading (title at top of every subpage) ────────────── */
+.page-heading {
+  max-width: 1200px; margin: 0 auto; padding: 3.5rem 2.5rem 0;
+}
+.page-heading h1 {
+  font-family: var(--mono); font-size: clamp(1.8rem, 4vw, 2.6rem);
+  color: var(--accent); letter-spacing: 0.01em;
+}
+
+.page-error {
+  max-width: 600px; margin: 6rem auto; padding: 0 2.5rem;
+  font-family: var(--mono); font-size: 0.85rem; color: var(--muted);
+  text-align: center;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  #site-header { padding: 0 1.1rem; height: 50px; }
+  #site-nav { margin-left: 1rem; }
+  #nav-left, #nav-right { gap: 1.1rem; }
+  .nav-link { font-size: 0.64rem; }
+  .page-heading { padding: 2rem 1.2rem 0; }
+  footer { padding: 1.2rem 1.1rem; }
+}

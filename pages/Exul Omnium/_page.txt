@@ -1,0 +1,11 @@
+[label]
+Exul Omnium
+
+[featured]
+true
+
+[carousel_media]
+CardDisplay.mkv
+
+[carousel_caption]
+Chance-Based physical TCG

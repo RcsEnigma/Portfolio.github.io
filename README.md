@@ -1,6 +1,8 @@
 # Portfolio Website
 
-A self-updating gallery-style portfolio. Add media + a `.txt` file to `/works`, run one command, done.
+A self-updating gallery-style portfolio, plus an optional system for
+fully custom subpages (case studies, deep-dive project pages, etc).
+Add files, run one script, push.
 
 ---
 
@@ -8,24 +10,42 @@ A self-updating gallery-style portfolio. Add media + a `.txt` file to `/works`, 
 
 ```
 portfolio/
-├── index.html              ← the entire website (edit About/Contact text inside)
-├── manifest.json           ← auto-generated, do not edit manually
-├── generate-manifest.js    ← run this after adding works
-└── works/
-    ├── my_project.jpg      ← primary media
-    ├── my_project.txt      ← metadata for that work
-    ├── series_01.jpg       ← } these three share the same
-    ├── series_02.jpg       ← } canonical name "series"
-    ├── series_03.jpg       ← } and are grouped automatically
-    ├── series.txt          ← metadata for the series
-    └── ...
+├── index.html              the main gallery homepage
+├── theme.css                shared styles for subpages
+├── page-widgets.css         layout styles for subpage widgets
+├── page-engine.js           renders subpages (don't edit)
+├── generate-manifest.js     run this after adding anything
+├── manifest.json            auto-generated — gallery data
+├── pages.json                auto-generated — subpage data
+├── .gitattributes
+├── works/                    your gallery pieces live here
+│   ├── my_project.jpg
+│   └── my_project.txt
+├── pages/                    your custom subpages live here
+│   └── studies/
+│       ├── _page.txt
+│       ├── 01_intro.txt
+│       ├── 01_intro_hero.jpg
+│       └── 02_showcase.txt
+└── studies/                  AUTO-GENERATED — gives the page a real URL
+    └── index.html            never edit this directly
 ```
+
+Every time you add or change anything in `/works` or `/pages`, run:
+
+```bash
+node generate-manifest.js
+```
+
+then commit and push as usual. That single command rebuilds the gallery,
+rebuilds every subpage, and creates or removes the tiny auto-generated
+folders that give each subpage a clean URL like `yoursite.com/studies/`.
 
 ---
 
-## The `.txt` format
+## Part 1 — The gallery (`/works`)
 
-Every field is optional. Order doesn't matter.
+### The `.txt` format
 
 ```
 [title]
@@ -33,7 +53,6 @@ Your Work Title Here
 
 [description]
 Any length. Supports line breaks.
-Second paragraph goes here.
 
 [tags]
 animation, sci-fi, 3D, personal
@@ -51,84 +70,160 @@ true
 my_project_02.mp4, my_project_03.jpg
 ```
 
-### Fields explained
+| Field | What it does |
+|---|---|
+| `[title]` | Shown on hover and in the lightbox. Defaults to filename. |
+| `[description]` | Shown in the lightbox info panel. |
+| `[tags]` | Comma or newline separated. Selecting multiple tags shows only works that have **all** selected tags. |
+| `[date]` | Any string. Works sort newest-first by this field. |
+| `[link]` | External URL, shown as a link in the lightbox. |
+| `[featured]` | `true` to include this work in the homepage carousel. |
+| `[extra]` | Extra media files to bundle into this work's gallery. |
 
-| Field        | What it does |
-|-------------|--------------|
-| `[title]`   | Displayed on hover and in the modal. Defaults to filename if omitted. |
-| `[description]` | Shown in the detail modal. Supports multi-line. |
-| `[tags]`    | Comma or newline separated. Populates the filter menu automatically. |
-| `[date]`    | Any string — `2024-11`, `Autumn 2024`, etc. Shown in modal. |
-| `[link]`    | External URL — shows an "↗" button in the modal. |
-| `[featured]`| Set to `true` to include this work in the hero carousel at the top. |
-| `[extra]`   | Additional media files to attach (comma or newline separated filenames). |
+### Grouping multiple files into one gallery entry
 
----
+**Numbered filenames** (easiest): `cityscape_01.jpg`, `cityscape_02.jpg`,
+`cityscape.txt` — anything sharing a base name bundles automatically,
+lowest number becomes the thumbnail.
 
-## Grouping multiple media files
+**`[extra]` field**: list filenames directly in the `.txt`, useful when
+filenames don't share a pattern.
 
-**Method A — numbered filenames** (easiest)
+### Grid spans
 
-Name your files with a shared base and sequential numbers:
-
-```
-cityscape_01.jpg
-cityscape_02.jpg
-cityscape_03.mp4
-cityscape.txt        ← one txt covers all three
-```
-
-Anything matching `cityscape*` gets bundled together automatically. The lowest-numbered file becomes the grid thumbnail.
-
-**Method B — `[extra]` field in the txt**
-
-```
-[extra]
-making_of.mp4, final_render.jpg
-```
-
-This lets you mix files with completely different names.
+`generate-manifest.js` reads each image's real dimensions and assigns a
+grid span automatically — wide for landscape, tall for portrait
+(anything narrower than ~0.85 aspect ratio), normal for square-ish.
+Videos default to wide if dimensions can't be read.
 
 ---
 
-## The carousel
+## Part 2 — Custom subpages (`/pages`)
 
-Add `[featured]\ntrue` to any `.txt` to include that work in the hero carousel. Multiple works can be featured — they'll auto-cycle every 5 seconds.
+Use this for anything bigger than a single gallery card — a case study,
+a deep dive, a multi-part showcase. Each subpage gets its own real URL.
+
+### Folder structure for one page
+
+```
+pages/studies/
+├── _page.txt          page-level settings
+├── 01_intro.txt        first widget (section)
+├── 01_intro_hero.jpg
+├── 02_showcase.txt     second widget
+└── 02_showcase_01.jpg
+```
+
+The folder name becomes the URL slug (lowercased, spaces become
+hyphens) — `pages/Case Study One/` becomes `yoursite.com/case-study-one/`.
+
+### `_page.txt` — page-level settings
+
+```
+[label]
+Studies
+
+[order]
+1
+
+[featured]
+true
+
+[carousel_media]
+hero.jpg
+
+[carousel_caption]
+A short blurb shown under the title in the homepage carousel.
+```
+
+| Field | What it does |
+|---|---|
+| `[label]` | Shown in the nav tab and as the page's `<h1>`. |
+| `[order]` | Optional. Controls left-to-right position among your custom nav tabs. Omit to sort alphabetically. |
+| `[featured]` | `true` to include this page in the homepage carousel. |
+| `[carousel_media]` | Filename (lives in this same page folder) used as the carousel preview. If omitted, the first widget with media is used automatically. |
+| `[carousel_caption]` | Optional subtitle text for the carousel slide. Clicking the slide takes the visitor straight to the page. |
+
+### Widget files — one `.txt` per section
+
+Every other `.txt` file in the page folder (except `_page.txt`) is a
+widget. They render top to bottom in filename order — prefix with
+numbers (`01_`, `02_`...) to control the sequence.
+
+```
+[type]
+image-left
+
+[title]
+Section Title
+
+[text]
+Body copy. Multiple paragraphs are fine.
+
+[media]
+some_image.jpg
+
+[background]
+#141414
+```
+
+`[background]` is optional — omit it and the section blends into the
+site's normal background. Set a hex code to break a section out visually.
+
+### The seven layout types
+
+| `[type]` value | What it looks like | On mobile |
+|---|---|---|
+| `image-left` | Image left, text right | Image stacks above text |
+| `text-left` | Text left, image right | Image stacks above text |
+| `split` | Text centered, one image on each side | Image, text, image — stacked |
+| `media-only` | A single centered, uncropped image or video | Same |
+| `full-bleed` | Edge-to-edge media with a large title overlaid | Same, smaller type |
+| `text-only` | Centered text block, no media | Same |
+| `carousel` | Swipeable multi-media block, same UI as the homepage hero | Same |
+
+For `split`, `[media]` needs two filenames (comma or newline separated)
+— first becomes the left image, second the right.
+
+For `carousel`, `[media]` takes any number of filenames the same way.
 
 ---
 
-## Updating the site
+## Deleting a page
+
+Delete the folder under `/pages/`, run `node generate-manifest.js`
+again, and the script automatically removes the matching auto-generated
+URL folder too. It only ever touches folders it created itself (marked
+internally), so it will never delete `/works`, `/pages`, or anything
+you made by hand.
+
+---
+
+## Customising site-wide text & colours
+
+- **Site name, About/Contact copy** — edit directly inside `index.html`
+- **Colours, fonts** — the `:root` CSS variables at the top of
+  `index.html`'s `<style>` block. If you change them, also update the
+  matching `:root` block in `theme.css` so subpages stay visually
+  consistent.
+
+---
+
+## Local preview
+
+Browsers block `fetch()` on `file://` URLs, so opening `index.html`
+directly won't load your real data — use a local server instead:
 
 ```bash
-# 1. Drop your new media + .txt into /works
-# 2. Run:
-node generate-manifest.js
-
-# 3. Commit and push. The site reads manifest.json on load.
+npx serve .
 ```
-
-That's it. No build step, no framework, no bundler.
-
----
-
-## Customising the site
-
-Open `index.html` and find:
-
-- **Site name** → search for `Studio Name` in the header
-- **About page** → the `#about-page` div
-- **Contact page** → the `#contact-page` div
-- **Colours** → the `:root` CSS variables at the top of the `<style>` block
-- **Grid row height** → `grid-auto-rows: 280px` (increase for taller thumbnails)
 
 ---
 
 ## Deployment
 
-Works anywhere static files are served:
-
-- **GitHub Pages** — push to a repo, enable Pages
-- **Netlify / Vercel** — drag the folder in
-- **Any web host** — upload everything
-
-> **Local preview:** Open with a local server (e.g. `npx serve .` or VS Code Live Server). Browsers block `fetch()` on `file://` URLs, so opening `index.html` directly will use the built-in demo data instead of your manifest.
+Works on GitHub Pages, Netlify, Vercel, or any static host. If using a
+custom domain, point it at the repo root the same way you already have
+— subpages rely on root-relative paths (`/works/...`, `/pages/...`,
+`/theme.css`) so they work correctly regardless of which page you're
+viewing.

@@ -1,42 +1,38 @@
 /**
  * generate-manifest.js
- * Run after adding files to /works:
+ * Run after adding files to /works or /pages:
  *   node generate-manifest.js
  *
- * Reads image dimensions natively (no npm needed) to assign
- * correct grid spans.
+ * Builds manifest.json (gallery works) and pages.json (custom subpages),
+ * and auto-writes/removes tiny stub index.html files so each page in
+ * /pages gets a real clean URL like yoursite.com/studies/
  */
 
 const fs   = require("fs");
 const path = require("path");
 
 const WORKS_DIR    = path.join(__dirname, "works");
-const MANIFEST_OUT = path.join(__dirname, "manifest.json");
+const PAGES_DIR     = path.join(__dirname, "pages");
+const MANIFEST_OUT  = path.join(__dirname, "manifest.json");
+const PAGES_OUT      = path.join(__dirname, "pages.json");
+const STUB_MARKER    = "AUTO-GENERATED-PAGE-STUB";
 
 const IMAGE_EXT = new Set([".jpg",".jpeg",".png",".gif",".webp",".avif",".svg"]);
 const VIDEO_EXT = new Set([".mp4",".webm",".mov",".ogg",".mkv"]);
 const MEDIA_EXT = new Set([...IMAGE_EXT, ...VIDEO_EXT]);
 
-// ── Parse .txt file ──────────────────────────────────────────
-function parseTxt(raw) {
-  const out = { title:"", description:"", tags:[], featured:false, extraMedia:[], date:"", link:"" };
+// ════════════════════════════════════════════════════════════
+//  SHARED HELPERS
+// ════════════════════════════════════════════════════════════
+
+// Generic [section] block parser — returns { key: "trimmed value" }
+function parseBlocks(raw) {
+  const out = {};
   const lines = raw.replace(/\r\n/g,"\n").split("\n");
   let key = null, buf = [];
   const flush = () => {
     if (!key) return;
-    const val = buf.join("\n").trim();
-    switch (key) {
-      case "title":       out.title       = val; break;
-      case "description": out.description = val; break;
-      case "date":        out.date        = val; break;
-      case "link":        out.link        = val; break;
-      case "tags":
-        out.tags = val.split(/[\n,]+/).map(t=>t.trim()).filter(Boolean); break;
-      case "featured":
-        out.featured = /^(true|yes|1)$/i.test(val); break;
-      case "extra":
-        out.extraMedia = val.split(/[\n,]+/).map(t=>t.trim()).filter(Boolean); break;
-    }
+    out[key] = buf.join("\n").trim();
     buf = []; key = null;
   };
   for (const line of lines) {
@@ -47,7 +43,37 @@ function parseTxt(raw) {
   return out;
 }
 
-// ── Read image dimensions (no npm) ───────────────────────────
+function mediaType(f) {
+  const ext = path.extname(f).toLowerCase();
+  return VIDEO_EXT.has(ext) ? "video" : IMAGE_EXT.has(ext) ? "image" : "unknown";
+}
+
+function canonical(base) { return base.replace(/[-_\s]*\d+$/, ""); }
+
+function slugify(name) {
+  return name.toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// ════════════════════════════════════════════════════════════
+//  WORKS (gallery) — manifest.json
+// ════════════════════════════════════════════════════════════
+
+function parseWorkTxt(raw) {
+  const b = parseBlocks(raw);
+  return {
+    title:       b.title || "",
+    description: b.description || "",
+    tags:        (b.tags || "").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
+    featured:    /^(true|yes|1)$/i.test(b.featured || ""),
+    extraMedia:  (b.extra || "").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
+    date:        b.date || "",
+    link:        b.link || "",
+  };
+}
+
+// Read image dimensions natively — PNG, JPEG, GIF, WebP
 function readDimensions(filepath) {
   const ext = path.extname(filepath).toLowerCase();
   if (!IMAGE_EXT.has(ext) || ext === ".svg" || ext === ".avif") return null;
@@ -94,33 +120,27 @@ function readDimensions(filepath) {
   return null;
 }
 
-// ── Grid span from aspect ratio ──────────────────────────────
-// Tall threshold: 0.85 — any portrait or near-portrait image
 function deriveSpan(ar, type) {
   if (!ar) return type === "video" ? "wide" : "normal";
   if (ar > 2.2)  return "ultrawide";
   if (ar > 1.45) return "wide";
-  if (ar < 0.85) return "tall";   // raised threshold — catches more portrait images
+  if (ar < 0.85) return "tall";
   return "normal";
 }
 
-function canonical(base) { return base.replace(/[-_\s]*\d+$/, ""); }
-function mediaType(f) {
-  const ext = path.extname(f).toLowerCase();
-  return VIDEO_EXT.has(ext) ? "video" : IMAGE_EXT.has(ext) ? "image" : "unknown";
-}
-
-// ── Main ─────────────────────────────────────────────────────
-function build() {
-  if (!fs.existsSync(WORKS_DIR)) { console.warn("Warning: /works not found, creating."); fs.mkdirSync(WORKS_DIR); }
+function buildWorks() {
+  if (!fs.existsSync(WORKS_DIR)) {
+    console.warn("Warning: /works not found, creating.");
+    fs.mkdirSync(WORKS_DIR);
+  }
 
   const files = fs.readdirSync(WORKS_DIR).filter(f => fs.statSync(path.join(WORKS_DIR,f)).isFile());
   const txtMap = {}, groups = {};
 
   for (const f of files) {
-    const origExt = path.extname(f);           // original case, e.g. '.PNG' or '.png'
-    const ext     = origExt.toLowerCase();      // normalised for set lookups
-    const base    = path.basename(f, origExt); // strip using ORIGINAL case so 'file.PNG' → 'file'
+    const origExt = path.extname(f);
+    const ext     = origExt.toLowerCase();
+    const base    = path.basename(f, origExt); // strip with ORIGINAL case so 'file.PNG' -> 'file'
     if (ext === ".txt") { txtMap[base] = fs.readFileSync(path.join(WORKS_DIR,f),"utf8"); continue; }
     if (!MEDIA_EXT.has(ext)) continue;
     const canon = canonical(base);
@@ -130,7 +150,7 @@ function build() {
   const entries = [];
   for (const [canon, mediaFiles] of Object.entries(groups)) {
     const txtRaw = txtMap[canon] ?? mediaFiles.map(f => txtMap[path.basename(f,path.extname(f))]).find(Boolean) ?? null;
-    const meta = txtRaw ? parseTxt(txtRaw)
+    const meta = txtRaw ? parseWorkTxt(txtRaw)
       : { title:canon, description:"", tags:[], featured:false, extraMedia:[], date:"", link:"" };
 
     const sorted = [...mediaFiles].sort((a,b) => {
@@ -153,24 +173,191 @@ function build() {
     });
   }
 
-  // Sort by date descending, then title — featured does NOT affect grid order
   entries.sort((a,b) => {
     if (a.date && b.date) return b.date.localeCompare(a.date);
     return a.title.localeCompare(b.title);
   });
 
   const allTags = [...new Set(entries.flatMap(e => e.tags))].sort();
-  const manifest = { generated: new Date().toISOString(), tags: allTags, works: entries };
+  return { generated: new Date().toISOString(), tags: allTags, works: entries };
+}
+
+// ════════════════════════════════════════════════════════════
+//  PAGES (custom subpages) — pages.json + auto stub index.html
+// ════════════════════════════════════════════════════════════
+
+const VALID_WIDGET_TYPES = new Set([
+  "image-left","text-left","split","media-only","full-bleed","text-only","carousel"
+]);
+
+function parsePageMeta(raw, folderName) {
+  const b = parseBlocks(raw);
+  return {
+    label:           b.label || folderName,
+    order:           b.order ? parseInt(b.order, 10) : null,
+    featured:        /^(true|yes|1)$/i.test(b.featured || ""),
+    carouselMedia:   b.carousel_media || null,
+    carouselCaption: b.carousel_caption || "",
+  };
+}
+
+function parseWidget(raw) {
+  const b = parseBlocks(raw);
+  const type = (b.type || "text-only").toLowerCase().trim();
+  const mediaList = (b.media || "").split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  return {
+    type: VALID_WIDGET_TYPES.has(type) ? type : "text-only",
+    title: b.title || "",
+    text: b.text || "",
+    media: mediaList,
+    background: b.background || null,
+  };
+}
+
+function buildPages() {
+  if (!fs.existsSync(PAGES_DIR)) return [];
+
+  const pageFolders = fs.readdirSync(PAGES_DIR).filter(f =>
+    fs.statSync(path.join(PAGES_DIR, f)).isDirectory());
+
+  const pages = [];
+
+  for (const folderName of pageFolders) {
+    const pageDir = path.join(PAGES_DIR, folderName);
+    const slug = slugify(folderName);
+    if (!slug) continue;
+
+    const metaPath = path.join(pageDir, "_page.txt");
+    const metaRaw  = fs.existsSync(metaPath) ? fs.readFileSync(metaPath, "utf8") : "";
+    const meta     = parsePageMeta(metaRaw, folderName);
+
+    const allFiles = fs.readdirSync(pageDir).filter(f =>
+      fs.statSync(path.join(pageDir, f)).isFile());
+
+    const widgetFiles = allFiles
+      .filter(f => path.extname(f).toLowerCase() === ".txt" && f.toLowerCase() !== "_page.txt")
+      .sort((a,b) => {
+        const na = parseInt(a.match(/^(\d+)/)?.[1] ?? "999999", 10);
+        const nb = parseInt(b.match(/^(\d+)/)?.[1] ?? "999999", 10);
+        if (na !== nb) return na - nb;
+        return a.localeCompare(b);
+      });
+
+    const widgets = widgetFiles.map(f => {
+      const raw = fs.readFileSync(path.join(pageDir, f), "utf8");
+      const w = parseWidget(raw);
+      w.media = w.media.map(file => ({ file, type: mediaType(file) }));
+      return w;
+    });
+
+    // Resolve carousel preview: explicit field, else first widget's first media file
+    let carouselFile = meta.carouselMedia;
+    if (!carouselFile) {
+      const firstWithMedia = widgets.find(w => w.media.length > 0);
+      if (firstWithMedia) carouselFile = firstWithMedia.media[0].file;
+    }
+    const carouselType = carouselFile ? mediaType(carouselFile) : null;
+
+    pages.push({
+      slug, folder: folderName,
+      label: meta.label, order: meta.order, featured: meta.featured,
+      carouselMedia: carouselFile, carouselType, carouselCaption: meta.carouselCaption,
+      widgets,
+    });
+  }
+
+  pages.sort((a,b) => {
+    if (a.order !== null && b.order !== null) return a.order - b.order;
+    if (a.order !== null) return -1;
+    if (b.order !== null) return 1;
+    return a.label.localeCompare(b.label);
+  });
+
+  return pages;
+}
+
+function stubTemplate(slug, label) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${label} \u2014 AJ Ambrozic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/theme.css">
+<link rel="stylesheet" href="/page-widgets.css">
+</head>
+<body>
+<!-- ${STUB_MARKER}: ${slug} -- do not edit this file. Edit /pages/${slug}/ then re-run generate-manifest.js -->
+<div id="header-root"></div>
+<main id="page-root"></main>
+<div id="footer-root"></div>
+<script>window.PAGE_SLUG = ${JSON.stringify(slug)};</script>
+<script src="/page-engine.js"></script>
+</body>
+</html>
+`;
+}
+
+function writeStubs(pages) {
+  const validSlugs = new Set(pages.map(p => p.slug));
+
+  for (const p of pages) {
+    const dir = path.join(__dirname, p.slug);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, "index.html"), stubTemplate(p.slug, p.label));
+  }
+
+  // Remove stale stubs — only touch folders WE generated (marker check)
+  const rootEntries = fs.readdirSync(__dirname).filter(f => {
+    try { return fs.statSync(path.join(__dirname, f)).isDirectory(); }
+    catch(_) { return false; }
+  });
+
+  for (const entry of rootEntries) {
+    if (validSlugs.has(entry)) continue;
+    const indexPath = path.join(__dirname, entry, "index.html");
+    if (!fs.existsSync(indexPath)) continue;
+    let content = "";
+    try { content = fs.readFileSync(indexPath, "utf8"); } catch(_) { continue; }
+    if (content.includes(STUB_MARKER)) {
+      fs.unlinkSync(indexPath);
+      const remaining = fs.readdirSync(path.join(__dirname, entry));
+      if (remaining.length === 0) fs.rmdirSync(path.join(__dirname, entry));
+      console.log("  removed stale page stub: /" + entry + "/");
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  MAIN
+// ════════════════════════════════════════════════════════════
+function build() {
+  // Works
+  const manifest = buildWorks();
   fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifest, null, 2));
 
-  console.log("\nmanifest.json written: " + entries.length + " work(s), " + allTags.length + " tag(s)\n");
-  for (const e of entries) {
+  console.log("\nmanifest.json written: " + manifest.works.length + " work(s), " + manifest.tags.length + " tag(s)\n");
+  for (const e of manifest.works) {
     const span = e.gridSpan.padEnd(10);
     const ar   = e.aspectRatio ? e.aspectRatio + " ar" : "no dims";
-    const feat = e.featured ? " [featured]" : "";
-    console.log("  " + span + " " + e.title + feat + "  (" + ar + ", " + e.allMedia.length + " file(s))");
+    console.log("  " + span + " " + e.title + "  (" + ar + ", " + e.allMedia.length + " file(s))");
   }
-  console.log("\nNote: .mkv files need H.264/VP8/VP9 codec inside to play in browsers.");
+
+  // Pages
+  const pages = buildPages();
+  fs.writeFileSync(PAGES_OUT, JSON.stringify({ generated: new Date().toISOString(), pages }, null, 2));
+  writeStubs(pages);
+
+  console.log("\npages.json written: " + pages.length + " page(s)\n");
+  for (const p of pages) {
+    console.log("  /" + p.slug + "/  \"" + p.label + "\"  " + p.widgets.length + " widget(s)" +
+      (p.featured ? "  [in homepage carousel]" : ""));
+  }
+
+  console.log("\nNote: .mkv files need an H.264/VP8/VP9 codec track to play in-browser.");
   console.log();
 }
 

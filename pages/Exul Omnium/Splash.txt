@@ -1,0 +1,14 @@
+[type]
+full-bleed
+
+[title]
+EXUL OMNIUM
+
+[text]
+
+
+[media]
+CardDisplay.mkv
+
+[background]
+#E41414

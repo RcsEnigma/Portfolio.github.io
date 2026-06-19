@@ -50,7 +50,13 @@ body {
   color: var(--accent); text-decoration: none; transition: opacity 0.2s;
 }
 #wordmark:hover { opacity: 0.6; }
-#site-nav { display: flex; gap: 2rem; align-items: center; }
+
+#site-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  flex: 1; margin-left: 2.5rem;
+}
+#nav-left, #nav-right { display: flex; gap: 2rem; align-items: center; }
+
 .nav-link {
   font-family: var(--mono); font-size: 0.72rem;
   letter-spacing: 0.12em; text-transform: uppercase;
@@ -72,7 +78,6 @@ body {
 }
 .carousel-slide.active { opacity: 1; }
 
-/* Bottom-left gradient only — image stays full brightness */
 .carousel-slide::before {
   content: '';
   position: absolute; inset: 0; z-index: 1;
@@ -88,22 +93,18 @@ body {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  /* No global brightness filter — gradient handles it */
 }
-/* Slow pan for portrait images in carousel */
 @keyframes portrait-pan {
   0%   { object-position: center 15%; }
   100% { object-position: center 85%; }
 }
 .portrait-pan { animation: portrait-pan 14s ease-in-out infinite alternate; }
 
-.carousel-slide .media-placeholder {
-  position: absolute; inset: 0;
-}
+.carousel-slide .media-placeholder { position: absolute; inset: 0; }
 .carousel-caption {
   position: relative; z-index: 2;
   padding: 2.5rem 3rem; max-width: 680px;
-  pointer-events: none; /* slide handles click */
+  pointer-events: none;
 }
 .carousel-tag {
   font-family: var(--mono); font-size: 0.65rem;
@@ -162,26 +163,23 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 3px;
   grid-auto-flow: dense;
-  /* No grid-auto-rows — cells size themselves via ::before */
 }
 
 .grid-item {
   position: relative; overflow: hidden;
   background: var(--surface); cursor: pointer; border-radius: var(--radius);
 }
-/* The ::before sets the cell height = cell width (square) */
 .grid-item::before                      { content: ''; display: block; padding-bottom: 100%;   }
-.grid-item[data-span="wide"]::before    { padding-bottom: 50%;   } /* 2:1  */
-.grid-item[data-span="tall"]::before    { padding-bottom: 200%;  } /* 1:2  */
-.grid-item[data-span="large"]::before   { padding-bottom: 100%;  } /* 2:2  */
-.grid-item[data-span="ultrawide"]::before { padding-bottom: 33.33%; } /* 3:1 */
+.grid-item[data-span="wide"]::before    { padding-bottom: 50%;   }
+.grid-item[data-span="tall"]::before    { padding-bottom: 200%;  }
+.grid-item[data-span="large"]::before   { padding-bottom: 100%;  }
+.grid-item[data-span="ultrawide"]::before { padding-bottom: 33.33%; }
 
 .grid-item[data-span="wide"]      { grid-column: span 2; }
 .grid-item[data-span="tall"]      { grid-row:    span 2; }
 .grid-item[data-span="large"]     { grid-column: span 2; grid-row: span 2; }
 .grid-item[data-span="ultrawide"] { grid-column: span 3; }
 
-/* All media fills the absolute space within the cell */
 .grid-item img, .grid-item video {
   position: absolute; inset: 0;
   width: 100%; height: 100%; object-fit: cover; display: block;
@@ -228,7 +226,7 @@ body {
 /* ── Modal — two-column centered card ────────────────────── */
 #modal-overlay {
   position: fixed; inset: 0; z-index: 200;
-  background: rgba(4,4,4,0.50); /* 50% — page visible behind */
+  background: rgba(4,4,4,0.50);
   display: flex; align-items: center; justify-content: center;
   padding: 1.5rem;
   opacity: 0; pointer-events: none; transition: opacity 0.28s ease;
@@ -245,7 +243,6 @@ body {
   box-shadow: 0 32px 80px rgba(0,0,0,0.7);
 }
 
-/* Top bar */
 #modal-topbar {
   height: 46px; flex-shrink: 0;
   border-bottom: 1px solid var(--border);
@@ -272,12 +269,8 @@ body {
   display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
 }
 
-/* Body: stage + info panel side by side */
-#modal-body {
-  flex: 1; display: flex; min-height: 0;
-}
+#modal-body { flex: 1; display: flex; min-height: 0; }
 
-/* Image stage */
 #modal-stage {
   flex: 1; position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
@@ -302,7 +295,6 @@ body {
   width: auto; height: auto; display: block; object-fit: contain;
 }
 
-/* Spinner */
 #modal-spinner {
   position: absolute; top: 50%; left: 50%;
   transform: translate(-50%,-50%);
@@ -314,7 +306,6 @@ body {
 #modal-spinner.visible { opacity: 1; }
 @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
 
-/* Arrows — within stage, won't overlap info panel */
 .modal-arrow {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
   background: rgba(255,255,255,0.04); border: 1px solid var(--border);
@@ -326,7 +317,6 @@ body {
 #modal-prev { left: 0.8rem; }
 #modal-next { right: 0.8rem; }
 
-/* Media dots — inside stage at bottom, horizontal */
 #modal-media-nav {
   position: absolute; bottom: 0.75rem; left: 50%;
   transform: translateX(-50%);
@@ -339,7 +329,6 @@ body {
 }
 .modal-media-dot.active { background: var(--accent); transform: scale(1.45); }
 
-/* Info panel — always visible, right column */
 #modal-info-panel {
   width: 310px; flex-shrink: 0;
   border-left: 1px solid var(--border);
@@ -433,8 +422,9 @@ footer span {
 /* ── Mobile ───────────────────────────────────────────────── */
 @media (max-width: 640px) {
   #site-header { padding: 0 1.1rem; height: 50px; }
-  #site-nav { gap: 1.3rem; }
-  .nav-link { font-size: 0.68rem; }
+  #site-nav { margin-left: 1rem; }
+  #nav-left, #nav-right { gap: 1.1rem; }
+  .nav-link { font-size: 0.64rem; }
 
   #carousel-section { height: clamp(220px, 58vw, 360px); }
   .carousel-caption { padding: 1.2rem 1.4rem; }
@@ -444,11 +434,7 @@ footer span {
   #works-section { padding: 1.6rem 0.8rem 4rem; }
   #filter-bar { margin-bottom: 1.4rem; }
 
-  /* 2-column grid on mobile; collapse all spans */
-  #works-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2px;
-  }
+  #works-grid { grid-template-columns: repeat(2, 1fr); gap: 2px; }
   .grid-item[data-span="wide"]::before,
   .grid-item[data-span="tall"]::before,
   .grid-item[data-span="large"]::before,
@@ -458,11 +444,8 @@ footer span {
   .grid-item[data-span="large"],
   .grid-item[data-span="ultrawide"] { grid-column: span 1; grid-row: span 1; }
 
-  /* Modal: full-screen, stacked */
   #modal-overlay { padding: 0; }
-  #modal-inner {
-    width: 100vw; height: 100dvh; border-radius: 0; border: none;
-  }
+  #modal-inner { width: 100vw; height: 100dvh; border-radius: 0; border: none; }
   #modal-body { flex-direction: column; }
   #modal-stage { flex: 0 0 45vh; }
   .modal-slot { padding: 0.8rem 3rem; }
@@ -489,9 +472,14 @@ footer span {
 <header id="site-header">
   <a id="wordmark" href="#" onclick="showPage('home')">AJ Ambrozic</a>
   <nav id="site-nav">
-    <a class="nav-link active" onclick="showPage('home')">Work</a>
-    <a class="nav-link" onclick="showPage('about')">About</a>
-    <a class="nav-link" onclick="showPage('contact')">Contact</a>
+    <div id="nav-left">
+      <a class="nav-link active" href="#" onclick="showPage('home')">Work</a>
+      <!-- custom page tabs injected here automatically -->
+    </div>
+    <div id="nav-right">
+      <a class="nav-link" href="#about" onclick="showPage('about')">About</a>
+      <a class="nav-link" href="#contact" onclick="showPage('contact')">Contact</a>
+    </div>
   </nav>
 </header>
 
@@ -570,7 +558,7 @@ footer span {
 <!-- ── FOOTER ────────────────────────────────────────────────── -->
 <footer>
   <span id="footer-count"></span>
-  <span>Blah Blah Blah</span>
+  <span>Run node generate-manifest.js after adding works</span>
 </footer>
 
 <script>
@@ -578,16 +566,16 @@ footer span {
 //  STATE
 // ═══════════════════════════════════════════════════════════════
 let manifest        = null;
-let activeFilters   = new Set(["all"]);
-let carouselIndex   = 0;
-let carouselTimer   = null;
-let modalWork       = null;
-let modalMediaIndex = 0;
-let currentSlot     = 'a';
+let pagesData        = { pages: [] };
+let activeFilters    = new Set(["all"]);
+let carouselIndex    = 0;
+let carouselTimer    = null;
+let modalWork        = null;
+let modalMediaIndex  = 0;
+let currentSlot      = 'a';
 
 const DEMO_GRADS = ["demo-grad-1","demo-grad-2","demo-grad-3","demo-grad-4"];
 
-// IntersectionObserver — pause grid videos when scrolled out of view
 const gridVideoObserver = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (!e.isIntersecting) { e.target.pause(); e.target.currentTime = 0; }
@@ -599,13 +587,24 @@ const gridVideoObserver = new IntersectionObserver(entries => {
 // ═══════════════════════════════════════════════════════════════
 async function boot() {
   try {
-    const res = await fetch("manifest.json?" + Date.now());
+    const res = await fetch("/manifest.json?" + Date.now());
     manifest = await res.json();
   } catch(e) { manifest = getDemoManifest(); }
+
+  try {
+    const pres = await fetch("/pages.json?" + Date.now());
+    pagesData = await pres.json();
+  } catch(e) { pagesData = { pages: [] }; }
+
   buildFilterBar();
+  buildPagesNavLinks();
   buildCarousel();
   buildGrid();
   updateFooter();
+
+  // Deep-link support: visiting /#about or /#contact (e.g. from a subpage) lands on that tab
+  const hash = location.hash.replace('#','');
+  if (hash === 'about' || hash === 'contact') showPage(hash);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -613,7 +612,8 @@ async function boot() {
 // ═══════════════════════════════════════════════════════════════
 function showPage(page) {
   document.getElementById("home-page").style.display = page === "home" ? "" : "none";
-  const hasFeatured = manifest?.works?.some(w => w.featured);
+  const hasFeatured = manifest?.works?.some(w => w.featured) ||
+                       (pagesData.pages || []).some(p => p.featured && p.carouselMedia);
   document.getElementById("carousel-section").style.display =
     page === "home" && hasFeatured ? "" : "none";
   document.querySelectorAll(".static-page").forEach(el => el.classList.remove("active"));
@@ -624,6 +624,17 @@ function showPage(page) {
   document.querySelectorAll(".nav-link").forEach(a => {
     a.classList.toggle("active",
       a.textContent.toLowerCase().includes(page === "home" ? "work" : page));
+  });
+}
+
+function buildPagesNavLinks() {
+  const navLeft = document.getElementById("nav-left");
+  (pagesData.pages || []).forEach(p => {
+    const a = document.createElement("a");
+    a.className = "nav-link";
+    a.href = "/" + p.slug + "/";
+    a.textContent = p.label;
+    navLeft.appendChild(a);
   });
 }
 
@@ -659,48 +670,78 @@ function filterGrid() {
   document.querySelectorAll(".grid-item").forEach(item => {
     if (activeFilters.has("all")) { item.classList.remove("hidden"); return; }
     const tags = JSON.parse(item.dataset.tags || "[]");
-    // AND logic: item must have ALL selected tags
     const visible = [...activeFilters].every(t => tags.includes(t));
     item.classList.toggle("hidden", !visible);
   });
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  CAROUSEL
+//  CAROUSEL — merges featured works AND featured pages
 // ═══════════════════════════════════════════════════════════════
 function buildCarousel() {
-  const featured = manifest.works.filter(w => w.featured);
-  const section  = document.getElementById("carousel-section");
-  if (!featured.length) { section.style.display = "none"; return; }
+  const featuredWorks = (manifest.works || []).filter(w => w.featured)
+    .map(w => ({ kind: "work", data: w }));
+  const featuredPages = (pagesData.pages || []).filter(p => p.featured && p.carouselMedia)
+    .map(p => ({ kind: "page", data: p }));
+
+  const slides = [...featuredWorks, ...featuredPages];
+
+  const section = document.getElementById("carousel-section");
+  if (!slides.length) { section.style.display = "none"; return; }
   section.style.display = "";
 
   const track = document.getElementById("carousel-track");
   const dots  = document.getElementById("carousel-dots");
   track.innerHTML = ""; dots.innerHTML = "";
 
-  featured.forEach((work, i) => {
+  slides.forEach((item, i) => {
     const slide = document.createElement("div");
     slide.className = "carousel-slide" + (i === 0 ? " active" : "");
-    slide.onclick = () => openModal(work);
 
-    const mEl = createMediaEl(work.primaryMedia, work.type, true);
-    if (mEl) {
-      // Slow pan for portrait images
-      if (work.aspectRatio && work.aspectRatio < 0.85) mEl.classList.add("portrait-pan");
-      slide.appendChild(mEl);
+    if (item.kind === "work") {
+      const work = item.data;
+      slide.onclick = () => openModal(work);
+
+      const mEl = createMediaEl(work.primaryMedia, work.type, true);
+      if (mEl) {
+        if (work.aspectRatio && work.aspectRatio < 0.85) mEl.classList.add("portrait-pan");
+        slide.appendChild(mEl);
+      } else {
+        const ph = document.createElement("div");
+        ph.className = "media-placeholder " + DEMO_GRADS[i % DEMO_GRADS.length];
+        slide.appendChild(ph);
+      }
+
+      const cap = document.createElement("div");
+      cap.className = "carousel-caption";
+      cap.innerHTML = `
+        <div class="carousel-tag">${work.tags.slice(0,2).join(" &middot; ")}</div>
+        <div class="carousel-title">${esc(work.title)}</div>
+        <div class="carousel-desc">${esc((work.description||"").split("\n")[0])}</div>`;
+      slide.appendChild(cap);
+
     } else {
-      const ph = document.createElement("div");
-      ph.className = "media-placeholder " + DEMO_GRADS[i % DEMO_GRADS.length];
-      slide.appendChild(ph);
+      const page = item.data;
+      slide.onclick = () => { window.location.href = "/" + page.slug + "/"; };
+
+      const mEl = createPageMediaEl(page.slug, page.carouselMedia, page.carouselType, true);
+      if (mEl) {
+        slide.appendChild(mEl);
+      } else {
+        const ph = document.createElement("div");
+        ph.className = "media-placeholder " + DEMO_GRADS[i % DEMO_GRADS.length];
+        slide.appendChild(ph);
+      }
+
+      const cap = document.createElement("div");
+      cap.className = "carousel-caption";
+      cap.innerHTML = `
+        <div class="carousel-tag">Project</div>
+        <div class="carousel-title">${esc(page.label)}</div>
+        <div class="carousel-desc">${esc(page.carouselCaption || "")}</div>`;
+      slide.appendChild(cap);
     }
 
-    const cap = document.createElement("div");
-    cap.className = "carousel-caption";
-    cap.innerHTML = `
-      <div class="carousel-tag">${work.tags.slice(0,2).join(" &middot; ")}</div>
-      <div class="carousel-title">${esc(work.title)}</div>
-      <div class="carousel-desc">${esc((work.description||"").split("\n")[0])}</div>`;
-    slide.appendChild(cap);
     track.appendChild(slide);
 
     const dot = document.createElement("div");
@@ -710,8 +751,8 @@ function buildCarousel() {
   });
 
   clearInterval(carouselTimer);
-  if (featured.length > 1)
-    carouselTimer = setInterval(() => goCarousel((carouselIndex + 1) % featured.length), 5000);
+  if (slides.length > 1)
+    carouselTimer = setInterval(() => goCarousel((carouselIndex + 1) % slides.length), 5000);
 }
 
 function goCarousel(idx) {
@@ -773,10 +814,9 @@ function buildGrid() {
       </div>`;
     item.appendChild(hInfo);
 
-    // Preload primary image on hover
     item.addEventListener("mouseenter", () => {
       if (work.primaryMedia && getMediaType(work.primaryMedia) === "image") {
-        const pre = new Image(); pre.src = "works/" + work.primaryMedia;
+        const pre = new Image(); pre.src = "/works/" + work.primaryMedia;
       }
     });
 
@@ -796,10 +836,8 @@ function openModal(work) {
     s.innerHTML = ""; s.classList.remove("active");
   });
 
-  // Title bar
   document.getElementById("modal-title-display").textContent = work.title;
 
-  // Info panel (always visible, populated here)
   document.getElementById("modal-info-date").textContent  = work.date || "";
   document.getElementById("modal-info-title").textContent = work.title;
   document.getElementById("modal-info-desc").textContent  = work.description || "";
@@ -809,13 +847,11 @@ function openModal(work) {
   if (work.link) { lnk.href = work.link; lnk.style.display = ""; }
   else lnk.style.display = "none";
 
-  // Dots & arrows
   buildModalDots(work);
   const multi = work.allMedia?.length > 1;
   document.getElementById("modal-prev").style.display = multi ? "" : "none";
   document.getElementById("modal-next").style.display = multi ? "" : "none";
 
-  // Zoom button: only for images
   const firstType = getMediaType(work.allMedia?.[0]) || work.type;
   document.getElementById("modal-zoom-btn").style.display = firstType === "image" ? "" : "none";
 
@@ -840,7 +876,6 @@ function buildModalDots(work) {
 function updateModalDots() {
   document.querySelectorAll(".modal-media-dot").forEach((d,i) =>
     d.classList.toggle("active", i === modalMediaIndex));
-  // Update zoom button for current media type
   const src  = modalWork?.allMedia?.[modalMediaIndex];
   const type = getMediaType(src) || modalWork?.type;
   document.getElementById("modal-zoom-btn").style.display = type === "image" ? "" : "none";
@@ -866,10 +901,10 @@ function loadSlotDirect(slotId, work) {
     const img = document.createElement("img");
     img.alt = work.title; img.style.cursor = "zoom-in";
     img.onclick = openZoom; img.onload = activate; img.onerror = activate;
-    img.src = "works/" + src;
+    img.src = "/works/" + src;
     slotEl.appendChild(img);
   } else {
-    const v = makeVideo("works/" + src);
+    const v = makeVideo("/works/" + src);
     slotEl.appendChild(v);
     activate();
     v.play().catch(()=>{});
@@ -902,10 +937,10 @@ function renderModalMedia() {
     const img = document.createElement("img");
     img.alt = modalWork.title; img.style.cursor = "zoom-in";
     img.onclick = openZoom; img.onload = swap; img.onerror = swap;
-    img.src = "works/" + src;
+    img.src = "/works/" + src;
     toEl.appendChild(img);
   } else {
-    const v = makeVideo("works/" + src);
+    const v = makeVideo("/works/" + src);
     toEl.appendChild(v);
     swap();
     setTimeout(() => v.play().catch(()=>{}), 60);
@@ -946,7 +981,7 @@ function openZoom() {
   const content = document.getElementById("zoom-content");
   content.innerHTML = "";
   const img = document.createElement("img");
-  img.src = "works/" + src; img.alt = modalWork.title;
+  img.src = "/works/" + src; img.alt = modalWork.title;
   content.appendChild(img);
   document.getElementById("zoom-overlay").classList.add("open");
 }
@@ -964,13 +999,8 @@ function closeModal() {
   modalWork = null;
 }
 
-function handleOverlayClick(e) {
-  // e.target is the overlay itself (not modal-inner) because
-  // modal-inner has onclick="event.stopPropagation()"
-  closeModal();
-}
+function handleOverlayClick(e) { closeModal(); }
 
-// Keyboard
 document.addEventListener("keydown", e => {
   if (document.getElementById("zoom-overlay").classList.contains("open")) {
     if (e.key === "Escape") closeZoom();
@@ -982,7 +1012,6 @@ document.addEventListener("keydown", e => {
   if ((e.key === "z" || e.key === "Z") && modalWork) openZoom();
 });
 
-// Touch swipe on modal stage
 let _tx = 0, _ty = 0;
 document.getElementById("modal-stage").addEventListener("touchstart", e => {
   _tx = e.changedTouches[0].clientX;
@@ -1008,7 +1037,7 @@ function getMediaType(filename) {
 
 function createMediaEl(src, type, autoplay) {
   if (!src) return null;
-  const p = "works/" + src;
+  const p = "/works/" + src;
   if (type === "video") {
     const v = document.createElement("video");
     v.src = p; v.muted = true; v.loop = true; v.playsInline = true;
@@ -1025,6 +1054,20 @@ function createMediaEl(src, type, autoplay) {
   return null;
 }
 
+function createPageMediaEl(slug, file, type, autoplay) {
+  if (!file) return null;
+  const p = "/pages/" + slug + "/" + file;
+  if (type === "video") {
+    const v = document.createElement("video");
+    v.src = p; v.muted = true; v.loop = true; v.playsInline = true;
+    if (autoplay) v.autoplay = true;
+    return v;
+  }
+  const img = document.createElement("img");
+  img.src = p; img.alt = ""; img.loading = "lazy";
+  return img;
+}
+
 function esc(s) {
   return String(s||"")
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
@@ -1036,7 +1079,6 @@ function updateFooter() {
   document.getElementById("footer-count").textContent = n + " work" + (n!==1?"s":"");
 }
 
-// Video hover-play on grid
 document.addEventListener("mouseover", e => {
   const item = e.target.closest(".grid-item");
   if (!item) return;
