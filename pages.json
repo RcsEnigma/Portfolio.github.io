@@ -1,0 +1,41 @@
+{
+  "generated": "2026-06-19T13:27:30.892Z",
+  "pages": [
+    {
+      "slug": "exul-omnium",
+      "folder": "Exul Omnium",
+      "label": "Exul Omnium",
+      "order": null,
+      "featured": true,
+      "carouselMedia": "CardDisplay.mkv",
+      "carouselType": "video",
+      "carouselCaption": "Chance-Based physical TCG",
+      "widgets": [
+        {
+          "type": "image-left",
+          "title": "Glass Cards",
+          "text": "Glass cards are designs that can rarely replace the conventional card look. The border becomes transparent, making the card art even more prominent. Previously white text becomes gold.",
+          "media": [
+            {
+              "file": "CardDisplay.mkv",
+              "type": "video"
+            }
+          ],
+          "background": "#E41414"
+        },
+        {
+          "type": "full-bleed",
+          "title": "EXUL OMNIUM",
+          "text": "",
+          "media": [
+            {
+              "file": "CardDisplay.mkv",
+              "type": "video"
+            }
+          ],
+          "background": "#E41414"
+        }
+      ]
+    }
+  ]
+}
