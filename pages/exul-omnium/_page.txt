@@ -8,4 +8,4 @@ true
 01_CardDisplay.mp4
 
 [carousel_caption]
-Chance-Based physical TCG
+Chance-based physical TCG
