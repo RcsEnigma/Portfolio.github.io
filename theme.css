@@ -74,15 +74,6 @@ footer span, footer .nav-link {
 }
 footer .nav-link:hover { color: var(--text); }
 
-/* ── Page heading (title at top of every subpage) ────────────── */
-.page-heading {
-  max-width: 1200px; margin: 0 auto; padding: 3.5rem 2.5rem 0;
-}
-.page-heading h1 {
-  font-family: var(--mono); font-size: clamp(1.8rem, 4vw, 2.6rem);
-  color: var(--accent); letter-spacing: 0.01em;
-}
-
 .page-error {
   max-width: 600px; margin: 6rem auto; padding: 0 2.5rem;
   font-family: var(--mono); font-size: 0.85rem; color: var(--muted);
@@ -100,6 +91,5 @@ footer .nav-link:hover { color: var(--text); }
   #site-nav { margin-left: 1rem; }
   #nav-left, #nav-right { gap: 1.1rem; }
   .nav-link { font-size: 0.64rem; }
-  .page-heading { padding: 2rem 1.2rem 0; }
   footer { padding: 1.2rem 1.1rem; }
 }

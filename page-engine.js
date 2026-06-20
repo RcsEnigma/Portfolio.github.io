@@ -9,7 +9,19 @@
   const SLUG = window.PAGE_SLUG;
   let pagesData = null;
 
-  const videoObserver = new IntersectionObserver(entries => {
+  // Videos that should auto-loop (full-bleed, carousel): pause when off-screen,
+  // resume automatically when back in view -- including after a resize/reflow.
+  const autoplayObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.play().catch(()=>{});
+      else e.target.pause();
+    });
+  }, { threshold: 0.15 });
+
+  // Videos with native controls (media-only): pause when off-screen to save
+  // resources, but never force-resume -- that would override the user's
+  // own play/pause choice.
+  const pauseOnlyObserver = new IntersectionObserver(entries => {
     entries.forEach(e => { if (!e.isIntersecting) e.target.pause(); });
   }, { threshold: 0.15 });
 
@@ -71,15 +83,11 @@
   }
 
   // ── Content ──────────────────────────────────────────────
+  // No hardcoded page title -- the widgets themselves carry titles
+  // wherever you want one (e.g. a text-only or full-bleed widget first).
   function buildContent(page) {
     const root = document.getElementById("page-root");
     root.innerHTML = "";
-
-    const heading = document.createElement("div");
-    heading.className = "page-heading";
-    heading.innerHTML = `<h1>${esc(page.label)}</h1>`;
-    root.appendChild(heading);
-
     page.widgets.forEach((w, i) => root.appendChild(buildWidget(w, page.slug, i)));
   }
 
@@ -92,6 +100,9 @@
     return ph;
   }
 
+  // opts.autoplay: muted/looping background-style video (no controls)
+  // opts.controls: user-operated video, no autoplay, no forced resume
+  // opts.manage: which observer to register with ("autoplay" | "pause-only" | none)
   function buildMediaEl(slug, item, opts) {
     opts = opts || {};
     if (!item) return null;
@@ -103,7 +114,10 @@
       v.controlsList = "nodownload nofullscreen";
       v.disablePictureInPicture = true;
       if (opts.autoplay) v.autoplay = true;
-      videoObserver.observe(v);
+
+      if (opts.manage === "autoplay") autoplayObserver.observe(v);
+      else if (opts.manage === "pause-only") pauseOnlyObserver.observe(v);
+
       return v;
     }
     const img = document.createElement("img");
@@ -141,12 +155,13 @@
     return wrap;
   }
 
+  // image-left / text-left: media treated like a silent looping clip if it's a video
   function buildSplitText(w, slug) {
     const grid = document.createElement("div");
     grid.className = "widget-grid";
     const mediaWrap = document.createElement("div");
     mediaWrap.className = "w-media";
-    const m = buildMediaEl(slug, w.media[0], { observe: true });
+    const m = buildMediaEl(slug, w.media[0], { autoplay: true, manage: "autoplay" });
     if (m) mediaWrap.appendChild(m); else mediaWrap.appendChild(makeMissingPlaceholder());
     grid.appendChild(mediaWrap);
     grid.appendChild(buildTextBlock(w));
@@ -159,12 +174,12 @@
 
     const left = document.createElement("div");
     left.className = "w-media";
-    const lm = buildMediaEl(slug, w.media[0]);
+    const lm = buildMediaEl(slug, w.media[0], { autoplay: true, manage: "autoplay" });
     if (lm) left.appendChild(lm);
 
     const right = document.createElement("div");
     right.className = "w-media";
-    const rm = buildMediaEl(slug, w.media[1]);
+    const rm = buildMediaEl(slug, w.media[1], { autoplay: true, manage: "autoplay" });
     if (rm) right.appendChild(rm);
 
     grid.appendChild(left);
@@ -173,10 +188,12 @@
     return grid;
   }
 
+  // media-only: a deliberate single showcase piece -- user-operated controls,
+  // never auto-resumed against their wishes
   function buildMediaOnly(w, slug) {
     const wrap = document.createElement("div");
     wrap.className = "w-media-only";
-    const m = buildMediaEl(slug, w.media[0], { controls: true });
+    const m = buildMediaEl(slug, w.media[0], { controls: true, manage: "pause-only" });
     if (m) wrap.appendChild(m); else wrap.appendChild(makeMissingPlaceholder());
     return wrap;
   }
@@ -184,7 +201,7 @@
   function buildFullBleed(w, slug) {
     const wrap = document.createElement("div");
     wrap.className = "w-fullbleed";
-    const m = buildMediaEl(slug, w.media[0], { autoplay: true });
+    const m = buildMediaEl(slug, w.media[0], { autoplay: true, manage: "autoplay" });
     if (m) wrap.appendChild(m);
     const cap = document.createElement("div");
     cap.className = "w-fullbleed-caption";
@@ -202,6 +219,9 @@
     return wrap;
   }
 
+  // Carousel: video lifecycle is managed at the WIDGET level, not per-slide --
+  // only the active slide's video should ever be playing, and resize/scroll
+  // should resume that same active slide rather than every hidden one at once.
   function buildCarouselWidget(w, slug) {
     const wrap = document.createElement("div");
     wrap.className = "w-carousel";
@@ -226,6 +246,7 @@
     items.forEach((m, i) => {
       const slide = document.createElement("div");
       slide.className = "w-carousel-slide" + (i === 0 ? " active" : "");
+      // No per-element observer here -- managed by the widget-level observer below
       const el = buildMediaEl(slug, m, { autoplay: i === 0 });
       if (el) slide.appendChild(el); else slide.appendChild(makeMissingPlaceholder());
       track.appendChild(slide);
@@ -237,13 +258,28 @@
     });
 
     function go(i) {
-      track.querySelectorAll(".w-carousel-slide").forEach((s, idx) => s.classList.toggle("active", idx === i));
+      track.querySelectorAll(".w-carousel-slide").forEach((s, idx) => {
+        s.classList.toggle("active", idx === i);
+        const v = s.querySelector("video");
+        if (v) { if (idx === i) v.play().catch(()=>{}); else v.pause(); }
+      });
       dots.querySelectorAll(".w-carousel-dot").forEach((d, idx) => d.classList.toggle("active", idx === i));
       active = i;
       clearInterval(timer);
       if (items.length > 1) timer = setInterval(() => go((active + 1) % items.length), 5000);
     }
     if (items.length > 1) timer = setInterval(() => go((active + 1) % items.length), 5000);
+
+    // Resize/scroll resume -- always targets whichever slide is currently active
+    const widgetObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const activeVideo = track.querySelector(".w-carousel-slide.active video");
+        if (!activeVideo) return;
+        if (e.isIntersecting) activeVideo.play().catch(()=>{});
+        else activeVideo.pause();
+      });
+    }, { threshold: 0.15 });
+    widgetObserver.observe(wrap);
 
     wrap.appendChild(track);
     if (items.length > 1) wrap.appendChild(dots);

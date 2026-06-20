@@ -11,4 +11,4 @@ Glass cards were designed as a way to show off more of the card art that would b
 02_ShinyDesign.gif
 
 [background]
-#E41414
+#EDEAE4

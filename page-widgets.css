@@ -47,21 +47,25 @@
 .widget[data-type="full-bleed"] { padding: 0; }
 .w-fullbleed {
   position: relative; width: 100%; min-height: 70vh; overflow: hidden;
-  display: flex; align-items: flex-end;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
 }
 .w-fullbleed img, .w-fullbleed video {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
 }
 .w-fullbleed::before {
   content: ''; position: absolute; inset: 0; z-index: 1;
-  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 45%, transparent 70%);
+  background: rgba(0,0,0,0.42);
 }
-.w-fullbleed-caption { position: relative; z-index: 2; padding: 3rem; max-width: 800px; }
+.w-fullbleed-caption {
+  position: relative; z-index: 2; padding: 3rem; max-width: 800px;
+  margin: 0 auto;
+}
 .w-title-large {
   font-family: var(--mono); font-size: clamp(2rem, 5vw, 3.6rem);
   font-weight: 700; color: #fff; margin-bottom: 0.6rem; line-height: 1.1;
 }
-.w-fullbleed .w-body { color: rgba(255,255,255,0.7); max-width: 560px; }
+.w-fullbleed .w-body { color: rgba(255,255,255,0.7); max-width: 560px; margin: 0 auto; }
 
 /* ── text-only ────────────────────────────────────────────── */
 .w-text-only { max-width: 720px; margin: 0 auto; text-align: center; }

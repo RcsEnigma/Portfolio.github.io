@@ -126,11 +126,26 @@ body {
   display: flex; gap: 0.5rem; z-index: 3;
 }
 .carousel-dot {
-  width: 24px; height: 2px;
-  background: rgba(255,255,255,0.22); cursor: pointer;
-  transition: background 0.3s, width 0.3s;
+  position: relative;
+  width: 32px; height: 2px;
+  background: rgba(255,255,255,0.22);
+  cursor: pointer;
+  overflow: hidden;
 }
-.carousel-dot.active { background: var(--accent); width: 40px; }
+.carousel-dot::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.carousel-dot.active::after {
+  animation: carousel-progress 5s linear forwards;
+}
+@keyframes carousel-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
 
 /* ── Works section ────────────────────────────────────────── */
 #works-section { padding: 3rem 2.5rem 5rem; max-width: 1600px; margin: 0 auto; }
@@ -185,14 +200,14 @@ body {
   transition: transform var(--trans), filter var(--trans);
 }
 .grid-item:hover img, .grid-item:hover video {
-  transform: scale(1.04); filter: brightness(0.28);
+  transform: scale(1.04); filter: brightness(0.5);
 }
 .grid-placeholder {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   transition: filter var(--trans);
 }
-.grid-item:hover .grid-placeholder { filter: brightness(0.28); }
+.grid-item:hover .grid-placeholder { filter: brightness(0.5); }
 
 .grid-hover-info {
   position: absolute; inset: 0;
@@ -346,6 +361,11 @@ body {
   font-size: 0.87rem; color: rgba(232,228,220,0.68);
   line-height: 1.8; white-space: pre-line; flex: 1;
 }
+.desc-link {
+  color: var(--accent2); text-decoration: underline;
+  text-underline-offset: 2px; transition: opacity 0.2s;
+}
+.desc-link:hover { opacity: 0.65; }
 #modal-info-tags { display: flex; flex-wrap: wrap; gap: 0.32rem; }
 .modal-tag {
   font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
@@ -839,7 +859,7 @@ function openModal(work) {
 
   document.getElementById("modal-info-date").textContent  = work.date || "";
   document.getElementById("modal-info-title").textContent = work.title;
-  document.getElementById("modal-info-desc").textContent  = work.description || "";
+  document.getElementById("modal-info-desc").innerHTML  = linkify(work.description || "");
   document.getElementById("modal-info-tags").innerHTML =
     work.tags.map(t => `<span class="modal-tag">${esc(t)}</span>`).join("");
   const lnk = document.getElementById("modal-info-link");
@@ -1071,6 +1091,18 @@ function esc(s) {
   return String(s||"")
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// Auto-detect http(s) URLs in plain text and turn them into clickable links.
+// Escapes everything first, so this is safe to feed raw description text.
+function linkify(text) {
+  const escaped = esc(text);
+  return escaped.replace(/(https?:\/\/[^\s<]+)/g, raw => {
+    let url = raw, trail = "";
+    const m = url.match(/[).,;:!?]+$/);
+    if (m) { trail = m[0]; url = url.slice(0, -trail.length); }
+    return `<a href="${url}" target="_blank" rel="noopener" class="desc-link">${url}</a>${trail}`;
+  });
 }
 
 function updateFooter() {
