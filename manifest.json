@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-20T07:16:49.485Z",
+  "generated": "2026-06-20T07:28:00.225Z",
   "tags": [
     "2D",
     "3D",
@@ -288,6 +288,26 @@
       "date": "2024-09",
       "link": "",
       "aspectRatio": 1.896,
+      "gridSpan": "wide"
+    },
+    {
+      "id": "CardDisplay",
+      "primaryMedia": "CardDisplay.mp4",
+      "allMedia": [
+        "CardDisplay.mp4"
+      ],
+      "type": "video",
+      "title": "Exul Omnium",
+      "description": "A stylish render of the 300 cards I made for my Exul Omnium project.\n\nThis render was made 2026-06, but this showcases the cards themselves more than the render.",
+      "tags": [
+        "2D",
+        "Illustration",
+        "Exul Omnium"
+      ],
+      "featured": false,
+      "date": "2024-07",
+      "link": "",
+      "aspectRatio": null,
       "gridSpan": "wide"
     },
     {
