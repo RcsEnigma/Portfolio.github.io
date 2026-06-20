@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AJ Ambrozic</title>
-<link rel="icon" type="image/x-icon" href="webicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -64,6 +63,23 @@ body {
 }
 .nav-link:hover, .nav-link.active { color: var(--text); }
 
+/* Hamburger -- hidden on desktop, only shown under the mobile breakpoint below */
+#nav-toggle {
+  display: none;
+  flex-direction: column; justify-content: center; gap: 5px;
+  width: 28px; height: 28px;
+  background: transparent; border: none; cursor: pointer; padding: 0;
+  flex-shrink: 0;
+}
+.nav-toggle-bar {
+  display: block; width: 100%; height: 1px;
+  background: var(--muted); transition: background 0.2s, transform 0.25s, opacity 0.2s;
+}
+#nav-toggle:hover .nav-toggle-bar { background: var(--text); }
+#nav-toggle.open .nav-toggle-bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+#nav-toggle.open .nav-toggle-bar:nth-child(2) { opacity: 0; }
+#nav-toggle.open .nav-toggle-bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
 /* ── Carousel ─────────────────────────────────────────────── */
 #carousel-section {
   position: relative; width: 100%;
@@ -75,8 +91,9 @@ body {
   transition: opacity 1.1s ease;
   display: flex; align-items: flex-end;
   cursor: pointer;
+  pointer-events: none;
 }
-.carousel-slide.active { opacity: 1; }
+.carousel-slide.active { opacity: 1; pointer-events: all; }
 
 .carousel-slide::before {
   content: '';
@@ -124,15 +141,27 @@ body {
 }
 .carousel-controls {
   position: absolute; bottom: 1.5rem; right: 2.5rem;
-  display: flex; gap: 0.5rem; z-index: 3;
+  display: flex; align-items: center; gap: 0.7rem; z-index: 3;
 }
+.carousel-nav-btn {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.7); width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1rem; line-height: 1; flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+.carousel-nav-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+#carousel-dots { display: flex; gap: 0.5rem; }
 .carousel-dot {
   position: relative;
-  width: 32px; height: 2px;
-  background: rgba(255,255,255,0.22);
+  width: 28px; height: 4px;
+  background: rgba(255,255,255,0.25);
   cursor: pointer;
   overflow: hidden;
+  border-radius: 1px;
+  transition: background 0.2s;
 }
+.carousel-dot:hover { background: rgba(255,255,255,0.45); }
 .carousel-dot::after {
   content: '';
   position: absolute; inset: 0;
@@ -201,14 +230,14 @@ body {
   transition: transform var(--trans), filter var(--trans);
 }
 .grid-item:hover img, .grid-item:hover video {
-  transform: scale(1.04); filter: brightness(0.75);
+  transform: scale(1.04); filter: brightness(0.5);
 }
 .grid-placeholder {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   transition: filter var(--trans);
 }
-.grid-item:hover .grid-placeholder { filter: brightness(0.5); }
+.grid-item:hover .grid-placeholder { filter: brightness(0.7); }
 
 .grid-hover-info {
   position: absolute; inset: 0;
@@ -442,9 +471,31 @@ footer span {
 /* ── Mobile ───────────────────────────────────────────────── */
 @media (max-width: 640px) {
   #site-header { padding: 0 1.1rem; height: 50px; }
-  #site-nav { margin-left: 1rem; }
-  #nav-left, #nav-right { gap: 1.1rem; }
-  .nav-link { font-size: 0.64rem; }
+
+  #nav-toggle { display: flex; }
+
+  #site-nav {
+    display: none;
+    position: fixed; top: 50px; left: 0; right: 0; bottom: 0;
+    margin-left: 0;
+    background: var(--bg);
+    flex-direction: column; align-items: stretch; justify-content: flex-start;
+    padding: 0.5rem 1.1rem 2rem;
+    overflow-y: auto;
+    z-index: 99;
+  }
+  #site-nav.open { display: flex; }
+
+  #nav-left, #nav-right {
+    flex-direction: column; align-items: stretch; gap: 0;
+  }
+  #nav-right { margin-top: 0.5rem; }
+
+  .nav-link {
+    font-size: 0.78rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid var(--border);
+  }
 
   #carousel-section { height: clamp(220px, 58vw, 360px); }
   .carousel-caption { padding: 1.2rem 1.4rem; }
@@ -491,6 +542,11 @@ footer span {
 <!-- ── HEADER ────────────────────────────────────────────────── -->
 <header id="site-header">
   <a id="wordmark" href="#" onclick="showPage('home')">AJ Ambrozic</a>
+  <button id="nav-toggle" onclick="toggleMobileNav()" aria-label="Toggle menu">
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+  </button>
   <nav id="site-nav">
     <div id="nav-left">
       <a class="nav-link active" href="#" onclick="showPage('home')">Work</a>
@@ -506,7 +562,11 @@ footer span {
 <!-- ── CAROUSEL ──────────────────────────────────────────────── -->
 <section id="carousel-section" style="display:none">
   <div id="carousel-track"></div>
-  <div class="carousel-controls" id="carousel-dots"></div>
+  <div class="carousel-controls">
+    <button class="carousel-nav-btn" id="carousel-prev-btn" aria-label="Previous">&#8249;</button>
+    <div id="carousel-dots"></div>
+    <button class="carousel-nav-btn" id="carousel-next-btn" aria-label="Next">&#8250;</button>
+  </div>
 </section>
 
 <!-- ── WORKS ─────────────────────────────────────────────────── -->
@@ -645,6 +705,16 @@ function showPage(page) {
     a.classList.toggle("active",
       a.textContent.toLowerCase().includes(page === "home" ? "work" : page));
   });
+  closeMobileNav();
+}
+
+function toggleMobileNav() {
+  document.getElementById("site-nav").classList.toggle("open");
+  document.getElementById("nav-toggle").classList.toggle("open");
+}
+function closeMobileNav() {
+  document.getElementById("site-nav").classList.remove("open");
+  document.getElementById("nav-toggle").classList.remove("open");
 }
 
 function buildPagesNavLinks() {
@@ -769,6 +839,14 @@ function buildCarousel() {
     dot.onclick = e => { e.stopPropagation(); goCarousel(i); };
     dots.appendChild(dot);
   });
+
+  const total = slides.length;
+  document.getElementById("carousel-prev-btn").onclick = e => {
+    e.stopPropagation(); goCarousel((carouselIndex - 1 + total) % total);
+  };
+  document.getElementById("carousel-next-btn").onclick = e => {
+    e.stopPropagation(); goCarousel((carouselIndex + 1) % total);
+  };
 
   clearInterval(carouselTimer);
   if (slides.length > 1)

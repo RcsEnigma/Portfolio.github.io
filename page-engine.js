@@ -61,6 +61,11 @@
     root.innerHTML = `
       <header id="site-header">
         <a id="wordmark" href="/">AJ Ambrozic</a>
+        <button id="nav-toggle" aria-label="Toggle menu">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
         <nav id="site-nav">
           <div id="nav-left">
             <a class="nav-link" href="/">Work</a>
@@ -72,6 +77,11 @@
           </div>
         </nav>
       </header>`;
+
+    document.getElementById("nav-toggle").onclick = () => {
+      document.getElementById("site-nav").classList.toggle("open");
+      document.getElementById("nav-toggle").classList.toggle("open");
+    };
   }
 
   function buildFooter() {
@@ -127,11 +137,33 @@
     return img;
   }
 
+  // Perceived brightness of a hex color (0 = black, 1 = white).
+  // Used to auto-pick dark text on light/bright custom backgrounds,
+  // so [background] is the only color you ever need to choose.
+  function getLuminance(hex) {
+    if (!hex) return null;
+    const c = hex.replace("#", "").trim();
+    let r, g, b;
+    if (c.length === 3) {
+      r = parseInt(c[0] + c[0], 16); g = parseInt(c[1] + c[1], 16); b = parseInt(c[2] + c[2], 16);
+    } else if (c.length === 6) {
+      r = parseInt(c.substring(0,2), 16); g = parseInt(c.substring(2,4), 16); b = parseInt(c.substring(4,6), 16);
+    } else {
+      return null;
+    }
+    if ([r,g,b].some(n => Number.isNaN(n))) return null;
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  }
+  const LIGHT_BG_THRESHOLD = 0.6; // raise to flip on dark-text sooner, lower to flip later
+
   function buildWidget(w, slug, index) {
     const section = document.createElement("section");
     section.className = "widget";
     section.dataset.type = w.type;
     section.style.background = w.background || "var(--bg)";
+
+    const lum = getLuminance(w.background);
+    if (lum !== null && lum > LIGHT_BG_THRESHOLD) section.classList.add("widget-on-light");
 
     switch (w.type) {
       case "image-left":

@@ -32,6 +32,11 @@
   color: rgba(232,228,220,0.72); white-space: pre-line;
 }
 
+/* Auto-applied when [background] is a bright/light hex -- see getLuminance()
+   in page-engine.js. Keeps text readable without you ever picking a text color. */
+.widget-on-light .w-title { color: #1a1714; }
+.widget-on-light .w-body  { color: rgba(20,18,16,0.75); }
+
 /* ── split: text centred, image flanking both sides ─────────── */
 .widget-grid-split { align-items: center; }
 .widget-grid-split .w-text  { flex: 1.1; text-align: center; }

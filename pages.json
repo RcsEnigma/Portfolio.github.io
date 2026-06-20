@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-20T13:59:55.206Z",
+  "generated": "2026-06-20T20:35:41.913Z",
   "pages": [
     {
       "slug": "exul-omnium",
@@ -33,7 +33,7 @@
               "type": "image"
             }
           ],
-          "background": "#EDEAE4"
+          "background": "#CCC7BC"
         }
       ]
     }
