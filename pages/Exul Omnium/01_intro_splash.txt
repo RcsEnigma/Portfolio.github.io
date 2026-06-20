@@ -8,7 +8,7 @@ EXUL OMNIUM
 blah blah blah
 
 [media]
-01_CardDisplay.mkv
+01_CardDisplay.mp4
 
 [background]
 #E41414
