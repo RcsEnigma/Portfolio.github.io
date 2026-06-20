@@ -5,7 +5,7 @@ image-left
 Glass Cards
 
 [text]
-Glass cards are designs that can rarely replace the conventional card look. The border becomes transparent, making the card art even more prominent. Previously white text becomes gold.
+Glass cards were designed as a way to show off more of the card art that would be otherwise obscured by the borders. They are rarer variants of standard cards, and the design is purely visual; whether a card is Glass or not has no bearing on gameplay.
 
 [media]
 02_ShinyDesign.gif

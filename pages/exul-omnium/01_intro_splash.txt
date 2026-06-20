@@ -4,11 +4,8 @@ full-bleed
 [title]
 EXUL OMNIUM
 
-[text]
-blah blah blah
-
 [media]
 01_CardDisplay.mp4
 
 [background]
-#E41414
+#EDEAE4
