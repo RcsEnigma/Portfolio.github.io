@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-20T07:28:00.225Z",
+  "generated": "2026-06-20T10:35:26.734Z",
   "tags": [
     "2D",
     "3D",
@@ -7,6 +7,7 @@
     "Blender",
     "Environment",
     "Exul Omnium",
+    "Game Design",
     "Graphic Design",
     "Illustration",
     "Multimodal",
@@ -298,11 +299,10 @@
       ],
       "type": "video",
       "title": "Exul Omnium",
-      "description": "A stylish render of the 300 cards I made for my Exul Omnium project.\n\nThis render was made 2026-06, but this showcases the cards themselves more than the render.",
+      "description": "A stylish render of the 300 cards I made for my Exul Omnium project.\n\nThis render was made 2026-06, but this section showcases the cards themselves more than the render.",
       "tags": [
-        "2D",
-        "Illustration",
-        "Exul Omnium"
+        "Exul Omnium",
+        "Game Design"
       ],
       "featured": false,
       "date": "2024-07",
