@@ -1,0 +1,13 @@
+[title]
+Exul Omnium
+
+[description]
+A stylish render of the 300 cards I made for my Exul Omnium project.
+
+This render was made 2026-06, but this showcases the cards themselves more than the render.
+
+[tags]
+2D, Illustration, Exul Omnium
+
+[date]
+2024-07
