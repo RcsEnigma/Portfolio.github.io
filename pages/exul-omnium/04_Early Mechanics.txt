@@ -7,6 +7,10 @@ Early Mechanics
 [text]
 The core design philosophy in my approach was simple: no gameplay-necessary text. Every card's ability would be detailed by an arrangement of symbols and icons. Eight "Factions" were created, where "Entity" cards need to be matched by type with "Land" cards in order for the Entity's abilities to work. 
 
+One highly-experimental decision of mine which I was quite worred about in practice was homogenizing Health and Damage into a single Strength value. What this means is an Entity that has 10 "Health" also deals 10 "Damage"; if it takes 9 Damage, it is now one point away from dealth and is only capable of dealing 1 "Damage". I imagine this as the Entity's fortitude - a heavily damaged and wounded creature won't be capable of producing attacks with the same proficiency as if it were healthy. To complement this system, both attackers deal their damage at the same time. Two entities with 10 Strength will completely defeat each other simultaneously, thus it's wise to pick weaker opponents. 
+
+When you see D followed by a number, it refers to a size of dice. On deploying an Entity, you roll the specified dice for it's Strength value. It also has a concrete value that gets added to, for some degree of certainty. This allows cards to fall into a "range" of possible Strength values when they enter the battlefield. After that, the Strength value will only change when the Entity recieves damage. 
+
 Split Faction Lands allow Entities of different types to share the same land. However, Split Faction Entities are less of a benefit - they require more specific Land types for their ability to work. Lands have a limited capacity that is permanently lost when an Entity within it dies. Lands also had their own abilities they can impart on their inhabitants.
 
 [media]
