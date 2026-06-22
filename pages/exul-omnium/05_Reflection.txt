@@ -5,7 +5,7 @@ image-left
 Reflection
 
 [text]
-Physical cards were soon printed, and a handful of playtests begun. While the game worked, the ability formatting proved to be too obscure for smooth gameplay. There overall wasn't enough substance to make gameplay interesting; weirdly enough, I was limited by what I could make the ACSII symbols represent - it got heiroglyphic very quickly and I chose simplicity.
+Physical cards were soon printed, and a handful of playtests begun. While the game worked, the ability formatting proved to be too obscure for smooth gameplay. There overall wasn't enough substance to make gameplay interesting; weirdly enough, I was limited by what I could make the ACSII symbols represent - it got heiroglyphic very quickly and I chose simplicity at the cost of less interesting ability variations.
 
 My personal interest in the project waned down, and was quickly forgotten as I shifted focus to better things.
 
@@ -13,4 +13,4 @@ My personal interest in the project waned down, and was quickly forgotten as I s
 Concepts6.png
 
 [background]
-#292A2E
+#18191C
