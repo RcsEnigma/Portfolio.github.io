@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-20T20:35:41.913Z",
+  "generated": "2026-06-22T12:57:27.558Z",
   "pages": [
     {
       "slug": "exul-omnium",
@@ -22,6 +22,46 @@
             }
           ],
           "background": "#EDEAE4"
+        },
+        {
+          "type": "split",
+          "title": "Origin",
+          "text": "Exul Omnium started as a simple desire to make an original trading card game. I discovered a website called Artbreeder in 2020 which hosted some of the earliest stable diffusion models. It couldn't recieve prompts, and instead had hardcoded 'types' of images that could be formed. There were four types: full body figures, landscapes, abstract 'album art', and headshots. Of those options, I found the first two the most workable and formed my game concept from only two types of cards.",
+          "media": [
+            {
+              "file": "Concepts.png",
+              "type": "image"
+            },
+            {
+              "file": "Concepts2.png",
+              "type": "image"
+            }
+          ],
+          "background": "#292A2E"
+        },
+        {
+          "type": "text-left",
+          "title": "Early Mechanics",
+          "text": "The core design philosophy in my approach was simple: no gameplay-necessary text. Every card's ability would be detailed by an arrangement of symbols and icons. Eight \"Factions\" were created, where \"Entity\" cards need to be matched by type with \"Land\" cards in order for the Entity's abilities to work. \n\nSplit Faction Lands allow Entities of different types to share the same land. However, Split Faction Entities are less of a benefit - they require more specific Land types for their ability to work. Lands have a limited capacity that is permanently lost when an Entity within it dies. Lands also had their own abilities they can impart on their inhabitants.",
+          "media": [
+            {
+              "file": "Concepts6.png",
+              "type": "image"
+            }
+          ],
+          "background": "#292A2E"
+        },
+        {
+          "type": "image-left",
+          "title": "Reflection",
+          "text": "Physical cards were soon printed, and a handful of playtests begun. While the game worked, the ability formatting proved to be too obscure for smooth gameplay. There overall wasn't enough substance to make gameplay interesting; weirdly enough, I was limited by what I could make the ACSII symbols represent - it got heiroglyphic very quickly and I chose simplicity.\n\nMy personal interest in the project waned down, and was quickly forgotten as I shifted focus to better things.",
+          "media": [
+            {
+              "file": "Concepts6.png",
+              "type": "image"
+            }
+          ],
+          "background": "#292A2E"
         },
         {
           "type": "image-left",

@@ -1,0 +1,16 @@
+[type]
+text-left
+
+[title]
+Early Mechanics
+
+[text]
+The core design philosophy in my approach was simple: no gameplay-necessary text. Every card's ability would be detailed by an arrangement of symbols and icons. Eight "Factions" were created, where "Entity" cards need to be matched by type with "Land" cards in order for the Entity's abilities to work. 
+
+Split Faction Lands allow Entities of different types to share the same land. However, Split Faction Entities are less of a benefit - they require more specific Land types for their ability to work. Lands have a limited capacity that is permanently lost when an Entity within it dies. Lands also had their own abilities they can impart on their inhabitants.
+
+[media]
+Concepts6.png
+
+[background]
+#292A2E
