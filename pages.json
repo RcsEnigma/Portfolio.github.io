@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-23T06:28:17.496Z",
+  "generated": "2026-06-23T06:38:48.137Z",
   "pages": [
     {
       "slug": "exul-omnium",
@@ -89,6 +89,22 @@
           "text": "",
           "media": [],
           "background": "#CCC7BC"
+        },
+        {
+          "type": "split",
+          "title": "Second Approach",
+          "text": "in 2022, I discovered Midjourney - a prompt-based image generator. The Exul Omnium flame has been reignited, and I returned with more skills. Firstly, I became very adept with Blender and used it's vector-based features to form my card layouts. Secondly, I found a proper card manufacturer - no more hand-cutting printer paper cardstock with household scissors.",
+          "media": [
+            {
+              "file": "Concepts7.png",
+              "type": "image"
+            },
+            {
+              "file": "Concepts10.png",
+              "type": "image"
+            }
+          ],
+          "background": "#18191C"
         },
         {
           "type": "image-left",
