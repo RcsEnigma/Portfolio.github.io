@@ -96,7 +96,33 @@
 }
 .w-carousel-dot.active { background: var(--accent); width: 32px; }
 
-/* ── Missing-media fallback (safety net, not a broken-image icon) ── */
+/* ── trio: three images in a horizontal row ──────────────── */
+.w-trio {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; gap: 1rem; align-items: stretch;
+}
+.w-trio-cell { flex: 1; min-width: 0; }
+.w-trio-cell img, .w-trio-cell video {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  border-radius: var(--radius);
+}
+
+/* ── title-bar: thin centered heading strip ──────────────── */
+.widget[data-type="title-bar"] { padding: 2rem 2.5rem; }
+.w-title-bar { max-width: 1200px; margin: 0 auto; text-align: center; }
+.w-title-bar-heading {
+  font-family: var(--mono); font-size: clamp(1rem, 2.5vw, 1.35rem);
+  font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text); line-height: 1.2;
+}
+.widget-on-light .w-title-bar-heading { color: #1a1714; }
+.w-title-bar-sub {
+  margin-top: 0.35rem; font-size: 0.82rem;
+  color: var(--muted); letter-spacing: 0.04em;
+}
+.widget-on-light .w-title-bar-sub { color: rgba(20,18,16,0.55); }
+
+/* ── Missing-media fallback ───────────────────────────────── */
 .w-media-missing {
   background: var(--surface); border: 1px dashed var(--border);
   color: var(--muted); font-family: var(--mono); font-size: 0.65rem;
@@ -117,6 +143,11 @@
 
   /* split: DOM order is already media, text, media -- stacks correctly as-is */
   .widget-grid-split { flex-direction: column; }
+
+  /* trio stacks to a single column on narrow screens */
+  .w-trio { flex-direction: column; }
+
+  .widget[data-type="title-bar"] { padding: 1.4rem 1.2rem; }
 
   .w-fullbleed { min-height: 50vh; }
   .w-fullbleed-caption { padding: 1.6rem; }

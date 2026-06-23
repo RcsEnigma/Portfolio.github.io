@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-22T13:23:31.875Z",
+  "generated": "2026-06-23T04:51:19.199Z",
   "pages": [
     {
       "slug": "exul-omnium",
@@ -24,16 +24,20 @@
           "background": "#EDEAE4"
         },
         {
-          "type": "split",
-          "title": "Origin",
-          "text": "Exul Omnium started as a simple desire to make an original trading card game. I discovered a website called Artbreeder in 2020 which hosted some of the earliest stable diffusion models. It couldn't recieve prompts, and instead had hardcoded 'types' of images that could be formed. There were four types: full body figures, landscapes, abstract 'album art', and headshots. Of those options, I found the first two the most workable and formed my game concept from only two types of cards.",
+          "type": "trio",
+          "title": "",
+          "text": "",
           "media": [
             {
-              "file": "Concepts.PNG",
+              "file": "Concepts3.PNG",
               "type": "image"
             },
             {
-              "file": "Concepts2.PNG",
+              "file": "Concepts5.PNG",
+              "type": "image"
+            },
+            {
+              "file": "Concepts4.PNG",
               "type": "image"
             }
           ],
@@ -42,7 +46,7 @@
         {
           "type": "text-left",
           "title": "Early Mechanics",
-          "text": "The core design philosophy in my approach was simple: no gameplay-necessary text. Every card's ability would be detailed by an arrangement of symbols and icons. Eight \"Factions\" were created, where \"Entity\" cards need to be matched by type with \"Land\" cards in order for the Entity's abilities to work. \n\nOne highly-experimental decision of mine which I was quite worred about in practice was homogenizing Health and Damage into a single Strength value. What this means is an Entity that has 10 \"Health\" also deals 10 \"Damage\"; if it takes 9 Damage, it is now one point away from dealth and is only capable of dealing 1 \"Damage\". I imagine this as the Entity's fortitude - a heavily damaged and wounded creature won't be capable of producing attacks with the same proficiency as if it were healthy. To complement this system, both attackers deal their damage at the same time. Two entities with 10 Strength will completely defeat each other simultaneously, thus it's wise to pick weaker opponents. \n\nWhen you see D followed by a number, it refers to a size of dice. On deploying an Entity, you roll the specified dice for it's Strength value. It also has a concrete value that gets added to, for some degree of certainty. This allows cards to fall into a \"range\" of possible Strength values when they enter the battlefield. After that, the Strength value will only change when the Entity recieves damage. \n\nSplit Faction Lands allow Entities of different types to share the same land. However, Split Faction Entities are less of a benefit - they require more specific Land types for their ability to work. Lands have a limited capacity that is permanently lost when an Entity within it dies. Lands also had their own abilities they can impart on their inhabitants.",
+          "text": "The core design philosophy in my approach was simple: no gameplay-necessary text. Every card's ability would be detailed by an arrangement of symbols and icons. Eight \"Factions\" were created, where \"Entity\" cards need to be matched by type with \"Land\" cards in order for the Entity's abilities to work. \n\nOne highly-experimental decision of mine which I was quite worred about in practice was homogenizing Health and Damage into a single Strength value. What this means is an Entity that has 10 \"Health\" also deals 10 \"Damage\"; if it takes 9 Damage, it is now one point away from death and is only capable of dealing 1 \"Damage\". I imagine this as the Entity's fortitude - a heavily damaged and wounded creature won't be capable of producing attacks with the same proficiency as if it were fully healthy. To complement this system, both attackers deal their damage at the same time. Two entities with 10 Strength will completely defeat each other simultaneously, thus it's wise to pick weaker opponents. \n\nWhen you see D followed by a number, it refers to a size of dice. On deploying an Entity, you roll the specified dice for it's Strength value. It also has a concrete value that gets added to, for some degree of certainty. This allows cards to fall into a \"range\" of possible Strength values when they enter the battlefield. After that, the Strength value will only change when the Entity recieves damage. \n\nSplit Faction Lands allow Entities of different types to share the same land. However, Split Faction Entities are less of a benefit - they require more specific Land types for their ability to work. Lands have a limited capacity that is permanently lost when an Entity within it dies. Lands also had their own abilities they can impart on their inhabitants.",
           "media": [
             {
               "file": "Concepts6.png",
@@ -61,6 +65,13 @@
               "type": "image"
             }
           ],
+          "background": "#18191C"
+        },
+        {
+          "type": "title-bar",
+          "title": "REBIRTH",
+          "text": "",
+          "media": [],
           "background": "#18191C"
         },
         {

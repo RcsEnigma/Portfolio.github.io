@@ -1,0 +1,8 @@
+[type]
+title-bar
+
+[title]
+REBIRTH
+
+[background]
+#18191C

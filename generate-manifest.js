@@ -187,7 +187,8 @@ function buildWorks() {
 // ════════════════════════════════════════════════════════════
 
 const VALID_WIDGET_TYPES = new Set([
-  "image-left","text-left","split","media-only","full-bleed","text-only","carousel"
+  "image-left","text-left","split","media-only","full-bleed","text-only","carousel",
+  "trio","title-bar"
 ]);
 
 function parsePageMeta(raw, folderName) {
