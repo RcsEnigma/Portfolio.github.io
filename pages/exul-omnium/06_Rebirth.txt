@@ -1,5 +1,5 @@
 [type]
-title-bar
+title
 
 [title]
 REBIRTH

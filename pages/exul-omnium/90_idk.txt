@@ -8,7 +8,7 @@ Glass Cards
 Glass cards were designed as a way to show off more of the card art that would be otherwise obscured by the borders. They are rarer variants of standard cards, and the design is purely visual; whether a card is Glass or not has no bearing on gameplay.
 
 [media]
-02_ShinyDesign.gif
+ShinyDesign.gif
 
 [background]
 #CCC7BC

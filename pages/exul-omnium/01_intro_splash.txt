@@ -5,7 +5,7 @@ full-bleed
 EXUL OMNIUM
 
 [media]
-01_CardDisplay.mp4
+CardDisplay.mp4
 
 [background]
 #EDEAE4

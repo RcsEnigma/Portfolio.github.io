@@ -1,0 +1,14 @@
+[type]
+split
+
+[title]
+Origin
+
+[text]
+Exul Omnium started as a simple desire to make an original trading card game. I discovered a website called Artbreeder in 2020 which hosted some of the earliest stable diffusion models. It couldn't recieve prompts, and instead had hardcoded 'types' of images that could be formed. There were four types: full body figures, landscapes, abstract 'album art', and headshots. Of those options, I found the first two the most workable and formed my game concept from only two types of cards.
+
+[media]
+Concepts.PNG, Concepts2.PNG
+
+[background]
+#18191C

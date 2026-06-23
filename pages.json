@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-23T04:51:19.199Z",
+  "generated": "2026-06-23T05:00:04.124Z",
   "pages": [
     {
       "slug": "exul-omnium",
@@ -17,11 +17,27 @@
           "text": "",
           "media": [
             {
-              "file": "01_CardDisplay.mp4",
+              "file": "CardDisplay.mp4",
               "type": "video"
             }
           ],
           "background": "#EDEAE4"
+        },
+        {
+          "type": "split",
+          "title": "Origin",
+          "text": "Exul Omnium started as a simple desire to make an original trading card game. I discovered a website called Artbreeder in 2020 which hosted some of the earliest stable diffusion models. It couldn't recieve prompts, and instead had hardcoded 'types' of images that could be formed. There were four types: full body figures, landscapes, abstract 'album art', and headshots. Of those options, I found the first two the most workable and formed my game concept from only two types of cards.",
+          "media": [
+            {
+              "file": "Concepts.PNG",
+              "type": "image"
+            },
+            {
+              "file": "Concepts2.PNG",
+              "type": "image"
+            }
+          ],
+          "background": "#18191C"
         },
         {
           "type": "trio",
@@ -68,7 +84,7 @@
           "background": "#18191C"
         },
         {
-          "type": "title-bar",
+          "type": "text-only",
           "title": "REBIRTH",
           "text": "",
           "media": [],
@@ -80,7 +96,7 @@
           "text": "Glass cards were designed as a way to show off more of the card art that would be otherwise obscured by the borders. They are rarer variants of standard cards, and the design is purely visual; whether a card is Glass or not has no bearing on gameplay.",
           "media": [
             {
-              "file": "02_ShinyDesign.gif",
+              "file": "ShinyDesign.gif",
               "type": "image"
             }
           ],
