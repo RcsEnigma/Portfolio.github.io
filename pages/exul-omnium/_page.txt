@@ -5,7 +5,7 @@ Exul Omnium
 true
 
 [carousel_media]
-01_CardDisplay.mp4
+CardDisplay.mp4
 
 [carousel_caption]
 Chance-based physical TCG

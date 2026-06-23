@@ -5,4 +5,4 @@ title
 REBIRTH
 
 [background]
-#18191C
+#CCC7BC
