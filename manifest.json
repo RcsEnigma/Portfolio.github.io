@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-23T06:59:25.716Z",
+  "generated": "2026-06-23T14:14:13.550Z",
   "tags": [
     "2D",
     "3D",
@@ -391,6 +391,28 @@
       "link": "",
       "aspectRatio": 1.058,
       "gridSpan": "normal"
+    },
+    {
+      "id": "Sword",
+      "primaryMedia": "Sword_01.png",
+      "allMedia": [
+        "Sword_01.png",
+        "Sword_02.mp4"
+      ],
+      "type": "image",
+      "title": "Zero-Point Blade",
+      "description": "A sword that can cut through any material. The idea here is the orange strip \"deletes\" anything that touches it, and the blue energy harnesses and stretches the strip into a blade shape. The circuitry in the hilt and blade controls this action, and the pommel is a battery. \n\nI also made an animation depicting the effect with some SFX.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Trepidation",
+        "Animation"
+      ],
+      "featured": true,
+      "date": "2023-12",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide"
     },
     {
       "id": "Pyroclastic_Elemental",

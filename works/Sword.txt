@@ -1,0 +1,16 @@
+[title]
+Zero-Point Blade
+
+[description]
+A sword that can cut through any material. The idea here is the orange strip "deletes" anything that touches it, and the blue energy harnesses and stretches the strip into a blade shape. The circuitry in the hilt and blade controls this action, and the pommel is a battery. 
+
+I also made an animation depicting the effect with some SFX.
+
+[tags]
+3D, Blender, Trepidation, Animation
+
+[featured]
+true
+
+[date]
+2023-12
