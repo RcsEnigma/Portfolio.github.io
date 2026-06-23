@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-23T14:14:13.550Z",
+  "generated": "2026-06-23T14:18:19.110Z",
   "tags": [
     "2D",
     "3D",
@@ -408,7 +408,7 @@
         "Trepidation",
         "Animation"
       ],
-      "featured": true,
+      "featured": false,
       "date": "2023-12",
       "link": "",
       "aspectRatio": 1.778,

@@ -9,8 +9,5 @@ I also made an animation depicting the effect with some SFX.
 [tags]
 3D, Blender, Trepidation, Animation
 
-[featured]
-true
-
 [date]
 2023-12
