@@ -368,6 +368,27 @@
 
   function initZoom() {
     if (_zoomOverlay) return;
+
+    // Inject styles here rather than relying on page-widgets.css so stale
+    // cached stylesheets can never break the zoom feature.
+    const style = document.createElement("style");
+    style.textContent = [
+      "#page-zoom-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.97);",
+      "display:flex;align-items:center;justify-content:center;",
+      "opacity:0;pointer-events:none;transition:opacity .22s ease;cursor:zoom-out;overflow:auto;}",
+      "#page-zoom-overlay.open{opacity:1;pointer-events:all;}",
+      "#page-zoom-content{display:flex;align-items:center;justify-content:center;",
+      "min-height:100vh;padding:2rem;}",
+      "#page-zoom-content img{max-width:96vw;max-height:96vh;width:auto;height:auto;",
+      "display:block;object-fit:contain;cursor:zoom-out;}",
+      "#page-zoom-close{position:fixed;top:1rem;right:1rem;",
+      "background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);",
+      "color:rgba(255,255,255,.8);width:34px;height:34px;border-radius:50%;",
+      "cursor:pointer;font-size:.9rem;display:flex;align-items:center;",
+      "justify-content:center;z-index:10000;transition:background .2s;}",
+      "#page-zoom-close:hover{background:rgba(255,255,255,.1);}"
+    ].join("");
+    document.head.appendChild(style);
     _zoomOverlay = document.createElement("div");
     _zoomOverlay.id = "page-zoom-overlay";
     _zoomOverlay.onclick = closeZoom;
