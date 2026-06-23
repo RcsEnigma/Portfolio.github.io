@@ -1,0 +1,8 @@
+[type]
+trio
+
+[media]
+Concepts9.webp, Concepts8.PNG, Concepts11.PNG
+
+[background]
+#060708

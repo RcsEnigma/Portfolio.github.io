@@ -5,7 +5,7 @@ split
 Second Approach
 
 [text]
-in 2022, I discovered Midjourney - a prompt-based image generator. The Exul Omnium flame has been reignited, and I returned with more skills. Firstly, I became very adept with Blender and used it's vector-based features to form my card layouts. Secondly, I found a proper card manufacturer - no more hand-cutting printer paper cardstock with household scissors.  
+in 2022, I discovered Midjourney - a prompt-based image generator with significantly more freedom. The Exul Omnium flame has been reignited, and I returned with more skills. Firstly, I became very adept with Blender and used it's vector-based features to form my card layouts. Secondly, I found a proper card manufacturer - no more hand-cutting printer paper cardstock with household scissors.  
 
 [media]
 Concepts7.png, Concepts10.png

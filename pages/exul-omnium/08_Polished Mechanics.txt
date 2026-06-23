@@ -1,0 +1,18 @@
+[type]
+text-only
+
+[title]
+Polished Mechanics
+
+[text]
+The ability system needed the biggest revamp. The system from The Battle Cats was very attractive to me - units can have 'traits' which act like passive strengths during combat. The units could also have specific types it must target. I worked off this principle to form Abilities, which contain both the trigger and the effect. The target type is determined by the coloring behind the Ability's icon.
+
+The rest of the game's philosophies stayed relatively unchanged; 8 Factions, two card types, identical Strength system. The full body artwork was no longer necessary - it's a remnant of Artbreeder's system which I decided to maintain into Midjourney. I felt a full body depiction framed the Entity more clinically, like a prison's booking photo. Thus, the "Attacker" cards got renamed to "Mercs" (Mercenaries).
+
+Heaps of abilities were soon arranged, and I had to quickly set up a wiki guide website for all of them.
+
+[media]
+Concepts9.webp
+
+[background]
+#292A2E
