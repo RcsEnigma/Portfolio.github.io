@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-23T14:18:19.110Z",
+  "generated": "2026-06-23T18:14:22.700Z",
   "tags": [
     "2D",
     "3D",
@@ -231,7 +231,8 @@
       "id": "Gummy",
       "primaryMedia": "Gummy.png",
       "allMedia": [
-        "Gummy.png"
+        "Gummy.png",
+        "Gummy.webp"
       ],
       "type": "image",
       "title": "Gummy Art",

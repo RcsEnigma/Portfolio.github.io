@@ -134,6 +134,10 @@
     img.alt = ""; img.loading = "lazy";
     img.onerror = () => img.replaceWith(makeMissingPlaceholder());
     img.src = mediaPath(slug, item.file);
+    if (!opts.noZoom) {
+      img.style.cursor = "zoom-in";
+      img.onclick = () => openZoom(img.src);
+    }
     return img;
   }
 
@@ -172,6 +176,8 @@
       case "media-only":  section.appendChild(buildMediaOnly(w, slug)); break;
       case "full-bleed":  section.appendChild(buildFullBleed(w, slug)); break;
       case "carousel":    section.appendChild(buildCarouselWidget(w, slug, index)); break;
+      case "trio":         section.appendChild(buildTrio(w, slug)); break;
+      case "title-bar":   section.appendChild(buildTitleBar(w)); break;
       case "text-only":
       default:             section.appendChild(buildTextOnly(w)); break;
     }
@@ -251,6 +257,39 @@
     return wrap;
   }
 
+  // Three images in a horizontal row, equal width, no text
+  function buildTrio(w, slug) {
+    const row = document.createElement("div");
+    row.className = "w-trio";
+    for (let i = 0; i < 3; i++) {
+      const cell = document.createElement("div");
+      cell.className = "w-trio-cell";
+      const m = buildMediaEl(slug, w.media[i] || null, { autoplay: true, manage: "autoplay" });
+      if (m) cell.appendChild(m); else cell.appendChild(makeMissingPlaceholder());
+      row.appendChild(cell);
+    }
+    return row;
+  }
+
+  // Thin centered heading strip — no media, just a title and optional subtitle
+  function buildTitleBar(w) {
+    const bar = document.createElement("div");
+    bar.className = "w-title-bar";
+    if (w.title) {
+      const h = document.createElement("h2");
+      h.className = "w-title-bar-heading";
+      h.textContent = w.title;
+      bar.appendChild(h);
+    }
+    if (w.text) {
+      const p = document.createElement("p");
+      p.className = "w-title-bar-sub";
+      p.textContent = w.text;
+      bar.appendChild(p);
+    }
+    return bar;
+  }
+
   // Carousel: video lifecycle is managed at the WIDGET level, not per-slide --
   // only the active slide's video should ever be playing, and resize/scroll
   // should resume that same active slide rather than every hidden one at once.
@@ -279,7 +318,7 @@
       const slide = document.createElement("div");
       slide.className = "w-carousel-slide" + (i === 0 ? " active" : "");
       // No per-element observer here -- managed by the widget-level observer below
-      const el = buildMediaEl(slug, m, { autoplay: i === 0 });
+      const el = buildMediaEl(slug, m, { autoplay: i === 0, noZoom: true });
       if (el) slide.appendChild(el); else slide.appendChild(makeMissingPlaceholder());
       track.appendChild(slide);
 
@@ -322,6 +361,50 @@
     return String(s || "")
       .replace(/&/g,"&amp;").replace(/</g,"&lt;")
       .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  // ── Image zoom overlay ───────────────────────────────────
+  let _zoomOverlay = null, _zoomContent = null;
+
+  function initZoom() {
+    if (_zoomOverlay) return;
+    _zoomOverlay = document.createElement("div");
+    _zoomOverlay.id = "page-zoom-overlay";
+    _zoomOverlay.onclick = closeZoom;
+
+    const btn = document.createElement("button");
+    btn.id = "page-zoom-close";
+    btn.innerHTML = "&#x2715;";
+    btn.onclick = closeZoom;
+
+    _zoomContent = document.createElement("div");
+    _zoomContent.id = "page-zoom-content";
+    _zoomContent.onclick = e => e.stopPropagation();
+
+    _zoomOverlay.appendChild(btn);
+    _zoomOverlay.appendChild(_zoomContent);
+    document.body.appendChild(_zoomOverlay);
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && _zoomOverlay.classList.contains("open")) closeZoom();
+    });
+  }
+
+  function openZoom(src) {
+    initZoom();
+    _zoomContent.innerHTML = "";
+    const img = document.createElement("img");
+    img.src = src;
+    _zoomContent.appendChild(img);
+    _zoomOverlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeZoom() {
+    _zoomOverlay.classList.remove("open");
+    document.body.style.overflow = "";
+    // Short delay so the fade-out animation plays before clearing
+    setTimeout(() => { if (_zoomContent) _zoomContent.innerHTML = ""; }, 230);
   }
 
   boot();

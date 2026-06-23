@@ -73,10 +73,10 @@ my_project_02.mp4, my_project_03.jpg
 | Field | What it does |
 |---|---|
 | `[title]` | Shown on hover and in the lightbox. Defaults to filename. |
-| `[description]` | Shown in the lightbox info panel. |
-| `[tags]` | Comma or newline separated. Selecting multiple tags shows only works that have **all** selected tags. |
+| `[description]` | Shown in the lightbox info panel. Any `https://` URL typed inline becomes a clickable link automatically — useful for linking to a subpage. |
+| `[tags]` | Comma or newline separated. Selecting multiple tags shows only works that have **all** selected tags (AND logic, not OR). |
 | `[date]` | Any string. Works sort newest-first by this field. |
-| `[link]` | External URL, shown as a link in the lightbox. |
+| `[link]` | External URL, shown as a dedicated link button in the lightbox. |
 | `[featured]` | `true` to include this work in the homepage carousel. |
 | `[extra]` | Extra media files to bundle into this work's gallery. |
 
@@ -170,22 +170,31 @@ some_image.jpg
 `[background]` is optional — omit it and the section blends into the
 site's normal background. Set a hex code to break a section out visually.
 
-### The seven layout types
+### The nine layout types
 
 | `[type]` value | What it looks like | On mobile |
 |---|---|---|
 | `image-left` | Image left, text right | Image stacks above text |
 | `text-left` | Text left, image right | Image stacks above text |
 | `split` | Text centered, one image on each side | Image, text, image — stacked |
-| `media-only` | A single centered, uncropped image or video | Same |
-| `full-bleed` | Edge-to-edge media with a large title overlaid | Same, smaller type |
+| `media-only` | A single centered image or video (with playback controls) | Same |
+| `full-bleed` | Edge-to-edge media, large centered title overlaid | Same, smaller type |
 | `text-only` | Centered text block, no media | Same |
 | `carousel` | Swipeable multi-media block, same UI as the homepage hero | Same |
+| `trio` | Three images in a horizontal row, equal width, no text | Stacks vertically |
+| `title-bar` | Large centered heading strip — quick section divider | Same |
 
-For `split`, `[media]` needs two filenames (comma or newline separated)
-— first becomes the left image, second the right.
+For `split`, `[media]` needs two filenames — first is left, second is right.
 
-For `carousel`, `[media]` takes any number of filenames the same way.
+For `trio`, `[media]` needs three filenames. Images are cropped to a 4:3 ratio.
+
+For `carousel`, `[media]` takes any number of filenames.
+
+### Clicking images to zoom
+
+All images on subpages (in `image-left`, `text-left`, `split`, `media-only`, and `trio`
+widgets) can be clicked to open a full-screen zoom overlay. Click anywhere
+outside the image or press Escape to close it.
 
 ---
 
