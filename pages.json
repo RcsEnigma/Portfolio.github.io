@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-23T05:00:04.124Z",
+  "generated": "2026-06-23T06:20:17.497Z",
   "pages": [
     {
       "slug": "exul-omnium",
@@ -7,7 +7,7 @@
       "label": "Exul Omnium",
       "order": null,
       "featured": true,
-      "carouselMedia": "01_CardDisplay.mp4",
+      "carouselMedia": "CardDisplay.mp4",
       "carouselType": "video",
       "carouselCaption": "Chance-based physical TCG",
       "widgets": [
@@ -26,7 +26,7 @@
         {
           "type": "split",
           "title": "Origin",
-          "text": "Exul Omnium started as a simple desire to make an original trading card game. I discovered a website called Artbreeder in 2020 which hosted some of the earliest stable diffusion models. It couldn't recieve prompts, and instead had hardcoded 'types' of images that could be formed. There were four types: full body figures, landscapes, abstract 'album art', and headshots. Of those options, I found the first two the most workable and formed my game concept from only two types of cards.",
+          "text": "Exul Omnium started as a simple desire to make an original trading card game. I discovered a website called Artbreeder in 2020 which hosted some of the earliest stable diffusion models. It couldn't recieve prompts, and instead had hardcoded 'types' of images that could be formed. There were four types: full body figures, landscapes, abstract 'album art', and headshots. Of those options, I found the first two the most workable and formed my game concept with only two types of cards.",
           "media": [
             {
               "file": "Concepts.PNG",
@@ -57,7 +57,7 @@
               "type": "image"
             }
           ],
-          "background": "#18191C"
+          "background": "#060708"
         },
         {
           "type": "text-left",
@@ -88,7 +88,7 @@
           "title": "REBIRTH",
           "text": "",
           "media": [],
-          "background": "#18191C"
+          "background": "#CCC7BC"
         },
         {
           "type": "image-left",
