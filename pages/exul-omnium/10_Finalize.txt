@@ -1,0 +1,18 @@
+[type]
+text-left
+
+[title]
+Finalization
+
+[text]
+With over 100 cards made with the new format, playtests started up again. The new format was much more fun and understandable. A microculture arose where players would let their opponent make important chance rolls for maximum fairness. The only caveat with this system was that it became difficult to track all the relevant perk abilities in play throughout combat. This issue pointed to the reality that this system would be more conducive digitally, where a computer could keep track of all the abilities for you; but that would raise it's own concerns regarding the magnitude of chance-based mechanics and the reality of randomly-generated values. Side note: Split lands provide a consistent 2 Merc slots, but variants exist where they player rolls an initial D4 for the land capacity. Statistically, a 1-4 chance is better than a flat 2 -- but the 25% instances where the player would roll 1, they found the rare occurance so debilitating to their game they actually PREFERRED the concrete certaintly of a flat 2. This reinforced to me how much players value certainty in a game built around RNG, even when rolling the dice offered better returns. 
+
+As the card count grew, I started reaching out to real artists -- a mixture of commissions and directly buying their premade artwork. These cards were significantly more appealing than the generated ones but, between cost and speed, generating the images was much, much quicker. So I did both.
+
+Now, with over 300 cards, I looked to replicate some more facets of popular TCGs: Holographic cards. My manufacturers were capable of producing this, and the look was too enticing to pass up. I created a secondary graphical look which I never properly named--Glass or Elite--which involved a transparent glass-like border which looked very sleek and showed off more of the artwork behind it. Previously white elements were recolored gold. Assuredly a gem in any deck. 
+
+[media]
+Concepts6.png
+
+[background]
+#292A2E

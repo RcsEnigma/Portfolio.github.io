@@ -1,0 +1,16 @@
+[type]
+text-only
+
+[title]
+So where is Exul Omnium now?
+
+[text]
+As the public opinions of AI-generated art developed sour, I foresaw incredibly poor reception with the project as a whole; my original outlook was that the imagery wasn't necssary at all--not for any TCG for that matter--and had no bearing on actual gameplay. Imagery brings in a lot of visual appeal, and with Exul Omnium's graphical style showing off even more of the artwork than usual, to say it would be a bad look is an understatement.
+
+I understand the grievances and, while the entire project is essentially ready for deployment, the game is stuck in a limbo until every single card could be replaced with human-made artwork (which is not a high personal priority of mine). So it sits, collecting dust, waiting...
+
+[media]
+ShinyDesign.gif
+
+[background]
+#CCC7BC

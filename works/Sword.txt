@@ -7,7 +7,7 @@ A sword that can cut through any material. The idea here is the orange strip "de
 I also made an animation depicting the effect with some SFX.
 
 [tags]
-3D, Blender, Trepidation, Animation
+3D, Blender, Trepidation
 
 [date]
 2023-12

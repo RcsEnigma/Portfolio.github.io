@@ -5,4 +5,4 @@ trio
 Concepts9.webp, Concepts8.PNG, Concepts11.PNG
 
 [background]
-#060708
+#292A2E
