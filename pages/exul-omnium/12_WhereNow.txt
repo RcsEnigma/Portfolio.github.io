@@ -1,5 +1,5 @@
 [type]
-text-only
+image-left
 
 [title]
 So where is Exul Omnium now?

@@ -15,4 +15,4 @@ Now, with over 300 cards, I looked to replicate some more facets of popular TCGs
 Concepts6.png
 
 [background]
-#292A2E
+#18191C
