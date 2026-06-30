@@ -1,6 +1,6 @@
 /* ================================================================
    page-widgets.css
-   Layout rules for the 7 widget types used on custom subpages.
+   Layout rules for the 9 widget types used on custom subpages.
    ================================================================ */
 
 .widget { padding: 4rem 2.5rem; }
@@ -76,20 +76,13 @@
 .w-text-only { max-width: 720px; margin: 0 auto; text-align: center; }
 
 /* ── carousel widget ──────────────────────────────────────── */
+/* Core film-strip positioning (.w-carousel-stage, .w-carousel-item,
+   .w-carousel-controls, .w-carousel-btn) is injected by page-engine.js
+   at boot rather than living here -- keeps the carousel immune to
+   stale cached copies of this file. Only wrapper/caption/dots below. */
 .w-carousel { max-width: 1200px; margin: 0 auto; }
 .w-carousel-caption { margin-bottom: 1.5rem; text-align: center; }
-.w-carousel-track {
-  position: relative; width: 100%; aspect-ratio: 16 / 9;
-  border-radius: var(--radius); overflow: hidden; background: #000;
-}
-.w-carousel-slide {
-  position: absolute; inset: 0; opacity: 0; transition: opacity 0.9s ease;
-}
-.w-carousel-slide.active { opacity: 1; }
-.w-carousel-slide img, .w-carousel-slide video {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
-.w-carousel-dots { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+.w-carousel-dots { display: flex; justify-content: center; gap: 0.5rem; }
 .w-carousel-dot {
   width: 20px; height: 2px; background: var(--border); cursor: pointer;
   transition: background 0.3s, width 0.3s;
@@ -114,13 +107,14 @@
 }
 .w-trio-cell img:hover { transform: scale(1.03); }
 
-/* ── title-bar: thin centered heading strip — v3 ─────────── */
+/* ── title-bar: thin centered heading strip ──────────────── */
+/* Font-size is injected by page-engine.js as a critical style (same
+   cache-proofing reason as the carousel) -- only structural rules here. */
 .widget[data-type="title-bar"] { padding: 2rem 2.5rem; }
 .w-title-bar { max-width: 1200px; margin: 0 auto; text-align: center; }
 .w-title-bar-heading {
-  font-family: var(--mono); font-size: clamp(3rem, 7vw, 5rem);
-  font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-  color: var(--text); line-height: 1.05;
+  font-family: var(--mono); font-weight: 700; text-transform: uppercase;
+  color: var(--text);
 }
 .widget-on-light .w-title-bar-heading { color: #1a1714; }
 .w-title-bar-sub {
@@ -165,5 +159,6 @@
   .w-fullbleed { min-height: 50vh; }
   .w-fullbleed-caption { padding: 1.6rem; }
 
-  .w-carousel-track { aspect-ratio: 4 / 3; }
+  .w-carousel-stage { height: clamp(220px, 50vh, 360px); }
+  .w-carousel-controls { gap: 0.5rem; }
 }
