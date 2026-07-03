@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-30T19:48:24.132Z",
+  "generated": "2026-07-03T01:33:36.155Z",
   "tags": [
     "2D",
     "3D",
@@ -394,6 +394,27 @@
       "gridSpan": "normal"
     },
     {
+      "id": "Frozen Aperture",
+      "primaryMedia": "Frozen Aperture_01.png",
+      "allMedia": [
+        "Frozen Aperture_01.png",
+        "Frozen Aperture_02.png",
+        "Frozen Aperture_03.png"
+      ],
+      "type": "image",
+      "title": "Frozen Aperture",
+      "description": "Depicting a concept I had for a while; what Aperture Science from Value's Portal franchise would look like during the wintertime. Frigid, icy, industrial spaces deep underground.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2023-12",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide"
+    },
+    {
       "id": "Sword",
       "primaryMedia": "Sword_01.png",
       "allMedia": [
@@ -520,6 +541,136 @@
       "date": "2023-04",
       "link": "",
       "aspectRatio": 1.778,
+      "gridSpan": "wide"
+    },
+    {
+      "id": "AbstractSeven",
+      "primaryMedia": "AbstractSeven.mkv",
+      "allMedia": [
+        "AbstractSeven.mkv"
+      ],
+      "type": "video",
+      "title": "AbstractCharge",
+      "description": "My thought with this one was an audio visualizer, The text would have the song title. I don't remember what this placeholder text says now. I don't speak Japanese. My inspiration comes from XS Project's music visualizers in some of his videos (https://www.youtube.com/watch?v=cZYqe9Rv-U4).",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2022-09",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide"
+    },
+    {
+      "id": "AbstractFive",
+      "primaryMedia": "AbstractFive.mkv",
+      "allMedia": [
+        "AbstractFive.mkv"
+      ],
+      "type": "video",
+      "title": "AbstractGlass",
+      "description": "Insipred by rave visuals. Dizzying shards of glass. \n\nSeamless",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2022-04",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide"
+    },
+    {
+      "id": "AbstractFour",
+      "primaryMedia": "AbstractFour.mp4",
+      "allMedia": [
+        "AbstractFour.mp4"
+      ],
+      "type": "video",
+      "title": "AbstractCrackedSkull",
+      "description": "Insipred by rave visuals. Works in tandem with the previous render, this one would appear when the leitmotif comes back gnarlier.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2022-02",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide"
+    },
+    {
+      "id": "AbstractOne",
+      "primaryMedia": "AbstractOne.mkv",
+      "allMedia": [
+        "AbstractOne.mkv"
+      ],
+      "type": "video",
+      "title": "AbstractCharge",
+      "description": "Insipred by rave visuals. This one would be used during the buildup to a drop.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2022-02",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide"
+    },
+    {
+      "id": "AbstractSix",
+      "primaryMedia": "AbstractSix.mkv",
+      "allMedia": [
+        "AbstractSix.mkv"
+      ],
+      "type": "video",
+      "title": "AbstractSix",
+      "description": "",
+      "tags": [],
+      "featured": false,
+      "date": "",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide"
+    },
+    {
+      "id": "AbstractThree",
+      "primaryMedia": "AbstractThree.mp4",
+      "allMedia": [
+        "AbstractThree.mp4"
+      ],
+      "type": "video",
+      "title": "AbstractSkull",
+      "description": "Insipred by rave visuals. A little morbid, but I foresee tessellation with some rave song themes.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2022-02",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide"
+    },
+    {
+      "id": "AbstractTwo",
+      "primaryMedia": "AbstractTwo.mkv",
+      "allMedia": [
+        "AbstractTwo.mkv"
+      ],
+      "type": "video",
+      "title": "AbstractCrackedOrb",
+      "description": "Insipred by rave visuals.\n\nSeamless",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2022-02",
+      "link": "",
+      "aspectRatio": null,
       "gridSpan": "wide"
     }
   ]

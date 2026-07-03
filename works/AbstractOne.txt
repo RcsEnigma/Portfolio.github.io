@@ -1,0 +1,11 @@
+[title]
+AbstractCharge
+
+[description]
+Insipred by rave visuals. This one would be used during the buildup to a drop.
+
+[tags]
+3D, Blender
+
+[date]
+2022-02

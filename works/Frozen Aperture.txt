@@ -1,0 +1,11 @@
+[title]
+Frozen Aperture
+
+[description]
+Depicting a concept I had for a while; what Aperture Science from Value's Portal franchise would look like during the wintertime. Frigid, icy, industrial spaces deep underground.
+
+[tags]
+3D, Blender
+
+[date]
+2023-12

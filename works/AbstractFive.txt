@@ -1,0 +1,13 @@
+[title]
+AbstractGlass
+
+[description]
+Insipred by rave visuals. Dizzying shards of glass. 
+
+Seamless
+
+[tags]
+3D, Blender
+
+[date]
+2022-04
