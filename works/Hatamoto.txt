@@ -1,0 +1,11 @@
+[title]
+Hatamoto Cover
+
+[description]
+Found a free model while browsing sketchfab. Decided to try out a rain theme, going for photorealism.
+
+[tags]
+2D, 3D, Blender, Graphic Design, Multimodal
+
+[date]
+2026-07

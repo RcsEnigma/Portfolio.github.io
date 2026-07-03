@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-03T01:33:36.155Z",
+  "generated": "2026-07-03T10:51:32.211Z",
   "tags": [
     "2D",
     "3D",
@@ -16,6 +16,30 @@
     "Trepidation"
   ],
   "works": [
+    {
+      "id": "Hatamoto",
+      "primaryMedia": "Hatamoto_01.png",
+      "allMedia": [
+        "Hatamoto_01.png",
+        "Hatamoto_02.png",
+        "Hatamoto_03.webp"
+      ],
+      "type": "image",
+      "title": "Hatamoto Cover",
+      "description": "Found a free model while browsing sketchfab. Decided to try out a rain theme, going for photorealism.",
+      "tags": [
+        "2D",
+        "3D",
+        "Blender",
+        "Graphic Design",
+        "Multimodal"
+      ],
+      "featured": false,
+      "date": "2026-07",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall"
+    },
     {
       "id": "PosterOne",
       "primaryMedia": "PosterOne_01.png",
@@ -563,6 +587,25 @@
       "gridSpan": "wide"
     },
     {
+      "id": "AbstractSix",
+      "primaryMedia": "AbstractSix.mkv",
+      "allMedia": [
+        "AbstractSix.mkv"
+      ],
+      "type": "video",
+      "title": "AbstractWeapons",
+      "description": "Mesmerising seamless swirl of weapons. Inspired by Voician's visuals on one of his megamix videos (https://www.youtube.com/watch?v=P6vC0KazSX4).",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2022-06",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide"
+    },
+    {
       "id": "AbstractFive",
       "primaryMedia": "AbstractFive.mkv",
       "allMedia": [
@@ -615,22 +658,6 @@
       ],
       "featured": false,
       "date": "2022-02",
-      "link": "",
-      "aspectRatio": null,
-      "gridSpan": "wide"
-    },
-    {
-      "id": "AbstractSix",
-      "primaryMedia": "AbstractSix.mkv",
-      "allMedia": [
-        "AbstractSix.mkv"
-      ],
-      "type": "video",
-      "title": "AbstractSix",
-      "description": "",
-      "tags": [],
-      "featured": false,
-      "date": "",
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide"
