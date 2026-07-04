@@ -169,8 +169,19 @@
   function buildFooter() {
     document.getElementById("footer-root").innerHTML = `
       <footer>
-        <a class="nav-link" href="/">&larr; Back to Work</a>
-        <span>AJ Ambrozic</span>
+        <a href="/" style="
+          font-family:var(--mono);font-size:0.72rem;letter-spacing:0.12em;
+          text-transform:uppercase;text-decoration:none;
+          color:var(--muted);border:1px solid var(--border);
+          padding:0.4rem 0.9rem;border-radius:var(--radius);
+          transition:color 0.2s,border-color 0.2s;
+        " onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--muted)'"
+           onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">
+          &larr; Back to Work
+        </a>
+        <span style="font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;">
+          AJ Ambrozic
+        </span>
       </footer>`;
   }
 
