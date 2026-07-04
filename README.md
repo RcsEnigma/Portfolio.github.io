@@ -18,10 +18,10 @@ portfolio/
 ├── manifest.json            auto-generated — gallery data
 ├── pages.json                auto-generated — subpage data
 ├── .gitattributes
-├── works/                    your gallery pieces live here
+├── works/                    gallery pieces
 │   ├── my_project.jpg
 │   └── my_project.txt
-├── pages/                    your custom subpages live here
+├── pages/                    custom subpages
 │   └── studies/
 │       ├── _page.txt
 │       ├── 01_intro.txt
