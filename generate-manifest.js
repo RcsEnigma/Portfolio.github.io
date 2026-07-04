@@ -3,29 +3,26 @@
  * Run after adding files to /works or /pages:
  *   node generate-manifest.js
  *
- * Builds manifest.json (gallery works) and pages.json (custom subpages),
- * and auto-writes/removes tiny stub index.html files so each page in
- * /pages gets a real clean URL like yoursite.com/studies/
+ * Builds manifest.json, pages.json, and writes/removes stub index.html
+ * files that give each subpage a real clean URL.
+ * Stamps a version number on every stylesheet/script link in each stub
+ * so stale CDN-cached copies are never served after a push.
  */
 
 const fs   = require("fs");
 const path = require("path");
 
-const WORKS_DIR    = path.join(__dirname, "works");
-const PAGES_DIR     = path.join(__dirname, "pages");
-const MANIFEST_OUT  = path.join(__dirname, "manifest.json");
-const PAGES_OUT      = path.join(__dirname, "pages.json");
-const STUB_MARKER    = "AUTO-GENERATED-PAGE-STUB";
+const WORKS_DIR   = path.join(__dirname, "works");
+const PAGES_DIR   = path.join(__dirname, "pages");
+const MANIFEST_OUT = path.join(__dirname, "manifest.json");
+const PAGES_OUT   = path.join(__dirname, "pages.json");
+const STUB_MARKER = "AUTO-GENERATED-PAGE-STUB";
 
 const IMAGE_EXT = new Set([".jpg",".jpeg",".png",".gif",".webp",".avif",".svg"]);
 const VIDEO_EXT = new Set([".mp4",".webm",".mov",".ogg",".mkv"]);
 const MEDIA_EXT = new Set([...IMAGE_EXT, ...VIDEO_EXT]);
 
-// ════════════════════════════════════════════════════════════
-//  SHARED HELPERS
-// ════════════════════════════════════════════════════════════
-
-// Generic [section] block parser — returns { key: "trimmed value" }
+// ── Generic [section] block parser ───────────────────────────
 function parseBlocks(raw) {
   const out = {};
   const lines = raw.replace(/\r\n/g,"\n").split("\n");
@@ -56,224 +53,200 @@ function slugify(name) {
     .replace(/^-+|-+$/g, "");
 }
 
-// ════════════════════════════════════════════════════════════
-//  WORKS (gallery) — manifest.json
-// ════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  WORKS — manifest.json
+// ══════════════════════════════════════════════════════════════
 
 function parseWorkTxt(raw) {
   const b = parseBlocks(raw);
   return {
-    title:       b.title || "",
-    description: b.description || "",
-    tags:        (b.tags || "").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
-    featured:    /^(true|yes|1)$/i.test(b.featured || ""),
-    extraMedia:  (b.extra || "").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
-    date:        b.date || "",
-    link:        b.link || "",
+    title:      b.title || "",
+    description:b.description || "",
+    tags:       (b.tags||"").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
+    featured:   /^(true|yes|1)$/i.test(b.featured||""),
+    extraMedia: (b.extra||"").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
+    date:       b.date||"",
+    link:       b.link||"",
   };
 }
 
-// Read image dimensions natively — PNG, JPEG, GIF, WebP
 function readDimensions(filepath) {
   const ext = path.extname(filepath).toLowerCase();
   if (!IMAGE_EXT.has(ext) || ext === ".svg" || ext === ".avif") return null;
   try {
-    const size = (ext === ".jpg" || ext === ".jpeg") ? 65536 : 128;
+    const size = (ext===".jpg"||ext===".jpeg") ? 65536 : 128;
     const buf  = Buffer.alloc(size);
-    const fd   = fs.openSync(filepath, "r");
+    const fd   = fs.openSync(filepath,"r");
     const read = fs.readSync(fd, buf, 0, size, 0);
     fs.closeSync(fd);
     const d = buf.slice(0, read);
-
-    if (ext === ".png" && d[0]===0x89 && d[1]===0x50 && d.length >= 24)
-      return { w: d.readUInt32BE(16), h: d.readUInt32BE(20) };
-
-    if (ext === ".gif" && d[0]===0x47 && d[1]===0x49 && d.length >= 10)
-      return { w: d.readUInt16LE(6), h: d.readUInt16LE(8) };
-
-    if (ext === ".jpg" || ext === ".jpeg") {
-      let i = 2;
-      while (i < d.length - 10) {
-        if (d[i] !== 0xFF) break;
-        const m = d[i+1];
-        const isSOF = (m>=0xC0&&m<=0xC3)||(m>=0xC5&&m<=0xC7)||
-                      (m>=0xC9&&m<=0xCB)||(m>=0xCD&&m<=0xCF);
-        if (isSOF) return { w: d.readUInt16BE(i+7), h: d.readUInt16BE(i+5) };
-        const segLen = d.readUInt16BE(i+2);
-        if (segLen < 2) break;
-        i += 2 + segLen;
+    if (ext===".png" && d[0]===0x89 && d[1]===0x50 && d.length>=24)
+      return { w:d.readUInt32BE(16), h:d.readUInt32BE(20) };
+    if (ext===".gif" && d[0]===0x47 && d[1]===0x49 && d.length>=10)
+      return { w:d.readUInt16LE(6), h:d.readUInt16LE(8) };
+    if (ext===".jpg"||ext===".jpeg") {
+      let i=2;
+      while (i<d.length-10) {
+        if (d[i]!==0xFF) break;
+        const m=d[i+1];
+        const isSOF=(m>=0xC0&&m<=0xC3)||(m>=0xC5&&m<=0xC7)||(m>=0xC9&&m<=0xCB)||(m>=0xCD&&m<=0xCF);
+        if (isSOF) return { w:d.readUInt16BE(i+7), h:d.readUInt16BE(i+5) };
+        const segLen=d.readUInt16BE(i+2);
+        if (segLen<2) break;
+        i+=2+segLen;
       }
     }
-
-    if (ext === ".webp" && d.toString("ascii",0,4)==="RIFF" && d.toString("ascii",8,12)==="WEBP") {
-      const chunk = d.toString("ascii",12,16);
-      if (chunk==="VP8 " && d.length>=30)
-        return { w:(d[26]|d[27]<<8)&0x3FFF, h:(d[28]|d[29]<<8)&0x3FFF };
-      if (chunk==="VP8L" && d.length>=25) {
-        const bits = d.readUInt32LE(21);
-        return { w:(bits&0x3FFF)+1, h:((bits>>14)&0x3FFF)+1 };
-      }
-      if (chunk==="VP8X" && d.length>=34)
-        return { w:1+(d[24]|d[25]<<8|d[26]<<16), h:1+(d[27]|d[28]<<8|d[29]<<16) };
+    if (ext===".webp" && d.toString("ascii",0,4)==="RIFF" && d.toString("ascii",8,12)==="WEBP") {
+      const chunk=d.toString("ascii",12,16);
+      if (chunk==="VP8 "&&d.length>=30) return { w:(d[26]|d[27]<<8)&0x3FFF, h:(d[28]|d[29]<<8)&0x3FFF };
+      if (chunk==="VP8L"&&d.length>=25) { const bits=d.readUInt32LE(21); return { w:(bits&0x3FFF)+1, h:((bits>>14)&0x3FFF)+1 }; }
+      if (chunk==="VP8X"&&d.length>=34) return { w:1+(d[24]|d[25]<<8|d[26]<<16), h:1+(d[27]|d[28]<<8|d[29]<<16) };
     }
   } catch(_) {}
   return null;
 }
 
 function deriveSpan(ar, type) {
-  if (!ar) return type === "video" ? "wide" : "normal";
-  if (ar > 2.2)  return "ultrawide";
-  if (ar > 1.45) return "wide";
-  if (ar < 0.85) return "tall";
+  if (!ar) return type==="video" ? "wide" : "normal";
+  if (ar>2.2)  return "ultrawide";
+  if (ar>1.45) return "wide";
+  if (ar<0.85) return "tall";
   return "normal";
 }
 
 function buildWorks() {
-  if (!fs.existsSync(WORKS_DIR)) {
-    console.warn("Warning: /works not found, creating.");
-    fs.mkdirSync(WORKS_DIR);
-  }
-
+  if (!fs.existsSync(WORKS_DIR)) { fs.mkdirSync(WORKS_DIR); }
   const files = fs.readdirSync(WORKS_DIR).filter(f => fs.statSync(path.join(WORKS_DIR,f)).isFile());
-  const txtMap = {}, groups = {};
+  const txtMap={}, groups={};
 
   for (const f of files) {
     const origExt = path.extname(f);
     const ext     = origExt.toLowerCase();
-    const base    = path.basename(f, origExt); // strip with ORIGINAL case so 'file.PNG' -> 'file'
-    if (ext === ".txt") { txtMap[base] = fs.readFileSync(path.join(WORKS_DIR,f),"utf8"); continue; }
+    const base    = path.basename(f, origExt);
+    if (ext===".txt") { txtMap[base]=fs.readFileSync(path.join(WORKS_DIR,f),"utf8"); continue; }
     if (!MEDIA_EXT.has(ext)) continue;
     const canon = canonical(base);
-    (groups[canon] = groups[canon] || []).push(f);
+    (groups[canon]=groups[canon]||[]).push(f);
   }
 
   const entries = [];
   for (const [canon, mediaFiles] of Object.entries(groups)) {
-    const txtRaw = txtMap[canon] ?? mediaFiles.map(f => txtMap[path.basename(f,path.extname(f))]).find(Boolean) ?? null;
+    const txtRaw = txtMap[canon] ?? mediaFiles.map(f=>txtMap[path.basename(f,path.extname(f))]).find(Boolean) ?? null;
     const meta = txtRaw ? parseWorkTxt(txtRaw)
       : { title:canon, description:"", tags:[], featured:false, extraMedia:[], date:"", link:"" };
-
-    const sorted = [...mediaFiles].sort((a,b) => {
-      const na = parseInt(path.basename(a,path.extname(a)).match(/(\d+)$/)?.[1] ?? "0");
-      const nb = parseInt(path.basename(b,path.extname(b)).match(/(\d+)$/)?.[1] ?? "0");
-      return na - nb;
+    const sorted = [...mediaFiles].sort((a,b)=>{
+      const na=parseInt(path.basename(a,path.extname(a)).match(/(\d+)$/)?.[1]??"0");
+      const nb=parseInt(path.basename(b,path.extname(b)).match(/(\d+)$/)?.[1]??"0");
+      return na-nb;
     });
-
-    const allMedia = [...sorted, ...meta.extraMedia.filter(m => !sorted.includes(m))];
+    const allMedia = [...sorted, ...meta.extraMedia.filter(m=>!sorted.includes(m))];
     const primary  = allMedia[0];
     const type     = mediaType(primary);
     const dims     = readDimensions(path.join(WORKS_DIR, primary));
-    const ar       = dims ? parseFloat((dims.w / dims.h).toFixed(3)) : null;
-
+    const ar       = dims ? parseFloat((dims.w/dims.h).toFixed(3)) : null;
     entries.push({
-      id: canon, primaryMedia: primary, allMedia, type,
-      title: meta.title || canon, description: meta.description,
-      tags: meta.tags, featured: meta.featured, date: meta.date, link: meta.link,
-      aspectRatio: ar, gridSpan: deriveSpan(ar, type),
+      id:canon, primaryMedia:primary, allMedia, type,
+      title:meta.title||canon, description:meta.description,
+      tags:meta.tags, featured:meta.featured, date:meta.date, link:meta.link,
+      aspectRatio:ar, gridSpan:deriveSpan(ar,type),
     });
   }
 
-  entries.sort((a,b) => {
-    if (a.date && b.date) return b.date.localeCompare(a.date);
+  entries.sort((a,b)=>{
+    if (a.date&&b.date) return b.date.localeCompare(a.date);
     return a.title.localeCompare(b.title);
   });
 
-  const allTags = [...new Set(entries.flatMap(e => e.tags))].sort();
-  return { generated: new Date().toISOString(), tags: allTags, works: entries };
+  const allTags = [...new Set(entries.flatMap(e=>e.tags))].sort();
+  return { generated:new Date().toISOString(), tags:allTags, works:entries };
 }
 
-// ════════════════════════════════════════════════════════════
-//  PAGES (custom subpages) — pages.json + auto stub index.html
-// ════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  PAGES — pages.json + stub index.html files
+// ══════════════════════════════════════════════════════════════
 
 const VALID_WIDGET_TYPES = new Set([
-  "image-left","text-left","split","media-only","full-bleed","text-only","carousel",
-  "trio","title-bar"
+  "image-left","text-left","split","media-only","full-bleed",
+  "text-only","carousel","trio","title-bar"
 ]);
 
 function parsePageMeta(raw, folderName) {
   const b = parseBlocks(raw);
   return {
     label:           b.label || folderName,
-    order:           b.order ? parseInt(b.order, 10) : null,
-    featured:        /^(true|yes|1)$/i.test(b.featured || ""),
-    carouselMedia:   b.carousel_media || null,
-    carouselCaption: b.carousel_caption || "",
+    order:           b.order ? parseInt(b.order,10) : null,
+    featured:        /^(true|yes|1)$/i.test(b.featured||""),
+    carouselMedia:   b.carousel_media||null,
+    carouselCaption: b.carousel_caption||"",
   };
 }
 
 function parseWidget(raw) {
   const b = parseBlocks(raw);
-  const type = (b.type || "text-only").toLowerCase().trim();
-  const mediaList = (b.media || "").split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  const type = (b.type||"text-only").toLowerCase().trim();
+  const mediaList = (b.media||"").split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
   return {
     type: VALID_WIDGET_TYPES.has(type) ? type : "text-only",
-    title: b.title || "",
-    text: b.text || "",
+    title: b.title||"",
+    text:  b.text||"",
     media: mediaList,
-    background: b.background || null,
+    background: b.background||null,
   };
 }
 
 function buildPages() {
   if (!fs.existsSync(PAGES_DIR)) return [];
-
-  const pageFolders = fs.readdirSync(PAGES_DIR).filter(f =>
-    fs.statSync(path.join(PAGES_DIR, f)).isDirectory());
+  const pageFolders = fs.readdirSync(PAGES_DIR)
+    .filter(f=>fs.statSync(path.join(PAGES_DIR,f)).isDirectory());
 
   const pages = [];
-
   for (const folderName of pageFolders) {
     const pageDir = path.join(PAGES_DIR, folderName);
-    const slug = slugify(folderName);
+    const slug    = slugify(folderName);
     if (!slug) continue;
 
     const metaPath = path.join(pageDir, "_page.txt");
-    const metaRaw  = fs.existsSync(metaPath) ? fs.readFileSync(metaPath, "utf8") : "";
+    const metaRaw  = fs.existsSync(metaPath) ? fs.readFileSync(metaPath,"utf8") : "";
     const meta     = parsePageMeta(metaRaw, folderName);
 
-    const allFiles = fs.readdirSync(pageDir).filter(f =>
-      fs.statSync(path.join(pageDir, f)).isFile());
-
+    const allFiles = fs.readdirSync(pageDir).filter(f=>fs.statSync(path.join(pageDir,f)).isFile());
     const widgetFiles = allFiles
-      .filter(f => path.extname(f).toLowerCase() === ".txt" && f.toLowerCase() !== "_page.txt")
-      .sort((a,b) => {
-        const na = parseInt(a.match(/^(\d+)/)?.[1] ?? "999999", 10);
-        const nb = parseInt(b.match(/^(\d+)/)?.[1] ?? "999999", 10);
-        if (na !== nb) return na - nb;
+      .filter(f=>path.extname(f).toLowerCase()===".txt" && f.toLowerCase()!=="_page.txt")
+      .sort((a,b)=>{
+        const na=parseInt(a.match(/^(\d+)/)?.[1]??"999999",10);
+        const nb=parseInt(b.match(/^(\d+)/)?.[1]??"999999",10);
+        if (na!==nb) return na-nb;
         return a.localeCompare(b);
       });
 
     const widgets = widgetFiles.map(f => {
-      const raw = fs.readFileSync(path.join(pageDir, f), "utf8");
-      const w = parseWidget(raw);
-      w.media = w.media.map(file => ({ file, type: mediaType(file) }));
+      const raw = fs.readFileSync(path.join(pageDir,f),"utf8");
+      const w   = parseWidget(raw);
+      w.media   = w.media.map(file=>({ file, type:mediaType(file) }));
       return w;
     });
 
-    // Resolve carousel preview: explicit field, else first widget's first media file
     let carouselFile = meta.carouselMedia;
     if (!carouselFile) {
-      const firstWithMedia = widgets.find(w => w.media.length > 0);
+      const firstWithMedia = widgets.find(w=>w.media.length>0);
       if (firstWithMedia) carouselFile = firstWithMedia.media[0].file;
     }
     const carouselType = carouselFile ? mediaType(carouselFile) : null;
 
     pages.push({
-      slug, folder: folderName,
-      label: meta.label, order: meta.order, featured: meta.featured,
-      carouselMedia: carouselFile, carouselType, carouselCaption: meta.carouselCaption,
+      slug, folder:folderName,
+      label:meta.label, order:meta.order, featured:meta.featured,
+      carouselMedia:carouselFile, carouselType, carouselCaption:meta.carouselCaption,
       widgets,
     });
   }
 
-  pages.sort((a,b) => {
-    if (a.order !== null && b.order !== null) return a.order - b.order;
-    if (a.order !== null) return -1;
-    if (b.order !== null) return 1;
+  pages.sort((a,b)=>{
+    if (a.order!==null&&b.order!==null) return a.order-b.order;
+    if (a.order!==null) return -1;
+    if (b.order!==null) return 1;
     return a.label.localeCompare(b.label);
   });
-
   return pages;
 }
 
@@ -291,7 +264,7 @@ function stubTemplate(slug, label, v) {
 <link rel="stylesheet" href="/page-widgets.css?v=${v}">
 </head>
 <body>
-<!-- ${STUB_MARKER}: ${slug} -- do not edit this file. Edit /pages/${slug}/ then re-run generate-manifest.js -->
+<!-- ${STUB_MARKER}: ${slug} -- do not edit. Edit /pages/${slug}/ and re-run generate-manifest.js -->
 <div id="header-root"></div>
 <main id="page-root"></main>
 <div id="footer-root"></div>
@@ -303,70 +276,57 @@ function stubTemplate(slug, label, v) {
 }
 
 function writeStubs(pages) {
-  const validSlugs = new Set(pages.map(p => p.slug));
-  // One version stamp per run -- every page gets the same value, and it
-  // changes every time you run this script, which is exactly when you'd
-  // want browsers/CDNs to stop serving cached theme.css / page-widgets.css
-  // / page-engine.js. This is what actually fixes "I changed the file but
-  // the site still looks old" -- no more hoping a byte-count change was
-  // enough to trip cache invalidation on its own.
+  const validSlugs = new Set(pages.map(p=>p.slug));
+  // Version stamp changes on every run, forcing browsers/CDNs to fetch
+  // fresh copies of theme.css, page-widgets.css, and page-engine.js.
   const v = Date.now();
 
   for (const p of pages) {
     const dir = path.join(__dirname, p.slug);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, "index.html"), stubTemplate(p.slug, p.label, v));
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir,{recursive:true});
+    fs.writeFileSync(path.join(dir,"index.html"), stubTemplate(p.slug, p.label, v));
   }
 
-  // Remove stale stubs — only touch folders WE generated (marker check)
-  const rootEntries = fs.readdirSync(__dirname).filter(f => {
-    try { return fs.statSync(path.join(__dirname, f)).isDirectory(); }
-    catch(_) { return false; }
+  // Remove stale stubs (only stubs WE generated — checked via marker string)
+  const rootEntries = fs.readdirSync(__dirname).filter(f=>{
+    try { return fs.statSync(path.join(__dirname,f)).isDirectory(); } catch(_) { return false; }
   });
-
   for (const entry of rootEntries) {
     if (validSlugs.has(entry)) continue;
     const indexPath = path.join(__dirname, entry, "index.html");
     if (!fs.existsSync(indexPath)) continue;
-    let content = "";
-    try { content = fs.readFileSync(indexPath, "utf8"); } catch(_) { continue; }
+    let content="";
+    try { content=fs.readFileSync(indexPath,"utf8"); } catch(_) { continue; }
     if (content.includes(STUB_MARKER)) {
       fs.unlinkSync(indexPath);
-      const remaining = fs.readdirSync(path.join(__dirname, entry));
-      if (remaining.length === 0) fs.rmdirSync(path.join(__dirname, entry));
-      console.log("  removed stale page stub: /" + entry + "/");
+      const remaining=fs.readdirSync(path.join(__dirname,entry));
+      if (remaining.length===0) fs.rmdirSync(path.join(__dirname,entry));
+      console.log("  removed stale stub: /" + entry + "/");
     }
   }
 }
 
-// ════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 //  MAIN
-// ════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 function build() {
-  // Works
   const manifest = buildWorks();
-  fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifest, null, 2));
-
-  console.log("\nmanifest.json written: " + manifest.works.length + " work(s), " + manifest.tags.length + " tag(s)\n");
+  fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifest,null,2));
+  console.log("\nmanifest.json: " + manifest.works.length + " work(s), " + manifest.tags.length + " tag(s)\n");
   for (const e of manifest.works) {
     const span = e.gridSpan.padEnd(10);
-    const ar   = e.aspectRatio ? e.aspectRatio + " ar" : "no dims";
-    console.log("  " + span + " " + e.title + "  (" + ar + ", " + e.allMedia.length + " file(s))");
+    const ar   = e.aspectRatio ? e.aspectRatio+" ar" : "no dims";
+    console.log("  "+span+" "+e.title+"  ("+ar+", "+e.allMedia.length+" file(s))");
   }
 
-  // Pages
   const pages = buildPages();
-  fs.writeFileSync(PAGES_OUT, JSON.stringify({ generated: new Date().toISOString(), pages }, null, 2));
+  fs.writeFileSync(PAGES_OUT, JSON.stringify({generated:new Date().toISOString(),pages},null,2));
   writeStubs(pages);
+  console.log("\npages.json: " + pages.length + " page(s)\n");
+  for (const p of pages)
+    console.log("  /"+p.slug+"/  \""+p.label+"\"  "+p.widgets.length+" widget(s)"+(p.featured?"  [carousel]":""));
 
-  console.log("\npages.json written: " + pages.length + " page(s)\n");
-  for (const p of pages) {
-    console.log("  /" + p.slug + "/  \"" + p.label + "\"  " + p.widgets.length + " widget(s)" +
-      (p.featured ? "  [in homepage carousel]" : ""));
-  }
-
-  console.log("\nNote: .mkv files need an H.264/VP8/VP9 codec track to play in-browser.");
-  console.log();
+  console.log("\nNote: .mkv files need H.264/VP8/VP9 codec to play in-browser.\n");
 }
 
 build();

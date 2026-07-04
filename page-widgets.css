@@ -1,8 +1,14 @@
 /* ================================================================
    page-widgets.css
    Layout rules for the 9 widget types used on custom subpages.
+
+   NOTE: time-sensitive or cache-sensitive styles (title-bar font size,
+   carousel positioning, zoom overlay) are injected directly by
+   page-engine.js at boot so stale CDN-cached copies of THIS file
+   can never break those features.
    ================================================================ */
 
+/* ── Reset & Base ─────────────────────────────────────────── */
 .widget { padding: 4rem 2.5rem; }
 
 /* ── image-left / text-left ──────────────────────────────── */
@@ -11,11 +17,12 @@
   display: flex; gap: 3rem; align-items: center;
 }
 .widget-grid .w-media,
-.widget-grid .w-text { flex: 1; min-width: 0; }
+.widget-grid .w-text  { flex: 1; min-width: 0; }
 
 .widget-grid .w-media img,
 .widget-grid .w-media video {
-  width: 100%; height: auto; display: block; border-radius: var(--radius);
+  width: 100%; height: auto; display: block;
+  border-radius: var(--radius);
 }
 
 .widget[data-type="image-left"] .w-media { order: 1; }
@@ -31,13 +38,10 @@
   font-size: 0.92rem; line-height: 1.85;
   color: rgba(232,228,220,0.72); white-space: pre-line;
 }
-
-/* Auto-applied when [background] is a bright/light hex -- see getLuminance()
-   in page-engine.js. Keeps text readable without you ever picking a text color. */
 .widget-on-light .w-title { color: #1a1714; }
 .widget-on-light .w-body  { color: rgba(20,18,16,0.75); }
 
-/* ── split: text centred, image flanking both sides ─────────── */
+/* ── split: text centred, images flanking both sides ─────── */
 .widget-grid-split { align-items: center; }
 .widget-grid-split .w-text  { flex: 1.1; text-align: center; }
 .widget-grid-split .w-media { flex: 1; }
@@ -45,8 +49,10 @@
 /* ── media-only ───────────────────────────────────────────── */
 .w-media-only { max-width: 900px; margin: 0 auto; }
 .w-media-only img, .w-media-only video {
-  width: 100%; height: auto; display: block; border-radius: var(--radius);
+  width: 100%; height: auto; display: block;
+  border-radius: var(--radius);
 }
+.w-media img, .w-media-only img { cursor: zoom-in; }
 
 /* ── full-bleed ───────────────────────────────────────────── */
 .widget[data-type="full-bleed"] { padding: 0; }
@@ -63,8 +69,7 @@
   background: rgba(0,0,0,0.42);
 }
 .w-fullbleed-caption {
-  position: relative; z-index: 2; padding: 3rem; max-width: 800px;
-  margin: 0 auto;
+  position: relative; z-index: 2; padding: 3rem; max-width: 800px; margin: 0 auto;
 }
 .w-title-large {
   font-family: var(--mono); font-size: clamp(3.5rem, 9vw, 7rem);
@@ -75,19 +80,20 @@
 /* ── text-only ────────────────────────────────────────────── */
 .w-text-only { max-width: 720px; margin: 0 auto; text-align: center; }
 
-/* ── carousel widget ──────────────────────────────────────── */
-/* Core film-strip positioning (.w-carousel-stage, .w-carousel-item,
-   .w-carousel-controls, .w-carousel-btn) is injected by page-engine.js
-   at boot rather than living here -- keeps the carousel immune to
-   stale cached copies of this file. Only wrapper/caption/dots below. */
+/* ── carousel ─────────────────────────────────────────────── */
+/* Core stage/item/controls CSS is injected by page-engine.js.
+   Only wrapper and dot base styles here. */
 .w-carousel { max-width: 1200px; margin: 0 auto; }
 .w-carousel-caption { margin-bottom: 1.5rem; text-align: center; }
 .w-carousel-dots { display: flex; justify-content: center; gap: 0.5rem; }
 .w-carousel-dot {
-  width: 20px; height: 2px; background: var(--border); cursor: pointer;
-  transition: background 0.3s, width 0.3s;
+  width: 28px; height: 4px;
+  background: rgba(255,255,255,0.25);
+  cursor: pointer; border-radius: 1px;
+  transition: background 0.2s;
 }
-.w-carousel-dot.active { background: var(--accent); width: 32px; }
+.w-carousel-dot:hover { background: rgba(255,255,255,0.45); }
+/* ::after fill + animation injected by page-engine.js */
 
 /* ── trio: three images in a horizontal row ──────────────── */
 .w-trio {
@@ -96,20 +102,17 @@
 }
 .w-trio-cell {
   flex: 1; min-width: 0;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
+  aspect-ratio: 4 / 3; overflow: hidden;
   border-radius: var(--radius);
 }
 .w-trio-cell img, .w-trio-cell video {
   width: 100%; height: 100%; object-fit: cover; display: block;
-  cursor: zoom-in;
-  transition: transform 0.35s ease;
+  cursor: zoom-in; transition: transform 0.35s ease;
 }
 .w-trio-cell img:hover { transform: scale(1.03); }
 
-/* ── title-bar: thin centered heading strip ──────────────── */
-/* Font-size is injected by page-engine.js as a critical style (same
-   cache-proofing reason as the carousel) -- only structural rules here. */
+/* ── title-bar ────────────────────────────────────────────── */
+/* font-size is injected by page-engine.js — only structural rules here */
 .widget[data-type="title-bar"] { padding: 2rem 2.5rem; }
 .w-title-bar { max-width: 1200px; margin: 0 auto; text-align: center; }
 .w-title-bar-heading {
@@ -122,9 +125,6 @@
   color: var(--muted); letter-spacing: 0.04em;
 }
 .widget-on-light .w-title-bar-sub { color: rgba(20,18,16,0.55); }
-
-/* Zoomable images in other widget types */
-.w-media img, .w-media-only img { cursor: zoom-in; }
 
 /* ── Missing-media fallback ───────────────────────────────── */
 .w-media-missing {
@@ -145,12 +145,9 @@
   .widget[data-type="image-left"] .w-text,
   .widget[data-type="text-left"]  .w-text  { order: 2 !important; }
 
-  /* split: DOM order is already media, text, media -- stacks correctly as-is */
   .widget-grid-split { flex-direction: column; }
 
-  /* trio stacks to a single column on narrow screens */
   .w-trio { flex-direction: column; }
-  /* when stacked, let each cell use the image's natural ratio */
   .w-trio-cell { aspect-ratio: unset; }
   .w-trio-cell img, .w-trio-cell video { height: auto; object-fit: initial; }
 
@@ -159,6 +156,5 @@
   .w-fullbleed { min-height: 50vh; }
   .w-fullbleed-caption { padding: 1.6rem; }
 
-  .w-carousel-stage { height: clamp(220px, 50vh, 360px); }
-  .w-carousel-controls { gap: 0.5rem; }
+  .w-carousel-stage { height: clamp(220px, 48vh, 340px); }
 }

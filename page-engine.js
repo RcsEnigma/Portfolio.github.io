@@ -1,64 +1,105 @@
 /**
  * page-engine.js
  * Renders a single custom subpage. Loaded by auto-generated stub files.
- * You should never need to edit this file directly.
+ * Do not edit directly — change /pages/<slug>/ then re-run generate-manifest.js.
  */
 
 (function () {
   const SLUG = window.PAGE_SLUG;
   let pagesData = null;
 
-  // ── Inject critical styles at boot ──────────────────────────────
-  // These live in JS rather than page-widgets.css so a stale CDN-cached
-  // stylesheet can never break them. Lesson learned the hard way.
+  // ── Critical styles injected at boot ────────────────────────────
+  // Lives here rather than page-widgets.css so a stale CDN-cached
+  // stylesheet can never break these features.
   ;(function injectCriticalStyles() {
     const s = document.createElement("style");
     s.textContent =
-      // Title-bar heading — override any cached small size
-      ".w-title-bar-heading{font-size:clamp(3rem,7vw,5rem)!important;" +
-        "letter-spacing:.05em!important;line-height:1.05!important;}" +
+      // Title-bar heading — large, close to full-bleed but slightly smaller
+      ".w-title-bar-heading{" +
+        "font-size:clamp(2.6rem,6.5vw,5rem)!important;" +
+        "letter-spacing:.05em!important;" +
+        "line-height:1.05!important;" +
+      "}" +
 
-      // Carousel — film-strip stage and sliding items
-      ".w-carousel-stage{position:relative;width:100%;height:clamp(320px,46vh,540px);" +
-        "overflow:hidden;background:var(--bg);}" +
-      ".w-carousel-item{position:absolute;top:5%;height:90%;overflow:hidden;" +
+      // Carousel stage
+      ".w-carousel-stage{" +
+        "position:relative;width:100%;height:clamp(300px,44vh,520px);" +
+        "overflow:hidden;background:var(--bg);" +
+      "}" +
+
+      // Carousel items — positioned by centre-x via transform so only
+      // left% drives the slide motion; width scales around the centre
+      // which eliminates the resize-grows-while-moving artifact.
+      ".w-carousel-item{" +
+        "position:absolute;top:5%;height:90%;overflow:hidden;" +
         "border-radius:var(--radius);" +
-        "transition:left .55s cubic-bezier(.22,1,.36,1)," +
+        "transform:translateX(-50%);" +
+        "transition:" +
+          "left .55s cubic-bezier(.22,1,.36,1)," +
           "width .55s cubic-bezier(.22,1,.36,1)," +
-          "opacity .55s ease;}" +
-      ".w-carousel-item img,.w-carousel-item video{width:100%;height:100%;display:block;}" +
-      ".w-carousel-controls{display:flex;align-items:center;justify-content:center;" +
-        "gap:.7rem;margin-top:1rem;}" +
-      ".w-carousel-btn{background:rgba(255,255,255,.06);" +
-        "border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);" +
-        "width:26px;height:26px;border-radius:50%;" +
+          "opacity .55s ease;" +
+      "}" +
+      ".w-carousel-item img,.w-carousel-item video{" +
+        "width:100%;height:100%;display:block;" +
+      "}" +
+
+      // Duration-bar animation for carousel dots (matches homepage style)
+      ".w-carousel-dot{position:relative;overflow:hidden;}" +
+      ".w-carousel-dot::after{" +
+        "content:'';position:absolute;inset:0;" +
+        "background:var(--accent);" +
+        "transform-origin:left;transform:scaleX(0);" +
+      "}" +
+      ".w-carousel-dot.active::after{" +
+        "animation:wcd-fill 5s linear forwards;" +
+      "}" +
+      "@keyframes wcd-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}" +
+
+      // Carousel controls row
+      ".w-carousel-controls{" +
+        "display:flex;align-items:center;justify-content:center;" +
+        "gap:.7rem;margin-top:1rem;" +
+      "}" +
+      ".w-carousel-btn{" +
+        "background:rgba(255,255,255,.06);" +
+        "border:1px solid rgba(255,255,255,.18);" +
+        "color:rgba(255,255,255,.7);width:26px;height:26px;border-radius:50%;" +
         "display:flex;align-items:center;justify-content:center;" +
         "cursor:pointer;font-size:1rem;line-height:1;" +
-        "transition:background .2s,color .2s;}" +
+        "transition:background .2s,color .2s;" +
+      "}" +
       ".w-carousel-btn:hover{background:rgba(255,255,255,.18);color:#fff;}" +
 
       // Zoom overlay
-      "#page-zoom-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.97);" +
+      "#page-zoom-overlay{" +
+        "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.97);" +
         "display:flex;align-items:center;justify-content:center;" +
         "opacity:0;pointer-events:none;transition:opacity .22s ease;" +
-        "cursor:zoom-out;overflow:auto;}" +
+        "cursor:zoom-out;overflow:auto;" +
+      "}" +
       "#page-zoom-overlay.open{opacity:1;pointer-events:all;}" +
-      "#page-zoom-content{display:flex;align-items:center;justify-content:center;" +
-        "min-height:100vh;padding:2rem;}" +
-      "#page-zoom-content img{max-width:96vw;max-height:96vh;width:auto;height:auto;" +
-        "display:block;object-fit:contain;cursor:zoom-out;}" +
-      "#page-zoom-close{position:fixed;top:1rem;right:1rem;background:rgba(0,0,0,.6);" +
-        "border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);" +
-        "width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:.9rem;" +
+      "#page-zoom-content{" +
         "display:flex;align-items:center;justify-content:center;" +
-        "z-index:10000;transition:background .2s;}" +
+        "min-height:100vh;padding:2rem;" +
+      "}" +
+      "#page-zoom-content img{" +
+        "max-width:96vw;max-height:96vh;" +
+        "width:auto;height:auto;display:block;" +
+        "object-fit:contain;cursor:zoom-out;" +
+      "}" +
+      "#page-zoom-close{" +
+        "position:fixed;top:1rem;right:1rem;" +
+        "background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);" +
+        "color:rgba(255,255,255,.8);width:34px;height:34px;" +
+        "border-radius:50%;cursor:pointer;font-size:.9rem;" +
+        "display:flex;align-items:center;justify-content:center;" +
+        "z-index:10000;transition:background .2s;" +
+      "}" +
       "#page-zoom-close:hover{background:rgba(255,255,255,.1);}";
     document.head.appendChild(s);
   })();
 
   // ── Video observers ──────────────────────────────────────────────
-  // autoplayObserver: muted looping videos (full-bleed, image-left, etc.)
-  //   pause when off-screen, resume automatically when back in view.
   const autoplayObserver = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) e.target.play().catch(() => {});
@@ -66,8 +107,6 @@
     });
   }, { threshold: 0.15 });
 
-  // pauseOnlyObserver: user-controlled videos (media-only)
-  //   pause when off-screen but never force-resume (respects user pause).
   const pauseOnlyObserver = new IntersectionObserver(entries => {
     entries.forEach(e => { if (!e.isIntersecting) e.target.pause(); });
   }, { threshold: 0.15 });
@@ -84,17 +123,14 @@
       buildFooter();
       return;
     }
-
     const page = pagesData.pages.find(p => p.slug === SLUG);
     buildHeader(pagesData.pages || []);
     buildFooter();
-
     if (!page) {
       document.getElementById("page-root").innerHTML =
         '<div class="page-error">Page not found.</div>';
       return;
     }
-
     document.title = page.label + " \u2014 AJ Ambrozic";
     buildContent(page);
   }
@@ -105,7 +141,6 @@
     const left = pages.map(p =>
       `<a class="nav-link${p.slug === SLUG ? " active" : ""}" href="/${p.slug}/">${esc(p.label)}</a>`
     ).join("");
-
     root.innerHTML = `
       <header id="site-header">
         <a id="wordmark" href="/">AJ Ambrozic</a>
@@ -125,7 +160,6 @@
           </div>
         </nav>
       </header>`;
-
     document.getElementById("nav-toggle").onclick = () => {
       document.getElementById("site-nav").classList.toggle("open");
       document.getElementById("nav-toggle").classList.toggle("open");
@@ -167,7 +201,7 @@
       v.controlsList = "nodownload nofullscreen";
       v.disablePictureInPicture = true;
       if (opts.autoplay) v.autoplay = true;
-      if (opts.manage === "autoplay")    autoplayObserver.observe(v);
+      if (opts.manage === "autoplay")        autoplayObserver.observe(v);
       else if (opts.manage === "pause-only") pauseOnlyObserver.observe(v);
       return v;
     }
@@ -182,17 +216,17 @@
     return img;
   }
 
-  // ── Luminance / light-background detection ────────────────────────
+  // ── Luminance / auto light-bg text ───────────────────────────────
   function getLuminance(hex) {
     if (!hex) return null;
-    const c = hex.replace("#", "").trim();
+    const c = hex.replace("#","").trim();
     let r, g, b;
     if (c.length === 3) {
-      r = parseInt(c[0]+c[0],16); g = parseInt(c[1]+c[1],16); b = parseInt(c[2]+c[2],16);
+      r=parseInt(c[0]+c[0],16); g=parseInt(c[1]+c[1],16); b=parseInt(c[2]+c[2],16);
     } else if (c.length === 6) {
-      r = parseInt(c.slice(0,2),16); g = parseInt(c.slice(2,4),16); b = parseInt(c.slice(4,6),16);
-    } else { return null; }
-    if ([r,g,b].some(n => isNaN(n))) return null;
+      r=parseInt(c.slice(0,2),16); g=parseInt(c.slice(2,4),16); b=parseInt(c.slice(4,6),16);
+    } else return null;
+    if ([r,g,b].some(n=>isNaN(n))) return null;
     return (0.299*r + 0.587*g + 0.114*b) / 255;
   }
   const LIGHT_BG_THRESHOLD = 0.6;
@@ -226,16 +260,15 @@
     wrap.className = "w-text";
     wrap.innerHTML =
       (w.title ? `<h2 class="w-title">${esc(w.title)}</h2>` : "") +
-      (w.text  ? `<p class="w-body">${esc(w.text)}</p>` : "");
+      (w.text  ? `<p  class="w-body">${esc(w.text)}</p>`  : "");
     return wrap;
   }
 
   function buildSplitText(w, slug) {
     const grid = document.createElement("div");
     grid.className = "widget-grid";
-    const mw = document.createElement("div");
-    mw.className = "w-media";
-    const m = buildMediaEl(slug, w.media[0], { autoplay: true, manage: "autoplay" });
+    const mw = document.createElement("div"); mw.className = "w-media";
+    const m  = buildMediaEl(slug, w.media[0], { autoplay:true, manage:"autoplay" });
     mw.appendChild(m || makeMissingPlaceholder());
     grid.appendChild(mw);
     grid.appendChild(buildTextBlock(w));
@@ -247,8 +280,8 @@
     grid.className = "widget-grid widget-grid-split";
     const lw = document.createElement("div"); lw.className = "w-media";
     const rw = document.createElement("div"); rw.className = "w-media";
-    const lm = buildMediaEl(slug, w.media[0], { autoplay: true, manage: "autoplay" });
-    const rm = buildMediaEl(slug, w.media[1], { autoplay: true, manage: "autoplay" });
+    const lm = buildMediaEl(slug, w.media[0], { autoplay:true, manage:"autoplay" });
+    const rm = buildMediaEl(slug, w.media[1], { autoplay:true, manage:"autoplay" });
     lw.appendChild(lm || makeMissingPlaceholder());
     rw.appendChild(rm || makeMissingPlaceholder());
     grid.appendChild(lw);
@@ -260,7 +293,7 @@
   function buildMediaOnly(w, slug) {
     const wrap = document.createElement("div");
     wrap.className = "w-media-only";
-    const m = buildMediaEl(slug, w.media[0], { controls: true, manage: "pause-only" });
+    const m = buildMediaEl(slug, w.media[0], { controls:true, manage:"pause-only" });
     wrap.appendChild(m || makeMissingPlaceholder());
     return wrap;
   }
@@ -268,13 +301,13 @@
   function buildFullBleed(w, slug) {
     const wrap = document.createElement("div");
     wrap.className = "w-fullbleed";
-    const m = buildMediaEl(slug, w.media[0], { autoplay: true, manage: "autoplay" });
+    const m = buildMediaEl(slug, w.media[0], { autoplay:true, manage:"autoplay" });
     if (m) wrap.appendChild(m);
     const cap = document.createElement("div");
     cap.className = "w-fullbleed-caption";
     cap.innerHTML =
       (w.title ? `<h2 class="w-title-large">${esc(w.title)}</h2>` : "") +
-      (w.text  ? `<p class="w-body">${esc(w.text)}</p>` : "");
+      (w.text  ? `<p  class="w-body">${esc(w.text)}</p>` : "");
     wrap.appendChild(cap);
     return wrap;
   }
@@ -290,9 +323,8 @@
     const row = document.createElement("div");
     row.className = "w-trio";
     for (let i = 0; i < 3; i++) {
-      const cell = document.createElement("div");
-      cell.className = "w-trio-cell";
-      const m = buildMediaEl(slug, w.media[i] || null, { autoplay: true, manage: "autoplay" });
+      const cell = document.createElement("div"); cell.className = "w-trio-cell";
+      const m = buildMediaEl(slug, w.media[i] || null, { autoplay:true, manage:"autoplay" });
       cell.appendChild(m || makeMissingPlaceholder());
       row.appendChild(cell);
     }
@@ -317,16 +349,20 @@
     return bar;
   }
 
-  // ── Carousel — film-strip with 5 simultaneous slots ──────────────
+  // ── Carousel — film-strip with centre-pivot positioning ───────────
   //
-  // Slot positions (-2 to +2) relative to the active item:
-  //   -2        -1       [0-CENTER]    +1         +2
-  //  8% peek  21% wide   42% wide    21% wide   8% peek
+  // Items are positioned by their CENTRE x-coordinate (not left edge).
+  // el.style.left  = cx%  (centre of this item)
+  // el.style.transform = "translateX(-50%)"  (always — pivots around centre)
+  // el.style.width = w%
   //
-  // Center uses object-fit:contain so portrait images never get cropped.
-  // Side items use object-fit:cover (they're partial previews).
-  // Items beyond ±2 are parked off-screen left/right so they slide in
-  // naturally when they next enter the visible range.
+  // This means only `left` drives the sliding motion. Width expanding /
+  // contracting happens symmetrically around the stationary centre point,
+  // so there's no visual artifact of the image appearing to grow sideways
+  // while it's mid-slide.
+  //
+  // Desktop shows 5 items (slots -2 to +2).
+  // Mobile (<= 640px) shows 3 items (slots -1 to +1) to avoid clutter.
   //
   function buildCarouselWidget(w, slug) {
     const wrap = document.createElement("div");
@@ -337,7 +373,7 @@
       cap.className = "w-carousel-caption";
       cap.innerHTML =
         (w.title ? `<h2 class="w-title">${esc(w.title)}</h2>` : "") +
-        (w.text  ? `<p class="w-body">${esc(w.text)}</p>` : "");
+        (w.text  ? `<p  class="w-body">${esc(w.text)}</p>`  : "");
       wrap.appendChild(cap);
     }
 
@@ -345,31 +381,39 @@
     const N = items.length;
     let active = 0, timer = null;
 
-    // Slot specs: left position and width as % of stage width
-    const SLOT = {
-      "-2": { l: -6,  wid: 14, op: 0.18, z: 1 },
-      "-1": { l:  8,  wid: 21, op: 0.50, z: 2 },
-       "0": { l: 29,  wid: 42, op: 1.00, z: 4 },
-       "1": { l: 71,  wid: 21, op: 0.50, z: 2 },
-       "2": { l: 92,  wid: 14, op: 0.18, z: 1 },
+    // cx = centre position as % of stage width
+    // w  = item width as % of stage width
+    // op = opacity (1 = fully visible)
+    // z  = z-index
+    const SLOT_DESKTOP = {
+      "-2": { cx:  7, w: 13, op: 0.20, z: 1 },
+      "-1": { cx: 23, w: 22, op: 0.55, z: 2 },
+       "0": { cx: 50, w: 44, op: 1.00, z: 4 },
+       "1": { cx: 77, w: 22, op: 0.55, z: 2 },
+       "2": { cx: 93, w: 13, op: 0.20, z: 1 },
+    };
+    const SLOT_MOBILE = {
+      "-1": { cx: 10, w: 18, op: 0.45, z: 2 },
+       "0": { cx: 50, w: 62, op: 1.00, z: 4 },
+       "1": { cx: 90, w: 18, op: 0.45, z: 2 },
     };
 
     const stage = document.createElement("div");
     stage.className = "w-carousel-stage";
 
+    // Build item elements — no click handlers yet; assigned in applyPositions
     const itemEls = items.map((m, i) => {
       const div = document.createElement("div");
       div.className = "w-carousel-item";
-      const el = buildMediaEl(slug, m, { noZoom: true });
+      const el = buildMediaEl(slug, m, { noZoom: true }); // zoom managed per-position
       div.appendChild(el || makeMissingPlaceholder());
-      div.addEventListener("click", () => { if (i !== active) go(i); });
       stage.appendChild(div);
       return div;
     });
 
     wrap.appendChild(stage);
 
-    // Relative slot position of item i from active, in range -floor(N/2)..+floor(N/2)
+    // Wrapping relative position: -floor(N/2) .. +floor(N/2)
     function relPos(i) {
       let p = ((i - active) % N + N) % N;
       if (p > Math.floor(N / 2)) p -= N;
@@ -377,36 +421,63 @@
     }
 
     function applyPositions() {
+      const isMobile = window.innerWidth <= 640;
+      const SLOT = isMobile ? SLOT_MOBILE : SLOT_DESKTOP;
+
       itemEls.forEach((el, i) => {
         const pos  = relPos(i);
-        const spec = SLOT[pos];
+        const spec = SLOT[String(pos)];
+
+        // Reset click handlers on every call so they don't accumulate
+        el.onclick = null;
+        const img = el.querySelector("img");
+        if (img) img.onclick = null;
 
         if (!spec) {
-          // Park off-screen on the correct side so it slides in when needed
-          el.style.left          = pos < 0 ? "-20%" : "120%";
-          el.style.width         = "14%";
-          el.style.opacity       = "0";
-          el.style.zIndex        = "0";
+          // Park off-screen on the correct side so it slides in smoothly
+          const parkW = isMobile ? 18 : 13;
+          el.style.left      = (pos < 0 ? -10 : 110) + "%";
+          el.style.transform = "translateX(-50%)";
+          el.style.width     = parkW + "%";
+          el.style.opacity   = "0";
+          el.style.zIndex    = "0";
+          el.style.cursor    = "default";
           el.style.pointerEvents = "none";
-          el.style.cursor        = "default";
+          if (img) { img.style.cursor = "default"; img.style.objectFit = "cover"; }
+          const vid = el.querySelector("video");
+          if (vid) { vid.pause(); vid.style.objectFit = "cover"; }
           return;
         }
 
-        el.style.left          = spec.l + "%";
-        el.style.width         = spec.wid + "%";
-        el.style.opacity       = spec.op;
-        el.style.zIndex        = spec.z;
-        el.style.pointerEvents = pos === 0 ? "none" : "auto";
-        el.style.cursor        = pos === 0 ? "default" : "pointer";
+        el.style.left      = spec.cx + "%";
+        el.style.transform = "translateX(-50%)";
+        el.style.width     = spec.w  + "%";
+        el.style.opacity   = spec.op;
+        el.style.zIndex    = spec.z;
 
-        // Center: contain (no cropping); sides: cover (crop is fine for previews)
-        const img = el.querySelector("img");
-        if (img) img.style.objectFit = pos === 0 ? "contain" : "cover";
-        const vid = el.querySelector("video");
-        if (vid) {
-          vid.style.objectFit = pos === 0 ? "contain" : "cover";
-          if (pos === 0) vid.play().catch(() => {});
-          else vid.pause();
+        // Center: full visible with object-fit contain (no crop), zoomable
+        if (pos === 0) {
+          el.style.cursor        = "default";
+          el.style.pointerEvents = "auto";
+          if (img) {
+            img.style.objectFit = "contain";
+            img.style.cursor    = "zoom-in";
+            img.onclick = e => { e.stopPropagation(); openZoom(img.src); };
+          }
+          const vid = el.querySelector("video");
+          if (vid) {
+            vid.style.objectFit = "contain";
+            vid.play().catch(() => {});
+          }
+        } else {
+          // Side items: tap to jump, cover-cropped
+          el.style.cursor        = "pointer";
+          el.style.pointerEvents = "auto";
+          const capturedI = i; // explicit capture for closure
+          el.onclick = () => go(capturedI);
+          if (img) { img.style.objectFit = "cover"; img.style.cursor = "pointer"; }
+          const vid = el.querySelector("video");
+          if (vid) { vid.pause(); vid.style.objectFit = "cover"; }
         }
       });
     }
@@ -422,7 +493,7 @@
       return d;
     }) : [];
 
-    // Controls row: [←] [dots] [→]
+    // Controls: [←] [duration-bar dots] [→]
     const controls = document.createElement("div");
     controls.className = "w-carousel-controls";
     if (N > 1) {
@@ -445,12 +516,22 @@
     function go(n) {
       active = ((n % N) + N) % N;
       applyPositions();
-      dotEls.forEach((d, i) => d.classList.toggle("active", i === active));
+
+      // Restart duration-bar animation: remove active first to kill running
+      // animation, force a reflow, then re-add to trigger @keyframes from 0.
+      dotEls.forEach((d, i) => {
+        d.classList.remove("active");
+        if (i === active) {
+          void d.offsetWidth; // force reflow — without this animation won't restart
+          d.classList.add("active");
+        }
+      });
+
       clearInterval(timer);
       if (N > 1) timer = setInterval(() => go(active + 1), 5000);
     }
 
-    // Intersection observer: resume/pause the center video on scroll/resize
+    // Pause/resume center video when widget scrolls in/out of view
     const obs = new IntersectionObserver(entries => {
       const v = itemEls[active]?.querySelector("video");
       if (!v) return;
@@ -459,7 +540,7 @@
     }, { threshold: 0.15 });
     obs.observe(wrap);
 
-    // Set initial positions without animation, then re-enable transitions
+    // Set initial positions instantly (no slide animation on first render)
     itemEls.forEach(el => el.style.transition = "none");
     applyPositions();
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -467,24 +548,22 @@
     }));
 
     if (N > 1) timer = setInterval(() => go(active + 1), 5000);
-
     return wrap;
   }
 
   // ── Helpers ───────────────────────────────────────────────────────
   function esc(s) {
-    return String(s || "")
+    return String(s||"")
       .replace(/&/g,"&amp;").replace(/</g,"&lt;")
       .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
-  // ── Zoom overlay ──────────────────────────────────────────────────
-  // CSS for the overlay is injected by injectCriticalStyles() above.
+  // ── Image zoom overlay ───────────────────────────────────────────
+  // CSS for this is injected by injectCriticalStyles() above.
   let _zoomOverlay = null, _zoomContent = null;
 
   function initZoom() {
     if (_zoomOverlay) return;
-
     _zoomOverlay = document.createElement("div");
     _zoomOverlay.id = "page-zoom-overlay";
     _zoomOverlay.onclick = closeZoom;
