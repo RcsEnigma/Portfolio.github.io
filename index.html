@@ -412,23 +412,22 @@ body {
 }
 #modal-info-link:hover { opacity: 0.6; }
 
-/* ── Zoom overlay — scroll to zoom, drag to pan ───────────── */
+/* ── Zoom overlay — scroll/pinch to zoom, drag to pan ─────── */
 #zoom-overlay {
   position: fixed; inset: 0; z-index: 300;
   background: rgba(0,0,0,0.97);
   opacity: 0; pointer-events: none; transition: opacity 0.22s ease;
   overflow: hidden; cursor: crosshair;
-  touch-action: none; /* we handle touch manually */
+  touch-action: none;
 }
 #zoom-overlay.open { opacity: 1; pointer-events: all; }
 #zoom-canvas {
   position: absolute; top: 0; left: 0;
-  transform-origin: 0 0;
-  will-change: transform;
+  transform-origin: 0 0; will-change: transform;
 }
 #zoom-canvas img {
-  display: block; max-width: none; user-select: none;
-  -webkit-user-drag: none;
+  display: block; max-width: none;
+  user-select: none; -webkit-user-drag: none;
 }
 #zoom-close-btn {
   position: fixed; top: 1rem; right: 1rem;
@@ -443,10 +442,8 @@ body {
   position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%);
   font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
   text-transform: uppercase; color: rgba(255,255,255,0.3);
-  pointer-events: none; z-index: 301;
-  transition: opacity 0.5s ease;
+  pointer-events: none; z-index: 301; transition: opacity 0.6s ease;
 }
-#zoom-close-btn:hover { background: rgba(255,255,255,0.1); }
 
 /* ── Static pages ─────────────────────────────────────────── */
 .static-page { display: none; max-width: 680px; margin: 6rem auto; padding: 0 2.5rem; }
@@ -645,7 +642,7 @@ footer span {
 <div id="zoom-overlay">
   <button id="zoom-close-btn" onclick="closeZoom()">&#x2715;</button>
   <div id="zoom-canvas"></div>
-  <div id="zoom-hint">Scroll to zoom &nbsp;&#183;&nbsp; Drag to pan &nbsp;&#183;&nbsp; Esc to close</div>
+  <div id="zoom-hint">Scroll to zoom &nbsp;&middot;&nbsp; Drag to pan &nbsp;&middot;&nbsp; Esc to close</div>
 </div>
 
 <!-- ── FOOTER ────────────────────────────────────────────────── -->
@@ -970,7 +967,6 @@ function openModal(work) {
 
   document.getElementById("modal-overlay").classList.add("open");
   document.body.style.overflow = "hidden";
-  // Push a history entry so the hardware back button closes the modal
   history.pushState({ _portfolio: "modal" }, "");
 }
 
@@ -1087,13 +1083,17 @@ function stepMedia(dir) {
 }
 
 // ── Pan/zoom engine ──────────────────────────────────────────
-// Supports: scroll-wheel zoom, pinch-zoom (touch), click-drag pan.
-// Images are loaded at their native resolution so 4K detail is available.
-let _zoomScale = 1, _zoomX = 0, _zoomY = 0;
-let _zoomDragging = false, _zoomDragStartX = 0, _zoomDragStartY = 0;
+// Scroll wheel or pinch to zoom (anchored to cursor/fingers).
+// Click-drag to pan. Image loads at native resolution for 4K detail.
+// ZOOM_MIN is set dynamically to the fit-to-screen scale so the
+// user can always zoom back out to see the full image.
+let _zoomScale = 1, _zoomFitScale = 1;
+let _zoomX = 0, _zoomY = 0;
+let _zoomDragging = false;
+let _zoomDragStartX = 0, _zoomDragStartY = 0;
 let _zoomOriginX = 0, _zoomOriginY = 0;
 let _zoomPinchDist = 0;
-const ZOOM_MIN = 0.5, ZOOM_MAX = 12;
+const ZOOM_MAX = 12;
 
 function _zoomApply() {
   document.getElementById("zoom-canvas").style.transform =
@@ -1102,22 +1102,21 @@ function _zoomApply() {
 
 function _zoomClamp() {
   const canvas = document.getElementById("zoom-canvas");
-  const img    = canvas.querySelector("img");
+  const img = canvas.querySelector("img");
   if (!img || !img.naturalWidth) return;
-  const W = img.naturalWidth  * _zoomScale;
-  const H = img.naturalHeight * _zoomScale;
+  const W  = img.naturalWidth  * _zoomScale;
+  const H  = img.naturalHeight * _zoomScale;
   const vw = window.innerWidth, vh = window.innerHeight;
-  // allow panning up to the image edge
-  _zoomX = Math.min(Math.max(_zoomX, vw - W), 0);
-  _zoomY = Math.min(Math.max(_zoomY, vh - H), 0);
-  // if image smaller than viewport in an axis, centre it
-  if (W < vw) _zoomX = (vw - W) / 2;
-  if (H < vh) _zoomY = (vh - H) / 2;
+  if (W < vw) { _zoomX = (vw - W) / 2; }
+  else { _zoomX = Math.min(0, Math.max(_zoomX, vw - W)); }
+  if (H < vh) { _zoomY = (vh - H) / 2; }
+  else { _zoomY = Math.min(0, Math.max(_zoomY, vh - H)); }
 }
 
 function _zoomAt(clientX, clientY, factor) {
   const prev = _zoomScale;
-  _zoomScale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, _zoomScale * factor));
+  // Clamp: never go below fit scale (always see full image), never above ZOOM_MAX
+  _zoomScale = Math.max(_zoomFitScale, Math.min(ZOOM_MAX, _zoomScale * factor));
   const ratio = _zoomScale / prev;
   _zoomX = clientX - ratio * (clientX - _zoomX);
   _zoomY = clientY - ratio * (clientY - _zoomY);
@@ -1135,43 +1134,43 @@ function openZoom() {
   canvas.innerHTML = "";
   const img = new Image();
   img.draggable = false;
+
   img.onload = () => {
-    // Start at a scale that fills ~90% of the shorter viewport dimension
-    const fitW = (window.innerWidth  * 0.9) / img.naturalWidth;
-    const fitH = (window.innerHeight * 0.9) / img.naturalHeight;
-    _zoomScale = Math.min(fitW, fitH, 1); // never enlarge below 1 on load
+    // Fit scale: largest scale at which the whole image fits inside the viewport
+    const fitW = window.innerWidth  / img.naturalWidth;
+    const fitH = window.innerHeight / img.naturalHeight;
+    _zoomFitScale = Math.min(fitW, fitH);
+    _zoomScale    = _zoomFitScale;
     _zoomX = (window.innerWidth  - img.naturalWidth  * _zoomScale) / 2;
     _zoomY = (window.innerHeight - img.naturalHeight * _zoomScale) / 2;
     _zoomApply();
   };
+
   img.src = "/works/" + src;
   canvas.appendChild(img);
+  // Reset state before image loads so first _zoomApply() from onload is clean
+  _zoomScale = 1; _zoomFitScale = 1; _zoomX = 0; _zoomY = 0;
 
-  _zoomScale = 1; _zoomX = 0; _zoomY = 0;
   const overlay = document.getElementById("zoom-overlay");
   overlay.classList.add("open");
 
-  // Fade out hint after 2s
   const hint = document.getElementById("zoom-hint");
   hint.style.opacity = "1";
-  setTimeout(() => { hint.style.opacity = "0"; }, 2000);
-
-  // Push a history entry so the Android back button closes zoom, not the page
-  history.pushState({ _portfolio: "zoom" }, "");
+  clearTimeout(hint._t);
+  hint._t = setTimeout(() => { hint.style.opacity = "0"; }, 2200);
 }
 
 function closeZoom() {
+  // Just close the overlay — no history manipulation needed.
+  // Zoom is a layer on top of the modal; X and Escape both return to modal.
   document.getElementById("zoom-overlay").classList.remove("open");
   document.getElementById("zoom-canvas").innerHTML = "";
-  // Pop the history entry we pushed if it's still there
-  if (history.state?._portfolio === "zoom") history.back();
 }
 
-// Scroll-wheel zoom
+// Scroll-wheel zoom — anchored to cursor position
 document.getElementById("zoom-overlay").addEventListener("wheel", e => {
   e.preventDefault();
-  const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-  _zoomAt(e.clientX, e.clientY, factor);
+  _zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.12 : 1 / 1.12);
 }, { passive: false });
 
 // Click-drag pan
@@ -1180,52 +1179,54 @@ document.getElementById("zoom-overlay").addEventListener("mousedown", e => {
   _zoomDragging = true;
   _zoomDragStartX = e.clientX; _zoomDragStartY = e.clientY;
   _zoomOriginX = _zoomX;       _zoomOriginY = _zoomY;
-  document.getElementById("zoom-overlay").style.cursor = "grabbing";
+  e.currentTarget.style.cursor = "grabbing";
 });
-document.addEventListener("mousemove", e => {
+window.addEventListener("mousemove", e => {
   if (!_zoomDragging) return;
-  _zoomX = _zoomOriginX + e.clientX - _zoomDragStartX;
-  _zoomY = _zoomOriginY + e.clientY - _zoomDragStartY;
+  _zoomX = _zoomOriginX + (e.clientX - _zoomDragStartX);
+  _zoomY = _zoomOriginY + (e.clientY - _zoomDragStartY);
   _zoomClamp();
   _zoomApply();
 });
-document.addEventListener("mouseup", () => {
+window.addEventListener("mouseup", () => {
+  if (!_zoomDragging) return;
   _zoomDragging = false;
   const ov = document.getElementById("zoom-overlay");
   if (ov.classList.contains("open")) ov.style.cursor = "crosshair";
 });
 
-// Pinch-zoom (touch)
+// Pinch-zoom + touch-drag
 document.getElementById("zoom-overlay").addEventListener("touchstart", e => {
   if (e.touches.length === 2) {
+    _zoomDragging = false;
     _zoomPinchDist = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
+      e.touches[0].clientY - e.touches[1].clientY);
   } else if (e.touches.length === 1) {
     _zoomDragging = true;
     _zoomDragStartX = e.touches[0].clientX; _zoomDragStartY = e.touches[0].clientY;
-    _zoomOriginX = _zoomX;                   _zoomOriginY = _zoomY;
+    _zoomOriginX = _zoomX; _zoomOriginY = _zoomY;
   }
 }, { passive: true });
+
 document.getElementById("zoom-overlay").addEventListener("touchmove", e => {
   e.preventDefault();
   if (e.touches.length === 2) {
     const dist = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
+      e.touches[0].clientY - e.touches[1].clientY);
     const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
     const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
     if (_zoomPinchDist > 0) _zoomAt(cx, cy, dist / _zoomPinchDist);
     _zoomPinchDist = dist;
   } else if (_zoomDragging && e.touches.length === 1) {
-    _zoomX = _zoomOriginX + e.touches[0].clientX - _zoomDragStartX;
-    _zoomY = _zoomOriginY + e.touches[0].clientY - _zoomDragStartY;
+    _zoomX = _zoomOriginX + (e.touches[0].clientX - _zoomDragStartX);
+    _zoomY = _zoomOriginY + (e.touches[0].clientY - _zoomDragStartY);
     _zoomClamp();
     _zoomApply();
   }
 }, { passive: false });
+
 document.getElementById("zoom-overlay").addEventListener("touchend", () => {
   _zoomDragging = false; _zoomPinchDist = 0;
 }, { passive: true });
@@ -1236,44 +1237,28 @@ function closeModal() {
   document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
   document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
   modalWork = null;
-  // Pop our history entry so the page URL is clean
   if (history.state?._portfolio === "modal") history.back();
 }
 
 function handleOverlayClick(e) { closeModal(); }
 
-// ── History-based back button handling (Samsung / Android) ───
-// We push a state entry when opening the modal and zoom, and
-// popstate fires when the hardware back button is pressed.
+// Hardware back button (Samsung / Android) — closes modal, not the page
 window.addEventListener("popstate", e => {
-  const state = e.state?._portfolio;
-  if (state === "zoom") {
-    document.getElementById("zoom-overlay").classList.remove("open");
-    document.getElementById("zoom-canvas").innerHTML = "";
-    return;
+  if (document.getElementById("zoom-overlay").classList.contains("open")) {
+    closeZoom(); return;
   }
-  if (state === "modal" || (!state && modalWork)) {
-    // If zoom was open on top, just close that; otherwise close modal
-    if (document.getElementById("zoom-overlay").classList.contains("open")) {
-      document.getElementById("zoom-overlay").classList.remove("open");
-      document.getElementById("zoom-canvas").innerHTML = "";
-    } else {
-      document.getElementById("modal-overlay").classList.remove("open");
-      document.body.style.overflow = "";
-      document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
-      document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
-      modalWork = null;
-    }
+  if (modalWork) {
+    document.getElementById("modal-overlay").classList.remove("open");
+    document.body.style.overflow = "";
+    document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
+    document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
+    modalWork = null;
   }
 });
 
 document.addEventListener("keydown", e => {
   if (document.getElementById("zoom-overlay").classList.contains("open")) {
-    if (e.key === "Escape") {
-      document.getElementById("zoom-overlay").classList.remove("open");
-      document.getElementById("zoom-canvas").innerHTML = "";
-      if (history.state?._portfolio === "zoom") history.back();
-    }
+    if (e.key === "Escape") closeZoom();
     return;
   }
   if (e.key === "Escape") closeModal();

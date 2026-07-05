@@ -9,5 +9,8 @@ Seamless
 [tags]
 3D, Blender
 
+[square]
+true
+
 [date]
 2022-04

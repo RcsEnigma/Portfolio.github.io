@@ -7,5 +7,8 @@ Mesmerising seamless swirl of weapons. Inspired by Voician's visuals on one of h
 [tags]
 3D, Blender
 
+[square]
+true
+
 [date]
 2022-06

@@ -64,6 +64,7 @@ function parseWorkTxt(raw) {
     description:b.description || "",
     tags:       (b.tags||"").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
     featured:   /^(true|yes|1)$/i.test(b.featured||""),
+    square:     /^(true|yes|1)$/i.test(b.square||""),
     extraMedia: (b.extra||"").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
     date:       b.date||"",
     link:       b.link||"",
@@ -148,7 +149,7 @@ function buildWorks() {
       id:canon, primaryMedia:primary, allMedia, type,
       title:meta.title||canon, description:meta.description,
       tags:meta.tags, featured:meta.featured, date:meta.date, link:meta.link,
-      aspectRatio:ar, gridSpan:deriveSpan(ar,type),
+      aspectRatio:ar, gridSpan: meta.square ? "normal" : deriveSpan(ar,type),
     });
   }
 

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-04T23:16:58.275Z",
+  "generated": "2026-07-05T06:16:02.532Z",
   "tags": [
     "2D",
     "3D",
@@ -603,7 +603,7 @@
       "date": "2022-06",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "wide"
+      "gridSpan": "normal"
     },
     {
       "id": "AbstractFive",
@@ -622,7 +622,7 @@
       "date": "2022-04",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "wide"
+      "gridSpan": "normal"
     },
     {
       "id": "AbstractFour",
@@ -660,7 +660,7 @@
       "date": "2022-02",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "wide"
+      "gridSpan": "normal"
     },
     {
       "id": "AbstractThree",
@@ -698,7 +698,7 @@
       "date": "2022-02",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "wide"
+      "gridSpan": "normal"
     }
   ]
 }
