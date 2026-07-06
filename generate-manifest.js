@@ -134,6 +134,8 @@ function deriveSpan(ar, type) {
 // Skips regeneration if the existing thumb is newer than the source.
 async function makeImageThumb(srcPath, thumbDir, srcFilename) {
   if (!sharp) return null;
+  const ext = path.extname(srcFilename).toLowerCase();
+  if (ext === ".gif") return null; // skip: converting GIF kills animation
   const baseName  = path.basename(srcFilename, path.extname(srcFilename));
   const thumbName = baseName + ".webp";
   const thumbPath = path.join(thumbDir, thumbName);

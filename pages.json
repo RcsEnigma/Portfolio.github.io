@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-06T05:39:55.297Z",
+  "generated": "2026-07-06T21:24:37.479Z",
   "pages": [
     {
       "slug": "exul-omnium",
@@ -232,7 +232,7 @@
             {
               "file": "ShinyDesign.gif",
               "type": "image",
-              "thumb": "ShinyDesign.webp"
+              "thumb": null
             }
           ],
           "background": "#CCC7BC",
