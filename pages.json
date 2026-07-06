@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-05T06:16:02.550Z",
+  "generated": "2026-07-06T05:39:55.297Z",
   "pages": [
     {
       "slug": "exul-omnium",
@@ -18,10 +18,12 @@
           "media": [
             {
               "file": "CardDisplay.mp4",
-              "type": "video"
+              "type": "video",
+              "thumb": null
             }
           ],
-          "background": "#EDEAE4"
+          "background": "#EDEAE4",
+          "compress": true
         },
         {
           "type": "split",
@@ -30,14 +32,17 @@
           "media": [
             {
               "file": "Concepts.PNG",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts.webp"
             },
             {
               "file": "Concepts2.PNG",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts2.webp"
             }
           ],
-          "background": "#18191C"
+          "background": "#18191C",
+          "compress": true
         },
         {
           "type": "trio",
@@ -46,18 +51,22 @@
           "media": [
             {
               "file": "Concepts3.PNG",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts3.webp"
             },
             {
               "file": "Concepts5.PNG",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts5.webp"
             },
             {
               "file": "Concepts4.PNG",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts4.webp"
             }
           ],
-          "background": "#060708"
+          "background": "#060708",
+          "compress": true
         },
         {
           "type": "text-left",
@@ -66,10 +75,12 @@
           "media": [
             {
               "file": "Concepts6.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts6.webp"
             }
           ],
-          "background": "#292A2E"
+          "background": "#292A2E",
+          "compress": true
         },
         {
           "type": "image-left",
@@ -78,17 +89,20 @@
           "media": [
             {
               "file": "Concepts6.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts6.webp"
             }
           ],
-          "background": "#18191C"
+          "background": "#18191C",
+          "compress": true
         },
         {
           "type": "text-only",
           "title": "REBIRTH",
           "text": "",
           "media": [],
-          "background": "#CCC7BC"
+          "background": "#CCC7BC",
+          "compress": true
         },
         {
           "type": "split",
@@ -97,14 +111,17 @@
           "media": [
             {
               "file": "Concepts7.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts7.webp"
             },
             {
               "file": "Concepts10.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts10.webp"
             }
           ],
-          "background": "#18191C"
+          "background": "#18191C",
+          "compress": true
         },
         {
           "type": "text-only",
@@ -113,10 +130,12 @@
           "media": [
             {
               "file": "Concepts9.webp",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts9.webp"
             }
           ],
-          "background": "#292A2E"
+          "background": "#292A2E",
+          "compress": true
         },
         {
           "type": "trio",
@@ -125,18 +144,22 @@
           "media": [
             {
               "file": "Concepts9.webp",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts9.webp"
             },
             {
               "file": "Concepts8.PNG",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts8.webp"
             },
             {
               "file": "Concepts11.PNG",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts11.webp"
             }
           ],
-          "background": "#292A2E"
+          "background": "#292A2E",
+          "compress": true
         },
         {
           "type": "text-left",
@@ -145,10 +168,12 @@
           "media": [
             {
               "file": "Concepts6.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Concepts6.webp"
             }
           ],
-          "background": "#18191C"
+          "background": "#18191C",
+          "compress": true
         },
         {
           "type": "carousel",
@@ -157,38 +182,47 @@
           "media": [
             {
               "file": "Card1.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Card1.webp"
             },
             {
               "file": "Card2.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Card2.webp"
             },
             {
               "file": "Card3.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Card3.webp"
             },
             {
               "file": "Card4.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Card4.webp"
             },
             {
               "file": "Card5.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Card5.webp"
             },
             {
               "file": "Card6.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Card6.webp"
             },
             {
               "file": "Card7.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Card7.webp"
             },
             {
               "file": "Card8.png",
-              "type": "image"
+              "type": "image",
+              "thumb": "Card8.webp"
             }
           ],
-          "background": "#060708"
+          "background": "#060708",
+          "compress": true
         },
         {
           "type": "image-left",
@@ -197,10 +231,12 @@
           "media": [
             {
               "file": "ShinyDesign.gif",
-              "type": "image"
+              "type": "image",
+              "thumb": "ShinyDesign.webp"
             }
           ],
-          "background": "#CCC7BC"
+          "background": "#CCC7BC",
+          "compress": true
         }
       ]
     }

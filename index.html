@@ -324,7 +324,7 @@ body {
 .modal-slot {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  padding: 0;
+  padding: 1.5rem 3.5rem;
   opacity: 0; transition: opacity 0.42s ease; pointer-events: none;
 }
 .modal-slot.active { opacity: 1; }
@@ -412,22 +412,19 @@ body {
 }
 #modal-info-link:hover { opacity: 0.6; }
 
-/* ── Zoom overlay — scroll/pinch to zoom, drag to pan ─────── */
+/* ── Zoom overlay ─────────────────────────────────────────── */
 #zoom-overlay {
   position: fixed; inset: 0; z-index: 300;
   background: rgba(0,0,0,0.97);
+  display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none; transition: opacity 0.22s ease;
-  overflow: hidden; cursor: crosshair;
-  touch-action: none;
+  overflow: auto; cursor: zoom-out;
 }
 #zoom-overlay.open { opacity: 1; pointer-events: all; }
-#zoom-canvas {
-  position: absolute; top: 0; left: 0;
-  transform-origin: 0 0; will-change: transform;
-}
-#zoom-canvas img {
-  display: block; max-width: none;
-  user-select: none; -webkit-user-drag: none;
+#zoom-content img, #zoom-content video {
+  max-width: 98vw; max-height: 98vh;
+  width: auto; height: auto; display: block; object-fit: contain;
+  cursor: zoom-out;
 }
 #zoom-close-btn {
   position: fixed; top: 1rem; right: 1rem;
@@ -438,12 +435,6 @@ body {
   z-index: 301; transition: background 0.2s;
 }
 #zoom-close-btn:hover { background: rgba(255,255,255,0.1); }
-#zoom-hint {
-  position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%);
-  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
-  text-transform: uppercase; color: rgba(255,255,255,0.3);
-  pointer-events: none; z-index: 301; transition: opacity 0.6s ease;
-}
 
 /* ── Static pages ─────────────────────────────────────────── */
 .static-page { display: none; max-width: 680px; margin: 6rem auto; padding: 0 2.5rem; }
@@ -529,6 +520,7 @@ footer span {
   #modal-inner { width: 100vw; height: 100dvh; border-radius: 0; border: none; }
   #modal-body { flex-direction: column; }
   #modal-stage { flex: 0 0 45vh; }
+  .modal-slot { padding: 0.8rem 3rem; }
   #modal-prev { left: 0.3rem; }
   #modal-next { right: 0.3rem; }
   .modal-arrow { width: 32px; height: 32px; font-size: 1rem; }
@@ -639,10 +631,9 @@ footer span {
 </div>
 
 <!-- ── ZOOM OVERLAY ──────────────────────────────────────────── -->
-<div id="zoom-overlay">
+<div id="zoom-overlay" onclick="closeZoom()">
   <button id="zoom-close-btn" onclick="closeZoom()">&#x2715;</button>
-  <div id="zoom-canvas"></div>
-  <div id="zoom-hint">Scroll to zoom &nbsp;&middot;&nbsp; Drag to pan &nbsp;&middot;&nbsp; Esc to close</div>
+  <div id="zoom-content"></div>
 </div>
 
 <!-- ── FOOTER ────────────────────────────────────────────────── -->
@@ -802,7 +793,7 @@ function buildCarousel() {
       const work = item.data;
       slide.onclick = () => openModal(work);
 
-      const mEl = createMediaEl(work.primaryMedia, work.type, true);
+      const mEl = createMediaEl(work.primaryMedia, work.type, true, work.thumbMedia);
       if (mEl) {
         if (work.aspectRatio && work.aspectRatio < 0.85) mEl.classList.add("portrait-pan");
         slide.appendChild(mEl);
@@ -893,7 +884,7 @@ function buildGrid() {
     const span = getSpan(work);
     if (span !== "normal") item.dataset.span = span;
 
-    const mEl = createMediaEl(work.primaryMedia, work.type, false);
+    const mEl = createMediaEl(work.primaryMedia, work.type, false, work.thumbMedia);
     if (mEl) {
       item.appendChild(mEl);
       if (work.type === "video") gridVideoObserver.observe(mEl);
@@ -967,7 +958,6 @@ function openModal(work) {
 
   document.getElementById("modal-overlay").classList.add("open");
   document.body.style.overflow = "hidden";
-  history.pushState({ _portfolio: "modal" }, "");
 }
 
 function buildModalDots(work) {
@@ -1082,154 +1072,23 @@ function stepMedia(dir) {
   renderModalMedia();
 }
 
-// ── Pan/zoom engine ──────────────────────────────────────────
-// Scroll wheel or pinch to zoom (anchored to cursor/fingers).
-// Click-drag to pan. Image loads at native resolution for 4K detail.
-// ZOOM_MIN is set dynamically to the fit-to-screen scale so the
-// user can always zoom back out to see the full image.
-let _zoomScale = 1, _zoomFitScale = 1;
-let _zoomX = 0, _zoomY = 0;
-let _zoomDragging = false;
-let _zoomDragStartX = 0, _zoomDragStartY = 0;
-let _zoomOriginX = 0, _zoomOriginY = 0;
-let _zoomPinchDist = 0;
-const ZOOM_MAX = 12;
-
-function _zoomApply() {
-  document.getElementById("zoom-canvas").style.transform =
-    `translate(${_zoomX}px,${_zoomY}px) scale(${_zoomScale})`;
-}
-
-function _zoomClamp() {
-  const canvas = document.getElementById("zoom-canvas");
-  const img = canvas.querySelector("img");
-  if (!img || !img.naturalWidth) return;
-  const W  = img.naturalWidth  * _zoomScale;
-  const H  = img.naturalHeight * _zoomScale;
-  const vw = window.innerWidth, vh = window.innerHeight;
-  if (W < vw) { _zoomX = (vw - W) / 2; }
-  else { _zoomX = Math.min(0, Math.max(_zoomX, vw - W)); }
-  if (H < vh) { _zoomY = (vh - H) / 2; }
-  else { _zoomY = Math.min(0, Math.max(_zoomY, vh - H)); }
-}
-
-function _zoomAt(clientX, clientY, factor) {
-  const prev = _zoomScale;
-  // Clamp: never go below fit scale (always see full image), never above ZOOM_MAX
-  _zoomScale = Math.max(_zoomFitScale, Math.min(ZOOM_MAX, _zoomScale * factor));
-  const ratio = _zoomScale / prev;
-  _zoomX = clientX - ratio * (clientX - _zoomX);
-  _zoomY = clientY - ratio * (clientY - _zoomY);
-  _zoomClamp();
-  _zoomApply();
-}
-
 function openZoom() {
   if (!modalWork) return;
-  const src = modalWork.allMedia?.[modalMediaIndex];
+  const src  = modalWork.allMedia?.[modalMediaIndex];
   if (!src) return;
   if ((getMediaType(src) || modalWork.type) !== "image") return;
-
-  const canvas = document.getElementById("zoom-canvas");
-  canvas.innerHTML = "";
-  const img = new Image();
-  img.draggable = false;
-
-  img.onload = () => {
-    // Fit scale: largest scale at which the whole image fits inside the viewport
-    const fitW = window.innerWidth  / img.naturalWidth;
-    const fitH = window.innerHeight / img.naturalHeight;
-    _zoomFitScale = Math.min(fitW, fitH);
-    _zoomScale    = _zoomFitScale;
-    _zoomX = (window.innerWidth  - img.naturalWidth  * _zoomScale) / 2;
-    _zoomY = (window.innerHeight - img.naturalHeight * _zoomScale) / 2;
-    _zoomApply();
-  };
-
-  img.src = "/works/" + src;
-  canvas.appendChild(img);
-  // Reset state before image loads so first _zoomApply() from onload is clean
-  _zoomScale = 1; _zoomFitScale = 1; _zoomX = 0; _zoomY = 0;
-
-  const overlay = document.getElementById("zoom-overlay");
-  overlay.classList.add("open");
-
-  const hint = document.getElementById("zoom-hint");
-  hint.style.opacity = "1";
-  clearTimeout(hint._t);
-  hint._t = setTimeout(() => { hint.style.opacity = "0"; }, 2200);
+  const content = document.getElementById("zoom-content");
+  content.innerHTML = "";
+  const img = document.createElement("img");
+  img.src = "/works/" + src; img.alt = modalWork.title;
+  content.appendChild(img);
+  document.getElementById("zoom-overlay").classList.add("open");
 }
 
 function closeZoom() {
-  // Just close the overlay — no history manipulation needed.
-  // Zoom is a layer on top of the modal; X and Escape both return to modal.
   document.getElementById("zoom-overlay").classList.remove("open");
-  document.getElementById("zoom-canvas").innerHTML = "";
+  document.getElementById("zoom-content").innerHTML = "";
 }
-
-// Scroll-wheel zoom — anchored to cursor position
-document.getElementById("zoom-overlay").addEventListener("wheel", e => {
-  e.preventDefault();
-  _zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.12 : 1 / 1.12);
-}, { passive: false });
-
-// Click-drag pan
-document.getElementById("zoom-overlay").addEventListener("mousedown", e => {
-  if (e.button !== 0) return;
-  _zoomDragging = true;
-  _zoomDragStartX = e.clientX; _zoomDragStartY = e.clientY;
-  _zoomOriginX = _zoomX;       _zoomOriginY = _zoomY;
-  e.currentTarget.style.cursor = "grabbing";
-});
-window.addEventListener("mousemove", e => {
-  if (!_zoomDragging) return;
-  _zoomX = _zoomOriginX + (e.clientX - _zoomDragStartX);
-  _zoomY = _zoomOriginY + (e.clientY - _zoomDragStartY);
-  _zoomClamp();
-  _zoomApply();
-});
-window.addEventListener("mouseup", () => {
-  if (!_zoomDragging) return;
-  _zoomDragging = false;
-  const ov = document.getElementById("zoom-overlay");
-  if (ov.classList.contains("open")) ov.style.cursor = "crosshair";
-});
-
-// Pinch-zoom + touch-drag
-document.getElementById("zoom-overlay").addEventListener("touchstart", e => {
-  if (e.touches.length === 2) {
-    _zoomDragging = false;
-    _zoomPinchDist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY);
-  } else if (e.touches.length === 1) {
-    _zoomDragging = true;
-    _zoomDragStartX = e.touches[0].clientX; _zoomDragStartY = e.touches[0].clientY;
-    _zoomOriginX = _zoomX; _zoomOriginY = _zoomY;
-  }
-}, { passive: true });
-
-document.getElementById("zoom-overlay").addEventListener("touchmove", e => {
-  e.preventDefault();
-  if (e.touches.length === 2) {
-    const dist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY);
-    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    if (_zoomPinchDist > 0) _zoomAt(cx, cy, dist / _zoomPinchDist);
-    _zoomPinchDist = dist;
-  } else if (_zoomDragging && e.touches.length === 1) {
-    _zoomX = _zoomOriginX + (e.touches[0].clientX - _zoomDragStartX);
-    _zoomY = _zoomOriginY + (e.touches[0].clientY - _zoomDragStartY);
-    _zoomClamp();
-    _zoomApply();
-  }
-}, { passive: false });
-
-document.getElementById("zoom-overlay").addEventListener("touchend", () => {
-  _zoomDragging = false; _zoomPinchDist = 0;
-}, { passive: true });
 
 function closeModal() {
   document.getElementById("modal-overlay").classList.remove("open");
@@ -1237,24 +1096,9 @@ function closeModal() {
   document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
   document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
   modalWork = null;
-  if (history.state?._portfolio === "modal") history.back();
 }
 
 function handleOverlayClick(e) { closeModal(); }
-
-// Hardware back button (Samsung / Android) — closes modal, not the page
-window.addEventListener("popstate", e => {
-  if (document.getElementById("zoom-overlay").classList.contains("open")) {
-    closeZoom(); return;
-  }
-  if (modalWork) {
-    document.getElementById("modal-overlay").classList.remove("open");
-    document.body.style.overflow = "";
-    document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
-    document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
-    modalWork = null;
-  }
-});
 
 document.addEventListener("keydown", e => {
   if (document.getElementById("zoom-overlay").classList.contains("open")) {
@@ -1290,20 +1134,22 @@ function getMediaType(filename) {
   return null;
 }
 
-function createMediaEl(src, type, autoplay) {
+function createMediaEl(src, type, autoplay, thumb) {
   if (!src) return null;
-  const p = "/works/" + src;
+  const orig = "/works/" + src;
+  const disp = thumb ? "/works/thumbs/" + thumb : orig;
   if (type === "video") {
     const v = document.createElement("video");
-    v.src = p; v.muted = true; v.loop = true; v.playsInline = true;
+    v.src = orig; v.muted = true; v.loop = true; v.playsInline = true;
     v.controlsList = "nodownload nofullscreen";
     v.disablePictureInPicture = true;
+    if (thumb) v.poster = "/works/thumbs/" + thumb;
     if (autoplay) v.autoplay = true;
     return v;
   }
   if (type === "image") {
     const img = document.createElement("img");
-    img.src = p; img.alt = src; img.loading = "lazy";
+    img.src = disp; img.alt = src; img.loading = "lazy";
     return img;
   }
   return null;

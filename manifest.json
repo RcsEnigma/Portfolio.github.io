@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-05T06:16:02.532Z",
+  "generated": "2026-07-06T05:39:51.560Z",
   "tags": [
     "2D",
     "3D",
@@ -38,7 +38,8 @@
       "date": "2026-07",
       "link": "",
       "aspectRatio": 0.773,
-      "gridSpan": "tall"
+      "gridSpan": "tall",
+      "thumbMedia": "Hatamoto_01.webp"
     },
     {
       "id": "PosterOne",
@@ -63,7 +64,8 @@
       "date": "2026-05",
       "link": "",
       "aspectRatio": 0.562,
-      "gridSpan": "tall"
+      "gridSpan": "tall",
+      "thumbMedia": "PosterOne_01.webp"
     },
     {
       "id": "Trepidation_Rooms",
@@ -84,7 +86,8 @@
       "date": "2026-05",
       "link": "",
       "aspectRatio": 1.778,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": "Trepidation_Rooms_01.webp"
     },
     {
       "id": "MagazineOne",
@@ -107,7 +110,8 @@
       "date": "2026-03",
       "link": "",
       "aspectRatio": 0.773,
-      "gridSpan": "tall"
+      "gridSpan": "tall",
+      "thumbMedia": "MagazineOne_01.webp"
     },
     {
       "id": "Grungy_Shower",
@@ -127,7 +131,8 @@
       "date": "2026-02",
       "link": "",
       "aspectRatio": 0.781,
-      "gridSpan": "tall"
+      "gridSpan": "tall",
+      "thumbMedia": "Grungy_Shower.webp"
     },
     {
       "id": "MagazineSix",
@@ -148,7 +153,8 @@
       "date": "2025-11",
       "link": "",
       "aspectRatio": 0.773,
-      "gridSpan": "tall"
+      "gridSpan": "tall",
+      "thumbMedia": "MagazineSix_01.webp"
     },
     {
       "id": "MagazineFour",
@@ -168,7 +174,8 @@
       "date": "2025-09",
       "link": "",
       "aspectRatio": 0.773,
-      "gridSpan": "tall"
+      "gridSpan": "tall",
+      "thumbMedia": "MagazineFour_01.webp"
     },
     {
       "id": "MagazineThree",
@@ -188,7 +195,8 @@
       "date": "2025-09",
       "link": "",
       "aspectRatio": 0.773,
-      "gridSpan": "tall"
+      "gridSpan": "tall",
+      "thumbMedia": "MagazineThree_01.webp"
     },
     {
       "id": "Translation",
@@ -209,7 +217,8 @@
       "date": "2025-09",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": null
     },
     {
       "id": "MagazineFive",
@@ -229,7 +238,8 @@
       "date": "2025-08",
       "link": "",
       "aspectRatio": 0.773,
-      "gridSpan": "tall"
+      "gridSpan": "tall",
+      "thumbMedia": "MagazineFive_01.webp"
     },
     {
       "id": "MagazineTwo",
@@ -249,7 +259,8 @@
       "date": "2025-08",
       "link": "",
       "aspectRatio": 0.773,
-      "gridSpan": "tall"
+      "gridSpan": "tall",
+      "thumbMedia": "MagazineTwo.webp"
     },
     {
       "id": "Gummy",
@@ -269,7 +280,8 @@
       "date": "2025-02",
       "link": "",
       "aspectRatio": 1,
-      "gridSpan": "normal"
+      "gridSpan": "normal",
+      "thumbMedia": "Gummy.webp"
     },
     {
       "id": "Colleague_Face",
@@ -293,7 +305,8 @@
       "date": "2024-11",
       "link": "",
       "aspectRatio": 1,
-      "gridSpan": "normal"
+      "gridSpan": "normal",
+      "thumbMedia": "Colleague_Face_01.webp"
     },
     {
       "id": "Procedural_Land",
@@ -314,7 +327,8 @@
       "date": "2024-09",
       "link": "",
       "aspectRatio": 1.896,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": "Procedural_Land_01.webp"
     },
     {
       "id": "CardDisplay",
@@ -333,7 +347,8 @@
       "date": "2024-07",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": null
     },
     {
       "id": "Skull_ArtOne",
@@ -352,7 +367,8 @@
       "date": "2024-05",
       "link": "",
       "aspectRatio": 1,
-      "gridSpan": "normal"
+      "gridSpan": "normal",
+      "thumbMedia": "Skull_ArtOne.webp"
     },
     {
       "id": "Scientist_Winged",
@@ -375,7 +391,8 @@
       "date": "2024-04",
       "link": "",
       "aspectRatio": 1.778,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": "Scientist_Winged_01.webp"
     },
     {
       "id": "Skull_ArtTwo",
@@ -394,7 +411,8 @@
       "date": "2024-04",
       "link": "",
       "aspectRatio": 1,
-      "gridSpan": "normal"
+      "gridSpan": "normal",
+      "thumbMedia": "Skull_ArtTwo.webp"
     },
     {
       "id": "Fossil_Walker",
@@ -415,7 +433,8 @@
       "date": "2024-02",
       "link": "",
       "aspectRatio": 1.058,
-      "gridSpan": "normal"
+      "gridSpan": "normal",
+      "thumbMedia": "Fossil_Walker_01.webp"
     },
     {
       "id": "Frozen Aperture",
@@ -436,7 +455,8 @@
       "date": "2023-12",
       "link": "",
       "aspectRatio": 1.778,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": "Frozen Aperture_01.webp"
     },
     {
       "id": "Sword",
@@ -457,7 +477,8 @@
       "date": "2023-12",
       "link": "",
       "aspectRatio": 1.778,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": "Sword_01.webp"
     },
     {
       "id": "Pyroclastic_Elemental",
@@ -478,7 +499,8 @@
       "date": "2023-09",
       "link": "",
       "aspectRatio": 1.088,
-      "gridSpan": "normal"
+      "gridSpan": "normal",
+      "thumbMedia": "Pyroclastic_Elemental_01.webp"
     },
     {
       "id": "Spiderman",
@@ -498,7 +520,8 @@
       "date": "2023-06",
       "link": "",
       "aspectRatio": 1.778,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": "Spiderman.webp"
     },
     {
       "id": "Creeping_Shade",
@@ -519,7 +542,8 @@
       "date": "2023-05",
       "link": "",
       "aspectRatio": 1.054,
-      "gridSpan": "normal"
+      "gridSpan": "normal",
+      "thumbMedia": "Creeping_Shade_01.webp"
     },
     {
       "id": "Dimension_Jumper",
@@ -540,7 +564,8 @@
       "date": "2023-05",
       "link": "",
       "aspectRatio": 1.047,
-      "gridSpan": "normal"
+      "gridSpan": "normal",
+      "thumbMedia": "Dimension_Jumper_01.webp"
     },
     {
       "id": "Pixel_Combat_Sprites",
@@ -565,7 +590,8 @@
       "date": "2023-04",
       "link": "",
       "aspectRatio": 1.778,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": "Pixel_Combat_Sprites_01.webp"
     },
     {
       "id": "AbstractSeven",
@@ -584,7 +610,8 @@
       "date": "2022-09",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": null
     },
     {
       "id": "AbstractSix",
@@ -603,7 +630,8 @@
       "date": "2022-06",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "normal"
+      "gridSpan": "wide",
+      "thumbMedia": null
     },
     {
       "id": "AbstractFive",
@@ -622,7 +650,8 @@
       "date": "2022-04",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "normal"
+      "gridSpan": "wide",
+      "thumbMedia": null
     },
     {
       "id": "AbstractFour",
@@ -641,7 +670,8 @@
       "date": "2022-02",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": null
     },
     {
       "id": "AbstractOne",
@@ -660,7 +690,8 @@
       "date": "2022-02",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "normal"
+      "gridSpan": "wide",
+      "thumbMedia": null
     },
     {
       "id": "AbstractThree",
@@ -679,7 +710,8 @@
       "date": "2022-02",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "wide"
+      "gridSpan": "wide",
+      "thumbMedia": null
     },
     {
       "id": "AbstractTwo",
@@ -698,7 +730,8 @@
       "date": "2022-02",
       "link": "",
       "aspectRatio": null,
-      "gridSpan": "normal"
+      "gridSpan": "wide",
+      "thumbMedia": null
     }
   ]
 }

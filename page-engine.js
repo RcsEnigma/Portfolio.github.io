@@ -73,20 +73,12 @@
       // Zoom overlay
       "#page-zoom-overlay{" +
         "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.97);" +
-        "display:flex;align-items:center;justify-content:center;" +
         "opacity:0;pointer-events:none;transition:opacity .22s ease;" +
-        "cursor:zoom-out;overflow:auto;" +
+        "overflow:hidden;cursor:crosshair;touch-action:none;" +
       "}" +
       "#page-zoom-overlay.open{opacity:1;pointer-events:all;}" +
-      "#page-zoom-content{" +
-        "display:flex;align-items:center;justify-content:center;" +
-        "min-height:100vh;padding:2rem;" +
-      "}" +
-      "#page-zoom-content img{" +
-        "max-width:96vw;max-height:96vh;" +
-        "width:auto;height:auto;display:block;" +
-        "object-fit:contain;cursor:zoom-out;" +
-      "}" +
+      "#page-zoom-canvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;}" +
+      "#page-zoom-canvas img{display:block;max-width:none;user-select:none;-webkit-user-drag:none;}" +
       "#page-zoom-close{" +
         "position:fixed;top:1rem;right:1rem;" +
         "background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);" +
@@ -95,7 +87,12 @@
         "display:flex;align-items:center;justify-content:center;" +
         "z-index:10000;transition:background .2s;" +
       "}" +
-      "#page-zoom-close:hover{background:rgba(255,255,255,.1);}";
+      "#page-zoom-close:hover{background:rgba(255,255,255,.1);}" +
+      "#page-zoom-hint{" +
+        "position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);" +
+        "font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;" +
+        "color:rgba(255,255,255,.3);pointer-events:none;z-index:10000;transition:opacity .6s ease;" +
+      "}";
     document.head.appendChild(s);
   })();
 
@@ -169,19 +166,8 @@
   function buildFooter() {
     document.getElementById("footer-root").innerHTML = `
       <footer>
-        <a href="/" style="
-          font-family:var(--mono);font-size:0.72rem;letter-spacing:0.12em;
-          text-transform:uppercase;text-decoration:none;
-          color:var(--muted);border:1px solid var(--border);
-          padding:0.4rem 0.9rem;border-radius:var(--radius);
-          transition:color 0.2s,border-color 0.2s;
-        " onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--muted)'"
-           onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">
-          &larr; Back to Work
-        </a>
-        <span style="font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;">
-          AJ Ambrozic
-        </span>
+        <a class="nav-link" href="/">&larr; Back to Work</a>
+        <span>AJ Ambrozic</span>
       </footer>`;
   }
 
@@ -204,25 +190,33 @@
   function buildMediaEl(slug, item, opts) {
     opts = opts || {};
     if (!item) return null;
+
+    const origUrl  = mediaPath(slug, item.file);
+    const thumbUrl = item.thumb ? "/pages/" + slug + "/thumbs/" + item.thumb : null;
+
     if (item.type === "video") {
       const v = document.createElement("video");
-      v.src = mediaPath(slug, item.file);
+      v.src = origUrl;
       v.muted = true; v.loop = true; v.playsInline = true;
       v.controls = !!opts.controls;
       v.controlsList = "nodownload nofullscreen";
       v.disablePictureInPicture = true;
+      if (thumbUrl) v.poster = thumbUrl; // poster frame from ffmpeg
       if (opts.autoplay) v.autoplay = true;
       if (opts.manage === "autoplay")        autoplayObserver.observe(v);
       else if (opts.manage === "pause-only") pauseOnlyObserver.observe(v);
       return v;
     }
+
     const img = document.createElement("img");
     img.alt = ""; img.loading = "lazy";
     img.onerror = () => img.replaceWith(makeMissingPlaceholder());
-    img.src = mediaPath(slug, item.file);
+    // Display the thumbnail if available; always zoom into the original
+    img.src = thumbUrl || origUrl;
+    img.dataset.orig = origUrl; // always points to full-res original
     if (!opts.noZoom) {
       img.style.cursor = "zoom-in";
-      img.onclick = () => openZoom(img.src);
+      img.onclick = () => openZoom(origUrl); // always full-res in zoom
     }
     return img;
   }
@@ -473,7 +467,8 @@
           if (img) {
             img.style.objectFit = "contain";
             img.style.cursor    = "zoom-in";
-            img.onclick = e => { e.stopPropagation(); openZoom(img.src); };
+            // dataset.orig is set by buildMediaEl to the full-res URL
+            img.onclick = e => { e.stopPropagation(); openZoom(img.dataset.orig || img.src); };
           }
           const vid = el.querySelector("video");
           if (vid) {
@@ -569,48 +564,150 @@
       .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
-  // ── Image zoom overlay ───────────────────────────────────────────
-  // CSS for this is injected by injectCriticalStyles() above.
-  let _zoomOverlay = null, _zoomContent = null;
+  // ── Pan/zoom overlay — matches the gallery zoom in index.html ────
+  // Scroll/pinch to zoom (anchored to cursor/fingers), drag to pan.
+  // Always opens the full-resolution original regardless of whether a
+  // thumbnail was displayed — so 4K detail is available at max zoom.
+  let _pzOverlay = null, _pzCanvas = null, _pzHint = null;
+  let _pzScale = 1, _pzFitScale = 1, _pzX = 0, _pzY = 0;
+  let _pzDrag = false, _pzDragSX = 0, _pzDragSY = 0, _pzOX = 0, _pzOY = 0;
+  let _pzPinchDist = 0;
+  const PZ_MAX = 12;
+
+  function _pzApply() {
+    _pzCanvas.style.transform = `translate(${_pzX}px,${_pzY}px) scale(${_pzScale})`;
+  }
+
+  function _pzClamp() {
+    const img = _pzCanvas.querySelector("img");
+    if (!img || !img.naturalWidth) return;
+    const W = img.naturalWidth * _pzScale, H = img.naturalHeight * _pzScale;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    _pzX = W < vw ? (vw-W)/2 : Math.min(0, Math.max(_pzX, vw-W));
+    _pzY = H < vh ? (vh-H)/2 : Math.min(0, Math.max(_pzY, vh-H));
+  }
+
+  function _pzAt(cx, cy, factor) {
+    const prev = _pzScale;
+    _pzScale = Math.max(_pzFitScale, Math.min(PZ_MAX, _pzScale * factor));
+    const r = _pzScale / prev;
+    _pzX = cx - r*(cx - _pzX);
+    _pzY = cy - r*(cy - _pzY);
+    _pzClamp(); _pzApply();
+  }
 
   function initZoom() {
-    if (_zoomOverlay) return;
-    _zoomOverlay = document.createElement("div");
-    _zoomOverlay.id = "page-zoom-overlay";
-    _zoomOverlay.onclick = closeZoom;
+    if (_pzOverlay) return;
+
+    _pzOverlay = document.createElement("div");
+    _pzOverlay.id = "page-zoom-overlay";
 
     const btn = document.createElement("button");
     btn.id = "page-zoom-close";
     btn.innerHTML = "&#x2715;";
     btn.onclick = closeZoom;
 
-    _zoomContent = document.createElement("div");
-    _zoomContent.id = "page-zoom-content";
-    _zoomContent.onclick = e => e.stopPropagation();
+    _pzCanvas = document.createElement("div");
+    _pzCanvas.id = "page-zoom-canvas";
 
-    _zoomOverlay.appendChild(btn);
-    _zoomOverlay.appendChild(_zoomContent);
-    document.body.appendChild(_zoomOverlay);
+    _pzHint = document.createElement("div");
+    _pzHint.id = "page-zoom-hint";
+    _pzHint.textContent = "Scroll to zoom \u00b7 Drag to pan \u00b7 Esc to close";
+
+    _pzOverlay.appendChild(btn);
+    _pzOverlay.appendChild(_pzCanvas);
+    _pzOverlay.appendChild(_pzHint);
+    document.body.appendChild(_pzOverlay);
+
+    // Scroll-wheel zoom
+    _pzOverlay.addEventListener("wheel", e => {
+      e.preventDefault();
+      _pzAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.12 : 1/1.12);
+    }, { passive: false });
+
+    // Drag pan
+    _pzOverlay.addEventListener("mousedown", e => {
+      if (e.button !== 0) return;
+      _pzDrag = true; _pzDragSX = e.clientX; _pzDragSY = e.clientY;
+      _pzOX = _pzX; _pzOY = _pzY;
+      _pzOverlay.style.cursor = "grabbing";
+    });
+    window.addEventListener("mousemove", e => {
+      if (!_pzDrag) return;
+      _pzX = _pzOX + (e.clientX - _pzDragSX);
+      _pzY = _pzOY + (e.clientY - _pzDragSY);
+      _pzClamp(); _pzApply();
+    });
+    window.addEventListener("mouseup", () => {
+      _pzDrag = false;
+      if (_pzOverlay.classList.contains("open")) _pzOverlay.style.cursor = "crosshair";
+    });
+
+    // Pinch + touch-drag
+    _pzOverlay.addEventListener("touchstart", e => {
+      if (e.touches.length === 2) {
+        _pzDrag = false;
+        _pzPinchDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+      } else if (e.touches.length === 1) {
+        _pzDrag = true;
+        _pzDragSX = e.touches[0].clientX; _pzDragSY = e.touches[0].clientY;
+        _pzOX = _pzX; _pzOY = _pzY;
+      }
+    }, { passive: true });
+    _pzOverlay.addEventListener("touchmove", e => {
+      e.preventDefault();
+      if (e.touches.length === 2) {
+        const dist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+        const cx = (e.touches[0].clientX+e.touches[1].clientX)/2;
+        const cy = (e.touches[0].clientY+e.touches[1].clientY)/2;
+        if (_pzPinchDist > 0) _pzAt(cx, cy, dist/_pzPinchDist);
+        _pzPinchDist = dist;
+      } else if (_pzDrag && e.touches.length === 1) {
+        _pzX = _pzOX + (e.touches[0].clientX - _pzDragSX);
+        _pzY = _pzOY + (e.touches[0].clientY - _pzDragSY);
+        _pzClamp(); _pzApply();
+      }
+    }, { passive: false });
+    _pzOverlay.addEventListener("touchend", () => { _pzDrag = false; _pzPinchDist = 0; }, { passive: true });
 
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape" && _zoomOverlay.classList.contains("open")) closeZoom();
+      if (e.key === "Escape" && _pzOverlay.classList.contains("open")) closeZoom();
     });
   }
 
-  function openZoom(src) {
+  function openZoom(origSrc) {
     initZoom();
-    _zoomContent.innerHTML = "";
-    const img = document.createElement("img");
-    img.src = src;
-    _zoomContent.appendChild(img);
-    _zoomOverlay.classList.add("open");
+    _pzCanvas.innerHTML = "";
+    _pzScale = 1; _pzFitScale = 1; _pzX = 0; _pzY = 0;
+
+    const img = new Image();
+    img.draggable = false;
+    img.onload = () => {
+      const fw = window.innerWidth  / img.naturalWidth;
+      const fh = window.innerHeight / img.naturalHeight;
+      _pzFitScale = Math.min(fw, fh);
+      _pzScale = _pzFitScale;
+      _pzX = (window.innerWidth  - img.naturalWidth  * _pzScale) / 2;
+      _pzY = (window.innerHeight - img.naturalHeight * _pzScale) / 2;
+      _pzApply();
+    };
+    img.src = origSrc;
+    _pzCanvas.appendChild(img);
+    _pzApply();
+
+    _pzOverlay.classList.add("open");
     document.body.style.overflow = "hidden";
+
+    _pzHint.style.opacity = "1";
+    clearTimeout(_pzHint._t);
+    _pzHint._t = setTimeout(() => { _pzHint.style.opacity = "0"; }, 2200);
   }
 
   function closeZoom() {
-    _zoomOverlay.classList.remove("open");
+    if (!_pzOverlay) return;
+    _pzOverlay.classList.remove("open");
     document.body.style.overflow = "";
-    setTimeout(() => { if (_zoomContent) _zoomContent.innerHTML = ""; }, 230);
+    setTimeout(() => { if (_pzCanvas) _pzCanvas.innerHTML = ""; }, 230);
   }
 
   boot();

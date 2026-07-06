@@ -11,6 +11,20 @@
 
 const fs   = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
+
+// ── Optional thumbnail dependencies ─────────────────────────
+// sharp: npm install sharp  (images → compressed WebP thumbnails)
+// ffmpeg: system install    (videos → poster frame JPEGs)
+let sharp = null;
+try { sharp = require("sharp"); } catch(_) {}
+
+let hasFfmpeg = false;
+try { execSync("ffmpeg -version", { stdio:"pipe" }); hasFfmpeg = true; } catch(_) {}
+
+const THUMB_DIR    = "thumbs";   // subfolder name inside works/ and pages/<slug>/
+const THUMB_MAX_PX = 1200;       // longest side of thumbnail
+const THUMB_QUALITY = 82;        // WebP quality (0-100)
 
 const WORKS_DIR   = path.join(__dirname, "works");
 const PAGES_DIR   = path.join(__dirname, "pages");
@@ -64,7 +78,6 @@ function parseWorkTxt(raw) {
     description:b.description || "",
     tags:       (b.tags||"").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
     featured:   /^(true|yes|1)$/i.test(b.featured||""),
-    square:     /^(true|yes|1)$/i.test(b.square||""),
     extraMedia: (b.extra||"").split(/[\n,]+/).map(t=>t.trim()).filter(Boolean),
     date:       b.date||"",
     link:       b.link||"",
@@ -115,8 +128,55 @@ function deriveSpan(ar, type) {
   return "normal";
 }
 
-function buildWorks() {
+// ── Thumbnail generation ─────────────────────────────────────
+
+// Returns the thumb filename (e.g. "mywork.webp") or null on failure.
+// Skips regeneration if the existing thumb is newer than the source.
+async function makeImageThumb(srcPath, thumbDir, srcFilename) {
+  if (!sharp) return null;
+  const baseName  = path.basename(srcFilename, path.extname(srcFilename));
+  const thumbName = baseName + ".webp";
+  const thumbPath = path.join(thumbDir, thumbName);
+  try {
+    const srcMtime = fs.statSync(srcPath).mtimeMs;
+    try { if (fs.statSync(thumbPath).mtimeMs >= srcMtime) return thumbName; } catch(_) {}
+    await sharp(srcPath)
+      .resize(THUMB_MAX_PX, THUMB_MAX_PX, { fit:"inside", withoutEnlargement:true })
+      .webp({ quality:THUMB_QUALITY })
+      .toFile(thumbPath);
+    return thumbName;
+  } catch(e) {
+    process.stdout.write("  thumb skipped (" + srcFilename + "): " + e.message + "\n");
+    return null;
+  }
+}
+
+// Returns the poster filename (e.g. "myvideo_poster.jpg") or null.
+function makeVideoThumb(srcPath, thumbDir, srcFilename) {
+  if (!hasFfmpeg) return null;
+  const baseName  = path.basename(srcFilename, path.extname(srcFilename));
+  const thumbName = baseName + "_poster.jpg";
+  const thumbPath = path.join(thumbDir, thumbName);
+  try {
+    const srcMtime = fs.statSync(srcPath).mtimeMs;
+    try { if (fs.statSync(thumbPath).mtimeMs >= srcMtime) return thumbName; } catch(_) {}
+    execSync(
+      `ffmpeg -i "${srcPath}" -vf "thumbnail=300,scale=${THUMB_MAX_PX}:-1" -frames:v 1 "${thumbPath}" -y`,
+      { stdio:"pipe" }
+    );
+    return thumbName;
+  } catch(_) { return null; }
+}
+
+function ensureThumbDir(dir) {
+  const d = path.join(dir, THUMB_DIR);
+  if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive:true });
+  return d;
+}
+
+async function buildWorks() {
   if (!fs.existsSync(WORKS_DIR)) { fs.mkdirSync(WORKS_DIR); }
+  const thumbDir = ensureThumbDir(WORKS_DIR);
   const files = fs.readdirSync(WORKS_DIR).filter(f => fs.statSync(path.join(WORKS_DIR,f)).isFile());
   const txtMap={}, groups={};
 
@@ -134,7 +194,7 @@ function buildWorks() {
   for (const [canon, mediaFiles] of Object.entries(groups)) {
     const txtRaw = txtMap[canon] ?? mediaFiles.map(f=>txtMap[path.basename(f,path.extname(f))]).find(Boolean) ?? null;
     const meta = txtRaw ? parseWorkTxt(txtRaw)
-      : { title:canon, description:"", tags:[], featured:false, extraMedia:[], date:"", link:"" };
+      : { title:canon, description:"", tags:[], featured:false, square:false, extraMedia:[], date:"", link:"" };
     const sorted = [...mediaFiles].sort((a,b)=>{
       const na=parseInt(path.basename(a,path.extname(a)).match(/(\d+)$/)?.[1]??"0");
       const nb=parseInt(path.basename(b,path.extname(b)).match(/(\d+)$/)?.[1]??"0");
@@ -145,11 +205,22 @@ function buildWorks() {
     const type     = mediaType(primary);
     const dims     = readDimensions(path.join(WORKS_DIR, primary));
     const ar       = dims ? parseFloat((dims.w/dims.h).toFixed(3)) : null;
+
+    // Generate thumbnail for primary media
+    let thumbMedia = null;
+    const srcPath = path.join(WORKS_DIR, primary);
+    if (type === "image") {
+      thumbMedia = await makeImageThumb(srcPath, thumbDir, primary);
+    } else if (type === "video") {
+      thumbMedia = makeVideoThumb(srcPath, thumbDir, primary);
+    }
+
     entries.push({
       id:canon, primaryMedia:primary, allMedia, type,
       title:meta.title||canon, description:meta.description,
       tags:meta.tags, featured:meta.featured, date:meta.date, link:meta.link,
       aspectRatio:ar, gridSpan: meta.square ? "normal" : deriveSpan(ar,type),
+      thumbMedia,
     });
   }
 
@@ -186,16 +257,19 @@ function parseWidget(raw) {
   const b = parseBlocks(raw);
   const type = (b.type||"text-only").toLowerCase().trim();
   const mediaList = (b.media||"").split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+  // [compress] defaults to true — set to false to skip thumbnail generation for this widget
+  const compress = !/^(false|no|0)$/i.test(b.compress||"");
   return {
     type: VALID_WIDGET_TYPES.has(type) ? type : "text-only",
     title: b.title||"",
     text:  b.text||"",
     media: mediaList,
     background: b.background||null,
+    compress,
   };
 }
 
-function buildPages() {
+async function buildPages() {
   if (!fs.existsSync(PAGES_DIR)) return [];
   const pageFolders = fs.readdirSync(PAGES_DIR)
     .filter(f=>fs.statSync(path.join(PAGES_DIR,f)).isDirectory());
@@ -210,6 +284,8 @@ function buildPages() {
     const metaRaw  = fs.existsSync(metaPath) ? fs.readFileSync(metaPath,"utf8") : "";
     const meta     = parsePageMeta(metaRaw, folderName);
 
+    const thumbDir = ensureThumbDir(pageDir);
+
     const allFiles = fs.readdirSync(pageDir).filter(f=>fs.statSync(path.join(pageDir,f)).isFile());
     const widgetFiles = allFiles
       .filter(f=>path.extname(f).toLowerCase()===".txt" && f.toLowerCase()!=="_page.txt")
@@ -220,12 +296,28 @@ function buildPages() {
         return a.localeCompare(b);
       });
 
-    const widgets = widgetFiles.map(f => {
+    const widgets = [];
+    for (const f of widgetFiles) {
       const raw = fs.readFileSync(path.join(pageDir,f),"utf8");
       const w   = parseWidget(raw);
-      w.media   = w.media.map(file=>({ file, type:mediaType(file) }));
-      return w;
-    });
+
+      // Build media items with optional thumbnails
+      const mediaItems = [];
+      for (const file of w.media) {
+        const mtype = mediaType(file);
+        let thumb = null;
+        if (w.compress) {
+          const srcPath = path.join(pageDir, file);
+          if (fs.existsSync(srcPath)) {
+            if (mtype === "image") thumb = await makeImageThumb(srcPath, thumbDir, file);
+            else if (mtype === "video") thumb = makeVideoThumb(srcPath, thumbDir, file);
+          }
+        }
+        mediaItems.push({ file, type:mtype, thumb });
+      }
+      w.media = mediaItems;
+      widgets.push(w);
+    }
 
     let carouselFile = meta.carouselMedia;
     if (!carouselFile) {
@@ -310,17 +402,22 @@ function writeStubs(pages) {
 // ══════════════════════════════════════════════════════════════
 //  MAIN
 // ══════════════════════════════════════════════════════════════
-function build() {
-  const manifest = buildWorks();
+async function build() {
+  // Report thumbnail tool availability
+  if (!sharp) console.log("\nNote: sharp not installed — skipping image thumbnails. Run: npm install sharp\n");
+  if (!hasFfmpeg) console.log("Note: ffmpeg not found — skipping video poster frames.\n");
+
+  const manifest = await buildWorks();
   fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifest,null,2));
   console.log("\nmanifest.json: " + manifest.works.length + " work(s), " + manifest.tags.length + " tag(s)\n");
   for (const e of manifest.works) {
-    const span = e.gridSpan.padEnd(10);
-    const ar   = e.aspectRatio ? e.aspectRatio+" ar" : "no dims";
-    console.log("  "+span+" "+e.title+"  ("+ar+", "+e.allMedia.length+" file(s))");
+    const span  = e.gridSpan.padEnd(10);
+    const ar    = e.aspectRatio ? e.aspectRatio+" ar" : "no dims";
+    const thumb = e.thumbMedia ? " [thumb: "+e.thumbMedia+"]" : (sharp ? " [no thumb]" : "");
+    console.log("  "+span+" "+e.title+"  ("+ar+", "+e.allMedia.length+" file(s))"+thumb);
   }
 
-  const pages = buildPages();
+  const pages = await buildPages();
   fs.writeFileSync(PAGES_OUT, JSON.stringify({generated:new Date().toISOString(),pages},null,2));
   writeStubs(pages);
   console.log("\npages.json: " + pages.length + " page(s)\n");
@@ -330,4 +427,4 @@ function build() {
   console.log("\nNote: .mkv files need H.264/VP8/VP9 codec to play in-browser.\n");
 }
 
-build();
+build().catch(e => { console.error("Build error:", e.message); process.exit(1); });
