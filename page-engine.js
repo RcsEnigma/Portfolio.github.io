@@ -27,16 +27,16 @@
         "overflow:hidden;background:var(--bg);" +
       "}" +
 
-      // Carousel items — positioned by centre-x via transform so only
-      // left% drives the slide motion; width scales around the centre
-      // which eliminates the resize-grows-while-moving artifact.
+      // Carousel items — all items share the same CSS width (44% of stage).
+      // Scale() in the transform handles visual size differences between slots.
+      // This means only `left` animates position and `transform` animates scale —
+      // no width animation, which was causing the "grows while sliding" artifact.
       ".w-carousel-item{" +
-        "position:absolute;top:5%;height:90%;overflow:hidden;" +
-        "border-radius:var(--radius);" +
-        "transform:translateX(-50%);" +
+        "position:absolute;top:0;height:100%;overflow:hidden;" +
+        "width:44%;border-radius:var(--radius);" +
         "transition:" +
           "left .55s cubic-bezier(.22,1,.36,1)," +
-          "width .55s cubic-bezier(.22,1,.36,1)," +
+          "transform .55s cubic-bezier(.22,1,.36,1)," +
           "opacity .55s ease;" +
       "}" +
       ".w-carousel-item img,.w-carousel-item video{" +
@@ -386,21 +386,26 @@
     const N = items.length;
     let active = 0, timer = null;
 
-    // cx = centre position as % of stage width
-    // w  = item width as % of stage width
-    // op = opacity (1 = fully visible)
-    // z  = z-index
+    // cx     = centre of item as % of stage width
+    // scale  = CSS scale() applied via transform (1.0 = full size, fills the 44% box)
+    // op     = opacity
+    // z      = z-index
+    //
+    // All items share a constant CSS width of 44% (set in the injected CSS above).
+    // Visual width = 44% * scale. Items are centred at cx%.
+    // Outer items (slots ±2) are positioned so their inner edge clears the stage edge
+    // and their outer edge is just barely visible.
     const SLOT_DESKTOP = {
-      "-2": { cx:  7, w: 13, op: 0.20, z: 1 },
-      "-1": { cx: 23, w: 22, op: 0.55, z: 2 },
-       "0": { cx: 50, w: 44, op: 1.00, z: 4 },
-       "1": { cx: 77, w: 22, op: 0.55, z: 2 },
-       "2": { cx: 93, w: 13, op: 0.20, z: 1 },
+      "-2": { cx: 13, scale: 0.55, op: 0.22, z: 1 },
+      "-1": { cx: 27, scale: 0.72, op: 0.55, z: 2 },
+       "0": { cx: 50, scale: 1.00, op: 1.00, z: 4 },
+       "1": { cx: 73, scale: 0.72, op: 0.55, z: 2 },
+       "2": { cx: 87, scale: 0.55, op: 0.22, z: 1 },
     };
     const SLOT_MOBILE = {
-      "-1": { cx: 10, w: 18, op: 0.45, z: 2 },
-       "0": { cx: 50, w: 62, op: 1.00, z: 4 },
-       "1": { cx: 90, w: 18, op: 0.45, z: 2 },
+      "-1": { cx: 11, scale: 0.72, op: 0.45, z: 2 },
+       "0": { cx: 50, scale: 1.00, op: 1.00, z: 4 },
+       "1": { cx: 89, scale: 0.72, op: 0.45, z: 2 },
     };
 
     const stage = document.createElement("div");
@@ -439,11 +444,9 @@
         if (img) img.onclick = null;
 
         if (!spec) {
-          // Park off-screen on the correct side so it slides in smoothly
-          const parkW = isMobile ? 18 : 13;
-          el.style.left      = (pos < 0 ? -10 : 110) + "%";
-          el.style.transform = "translateX(-50%)";
-          el.style.width     = parkW + "%";
+          // Park off-screen so it slides in smoothly when it next enters range
+          el.style.left      = (pos < 0 ? "-10" : "110") + "%";
+          el.style.transform = "translateX(-50%) scale(0.55)";
           el.style.opacity   = "0";
           el.style.zIndex    = "0";
           el.style.cursor    = "default";
@@ -455,8 +458,7 @@
         }
 
         el.style.left      = spec.cx + "%";
-        el.style.transform = "translateX(-50%)";
-        el.style.width     = spec.w  + "%";
+        el.style.transform = `translateX(-50%) scale(${spec.scale})`;
         el.style.opacity   = spec.op;
         el.style.zIndex    = spec.z;
 
