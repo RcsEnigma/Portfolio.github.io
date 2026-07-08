@@ -1010,7 +1010,12 @@ function loadSlotDirect(slotId, work) {
     const img = document.createElement("img");
     img.alt = work.title; img.style.cursor = "zoom-in";
     img.onclick = openZoom; img.onload = activate; img.onerror = activate;
-    img.src = "/works/" + src;
+    // Use thumbnail for display (already cached from grid = instant load, low memory).
+    // Store the original path so openZoom() can load full-res when requested.
+    const thumb = (modalMediaIndex === 0 && work.thumbMedia)
+      ? "/works/thumbs/" + work.thumbMedia : null;
+    img.dataset.origSrc = "/works/" + src;
+    img.src = thumb || "/works/" + src;
     slotEl.appendChild(img);
   } else {
     const v = makeVideo("/works/" + src);
@@ -1046,7 +1051,10 @@ function renderModalMedia() {
     const img = document.createElement("img");
     img.alt = modalWork.title; img.style.cursor = "zoom-in";
     img.onclick = openZoom; img.onload = swap; img.onerror = swap;
-    img.src = "/works/" + src;
+    const thumb = (modalMediaIndex === 0 && modalWork.thumbMedia)
+      ? "/works/thumbs/" + modalWork.thumbMedia : null;
+    img.dataset.origSrc = "/works/" + src;
+    img.src = thumb || "/works/" + src;
     toEl.appendChild(img);
   } else {
     const v = makeVideo("/works/" + src);
@@ -1125,13 +1133,26 @@ function openZoom() {
   if (!src) return;
   if ((getMediaType(src) || modalWork.type) !== "image") return;
 
+  // Get original full-res URL — the modal may be showing a thumbnail,
+  // so read from dataset.origSrc if set, otherwise fall back to the works path.
+  const activeSlot = document.getElementById("modal-slot-" + currentSlot);
+  const slotImg = activeSlot?.querySelector("img");
+  const origUrl = slotImg?.dataset?.origSrc || ("/works/" + src);
+
   const canvas = document.getElementById("zoom-canvas");
   canvas.innerHTML = "";
 
-  // Reset state BEFORE setting img.src to prevent a cached-image race:
-  // if src is cached, onload fires synchronously during the img.src assignment,
-  // so any reset placed AFTER would silently overwrite the correct fit values.
+  // Reset state BEFORE setting img.src (cached-image race condition fix).
   _zoomScale = 1; _zoomFitScale = 1; _zoomX = 0; _zoomY = 0;
+
+  // iOS fix: blank the modal slot images before loading the 4K zoom image.
+  // iOS tabs have strict memory limits; keeping both a thumbnail AND a 4K
+  // image in GPU texture memory simultaneously can crash the tab. Blanking
+  // the modal frees that budget so the zoom image has room to load.
+  document.querySelectorAll(".modal-slot img").forEach(img => {
+    img.dataset.savedSrc = img.src;
+    img.src = "";
+  });
 
   const img = new Image();
   img.draggable = false;
@@ -1144,7 +1165,7 @@ function openZoom() {
     _zoomY = (window.innerHeight - img.naturalHeight * _zoomScale) / 2;
     _zoomApply();
   };
-  img.src = "/works/" + src;
+  img.src = origUrl;
   canvas.appendChild(img);
 
   document.getElementById("zoom-overlay").classList.add("open");
@@ -1158,6 +1179,13 @@ function openZoom() {
 function closeZoom() {
   document.getElementById("zoom-overlay").classList.remove("open");
   document.getElementById("zoom-canvas").innerHTML = "";
+  // Restore modal slot images that were blanked for iOS memory headroom.
+  document.querySelectorAll(".modal-slot img").forEach(img => {
+    if (img.dataset.savedSrc !== undefined) {
+      img.src = img.dataset.savedSrc;
+      delete img.dataset.savedSrc;
+    }
+  });
 }
 
 // Scroll-wheel zoom anchored to cursor
