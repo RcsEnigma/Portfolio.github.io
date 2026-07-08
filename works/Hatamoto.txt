@@ -2,9 +2,7 @@
 Hatamoto Cover
 
 [description]
-Found a free model while browsing sketchfab. Decided to try out a rain theme, going for photorealism.
-
-"Cyber Samurai" downloaded off sketchfab from Kohaminh, and freshened up with custom materials for the specific design I had in mind.
+Found a free model, "Cyber Samurai" from Kohamin, while browsing sketchfab. I freshened up the model with custom materials and decided to try out a rain theme, going for photorealism.
 
 [tags]
 2D, 3D, Blender, Graphic Design, Multimodal

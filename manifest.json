@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-07T08:35:33.110Z",
+  "generated": "2026-07-08T10:14:02.349Z",
   "tags": [
     "2D",
     "3D",
@@ -26,7 +26,7 @@
       ],
       "type": "image",
       "title": "Hatamoto Cover",
-      "description": "Found a free model while browsing sketchfab. Decided to try out a rain theme, going for photorealism.\n\n\"Cyber Samurai\" downloaded off sketchfab from Kohaminh, and freshened up with custom materials for the specific design I had in mind.",
+      "description": "Found a free model, \"Cyber Samurai\" from Kohamin, while browsing sketchfab. I freshened up the model with custom materials and decided to try out a rain theme, going for photorealism.",
       "tags": [
         "2D",
         "3D",
@@ -155,6 +155,28 @@
       "aspectRatio": 0.773,
       "gridSpan": "tall",
       "thumbMedia": "MagazineSix_01.webp"
+    },
+    {
+      "id": "4Arms",
+      "primaryMedia": "4Arms_01.png",
+      "allMedia": [
+        "4Arms_01.png",
+        "4Arms_02.png"
+      ],
+      "type": "image",
+      "title": "4-Arms vs the Scientist",
+      "description": "\"The Four-Armed Prisoner rushes and PINS the Scientist to the WALL. HIS TOP SET PRESSES HIS FOREARMS ABOVE HIM, While the bottom set JACKHAMMERS PUNCHES into his TORSO. With each meaty THWACK, the Scientist's back EXPLODES BLOOD ONTO THE WALL.\"\n\nAn illustration of a scene from my Trepidation project. I don't look highly on this piece; I think it's overall a little too indiscernible. I really wanted to showcase all four arms while also detailing a sense of claustrophobia from the Scientist's (left) perspective.\n\nI made a crude 3d scene to try out various angles and this is what I landed on.\n\nCanonically takes place at the same moment in the same room as \"Colleague_Face\". I was inspired to make this based off the turnout of \"Scientist_Winged\".",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration"
+      ],
+      "featured": false,
+      "date": "2025-09",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "4Arms_01.webp"
     },
     {
       "id": "MagazineFour",
@@ -503,6 +525,29 @@
       "thumbMedia": "Pyroclastic_Elemental_01.webp"
     },
     {
+      "id": "Scientist_Thermal",
+      "primaryMedia": "Scientist_Thermal_01.PNG",
+      "allMedia": [
+        "Scientist_Thermal_01.PNG",
+        "Scientist_Thermal_02.webp",
+        "Scientist_Thermal_03.webp"
+      ],
+      "type": "image",
+      "title": "Scientist Thermal",
+      "description": "A heavily stylized depction of the Scientist character from my Trepidation project. Heavily inspired from the use of color from the works of Spazgunk on Newgrounds (images 2 and 3)",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration"
+      ],
+      "featured": false,
+      "date": "2023-09",
+      "link": "",
+      "aspectRatio": 1.089,
+      "gridSpan": "normal",
+      "thumbMedia": "Scientist_Thermal_01.webp"
+    },
+    {
       "id": "Spiderman",
       "primaryMedia": "Spiderman.png",
       "allMedia": [
@@ -594,6 +639,50 @@
       "thumbMedia": "Pixel_Combat_Sprites_01.webp"
     },
     {
+      "id": "Nephilim",
+      "primaryMedia": "Nephilim_01.png",
+      "allMedia": [
+        "Nephilim_01.png",
+        "Nephilim_02.png",
+        "Nephilim_03.png"
+      ],
+      "type": "image",
+      "title": "Nephilim",
+      "description": "\"The HEXTILLE PATTERN across the Nephilim's skin begins to glow RED HOT, and he starts WRITHING IN PAIN! He's excreting LITERS of blood -- his SMOLDERING flesh is luckily CAUTERIZING the majority of these lacerations. The thrashing slows... The wiring loses its HEAT... Still standing, the RAVAGED Nephilim angrily looks around the room for answers. A Dev timidly approaches, and offers some kind of illustration on a clipboard in one hand and a communication device in the other. The Nephilim looks down at him. He makes a MIDDLE FINGER AND PUNCHES the Dev, CRUMPLING him into a pile of flesh against the floor!\"\n\nConcept art for a 10-foot tall character in my Trepidation project. The hextille of wiring would've given his skin LiDAR-like depth stimuli, allowing him to sense impacts and react before they touch him. This would obviously not be very necessary to a beast of this caliber -- the hextille wiring was actually supposed to go in human-sized units, but the devs couldn't develop the technology to fit properly, it needed to be too dense. So a larger unit was created purely to see the current technology work under ideal bodily proportions. However, the prototype didn't work exactly as planned...\n\nSlide 3: A propaganda-style graphic depitcing the hextille-LiDAR technology as sleek and idealistic.\n\nTimeline: Slide 1 - Feb 23, Slide 2 - Feb 26, Slide 3 - Feb 24",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration"
+      ],
+      "featured": false,
+      "date": "2023-02",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "Nephilim_01.webp"
+    },
+    {
+      "id": "Scientist_Sketches",
+      "primaryMedia": "Scientist_Sketches.png",
+      "allMedia": [
+        "Scientist_Sketches.png"
+      ],
+      "type": "image",
+      "title": "Scientist Sketches",
+      "description": "Self Explanatory. Concept art which is considerably outdated now.",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration"
+      ],
+      "featured": false,
+      "date": "2022-11",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "Scientist_Sketches.webp"
+    },
+    {
       "id": "AbstractSeven",
       "primaryMedia": "AbstractSeven.mkv",
       "allMedia": [
@@ -634,6 +723,26 @@
       "thumbMedia": null
     },
     {
+      "id": "Power",
+      "primaryMedia": "Power.png",
+      "allMedia": [
+        "Power.png"
+      ],
+      "type": "image",
+      "title": "Power",
+      "description": "Some kind of mechaknight with an exploded molten heart, harnessing a form of red energy. Designing the look of the plated musculature was a lot of fun.",
+      "tags": [
+        "2D",
+        "Illustration"
+      ],
+      "featured": false,
+      "date": "2022-06",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "Power.webp"
+    },
+    {
       "id": "AbstractFive",
       "primaryMedia": "AbstractFive.mkv",
       "allMedia": [
@@ -652,6 +761,27 @@
       "aspectRatio": null,
       "gridSpan": "normal",
       "thumbMedia": null
+    },
+    {
+      "id": "Energy",
+      "primaryMedia": "Energy_01.png",
+      "allMedia": [
+        "Energy_01.png",
+        "Energy_02.png"
+      ],
+      "type": "image",
+      "title": "Energy",
+      "description": "A redraw of a doodle from a year earlier (Slide 2).\n\nI wanted to depict something very 'powerful'.",
+      "tags": [
+        "2D",
+        "Illustration"
+      ],
+      "featured": false,
+      "date": "2022-03",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "Energy_01.webp"
     },
     {
       "id": "AbstractFour",
@@ -732,6 +862,28 @@
       "aspectRatio": null,
       "gridSpan": "normal",
       "thumbMedia": null
+    },
+    {
+      "id": "Scientist_And_Colleague",
+      "primaryMedia": "Scientist_And_Colleague_01.png",
+      "allMedia": [
+        "Scientist_And_Colleague_01.png",
+        "Scientist_And_Colleague_02.PNG"
+      ],
+      "type": "image",
+      "title": "Scientist and Colleague",
+      "description": "Somewhat outdated concept art. On slide 2 I bundled in a closeup sketch of the Colleague created three months later (April of '22).",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration"
+      ],
+      "featured": false,
+      "date": "2022-01",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "normal",
+      "thumbMedia": "Scientist_And_Colleague_01.webp"
     }
   ]
 }

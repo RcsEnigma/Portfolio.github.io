@@ -1,0 +1,11 @@
+[title]
+Scientist Sketches
+
+[description]
+Self Explanatory. Concept art which is considerably outdated now.
+
+[tags]
+2D, Trepidation, Illustration
+
+[date]
+2022-11

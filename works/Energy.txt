@@ -1,0 +1,13 @@
+[title]
+Energy
+
+[description]
+A redraw of a doodle from a year earlier (Slide 2).
+
+I wanted to depict something very 'powerful'.
+
+[tags]
+2D, Illustration
+
+[date]
+2022-03

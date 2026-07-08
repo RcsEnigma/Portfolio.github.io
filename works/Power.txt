@@ -1,0 +1,11 @@
+[title]
+Power
+
+[description]
+Some kind of mechaknight with an exploded molten heart, harnessing a form of red energy. Designing the look of the plated musculature was a lot of fun.
+
+[tags]
+2D, Illustration
+
+[date]
+2022-06

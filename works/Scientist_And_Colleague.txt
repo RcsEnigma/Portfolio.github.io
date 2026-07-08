@@ -1,0 +1,14 @@
+[title]
+Scientist and Colleague
+
+[description]
+Somewhat outdated concept art. On slide 2 I bundled in a closeup sketch of the Colleague created three months later (April of '22).
+
+[tags]
+2D, Trepidation, Illustration
+
+[square]
+true
+
+[date]
+2022-01
