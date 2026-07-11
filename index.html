@@ -968,15 +968,6 @@ function openModal(work) {
   document.getElementById("modal-overlay").classList.add("open");
   document.body.style.overflow = "hidden";
   history.pushState({ _portfolio: "modal" }, "");
-
-  // Start background-loading the 4K original as soon as the modal opens.
-  // The modal itself shows the thumbnail (instant, already cached from grid),
-  // but by the time the user reads the description and taps zoom the full-res
-  // image is likely already in the browser cache, making zoom feel fast.
-  if (work.primaryMedia) {
-    const _pf = new Image();
-    _pf.src = "/works/" + work.primaryMedia;
-  }
 }
 
 function buildModalDots(work) {
@@ -1076,7 +1067,7 @@ function renderModalMedia() {
 function makeVideo(src) {
   const v = document.createElement("video");
   v.src = src; v.muted = true; v.loop = true; v.playsInline = true; v.controls = true;
-  v.controlsList = "nodownload nofullscreen";
+  v.controlsList = "nodownload";
   v.disablePictureInPicture = true;
   return v;
 }
@@ -1142,31 +1133,31 @@ function openZoom() {
   if (!src) return;
   if ((getMediaType(src) || modalWork.type) !== "image") return;
 
+  // Get original full-res URL — the modal may be showing a thumbnail,
+  // so read from dataset.origSrc if set, otherwise fall back to the works path.
   const activeSlot = document.getElementById("modal-slot-" + currentSlot);
   const slotImg = activeSlot?.querySelector("img");
   const origUrl = slotImg?.dataset?.origSrc || ("/works/" + src);
 
   const canvas = document.getElementById("zoom-canvas");
   canvas.innerHTML = "";
+
+  // Reset state BEFORE setting img.src (cached-image race condition fix).
   _zoomScale = 1; _zoomFitScale = 1; _zoomX = 0; _zoomY = 0;
 
-  // Free every grid thumbnail from GPU texture memory before loading the 4K.
-  // Thumbnails load fast so many are decoded at once; clearing them all gives
-  // the browser the budget it needs for the full-res image without crashing.
-  // The browser cache keeps the files so restoring them on close is instant.
+  // Blank ALL grid thumbnails AND modal images before loading the 4K.
+  // Grid thumbnails load fast and many stay decoded in GPU simultaneously;
+  // clearing them all first gives the browser the full memory budget for the
+  // 4K decode. Browser cache keeps the files so restoring is near-instant.
   document.querySelectorAll(".modal-slot img, .grid-item img").forEach(img => {
-    if (img.src && !img.dataset.savedSrc) {
-      img.dataset.savedSrc = img.src;
-      img.src = "";
-    }
+    if (img.src) { img.dataset.savedSrc = img.src; img.src = ""; }
   });
 
-  // Disable browser native pinch-zoom while our canvas zoom is active.
-  // Without this, iOS intercepts two-finger touches as a page zoom gesture
-  // rather than letting our touchmove handler receive them.
-  const vp = document.querySelector("meta[name=viewport]");
-  if (vp) vp.dataset.savedContent = vp.content;
-  if (vp) vp.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
+  // Disable native browser pinch-zoom while our zoom canvas is active.
+  // Without this, iOS intercepts two-finger touches as a page-zoom gesture
+  // instead of delivering them to our touchmove handler.
+  const _vp = document.querySelector("meta[name=viewport]");
+  if (_vp) { _vp.dataset.savedContent = _vp.content; _vp.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"; }
 
   const img = new Image();
   img.draggable = false;
@@ -1193,18 +1184,18 @@ function openZoom() {
 function closeZoom() {
   document.getElementById("zoom-overlay").classList.remove("open");
   document.getElementById("zoom-canvas").innerHTML = "";
-  // Restore all blanked images (modal slots + grid) from browser cache.
+  // Restore all blanked images from browser cache.
   document.querySelectorAll(".modal-slot img, .grid-item img").forEach(img => {
     if (img.dataset.savedSrc !== undefined) {
       img.src = img.dataset.savedSrc;
       delete img.dataset.savedSrc;
     }
   });
-  // Restore native pinch-zoom.
-  const vp = document.querySelector("meta[name=viewport]");
-  if (vp && vp.dataset.savedContent) {
-    vp.content = vp.dataset.savedContent;
-    delete vp.dataset.savedContent;
+  // Re-enable native pinch-zoom.
+  const _vp = document.querySelector("meta[name=viewport]");
+  if (_vp && _vp.dataset.savedContent) {
+    _vp.content = _vp.dataset.savedContent;
+    delete _vp.dataset.savedContent;
   }
 }
 
@@ -1306,37 +1297,12 @@ document.addEventListener("keydown", e => {
   if ((e.key === "z" || e.key === "Z") && modalWork) openZoom();
 });
 
-// Modal stage swipe (horizontal) to cycle media, and pinch to open zoom
-let _tx = 0, _ty = 0, _tPinchDist = 0;
+let _tx = 0, _ty = 0;
 document.getElementById("modal-stage").addEventListener("touchstart", e => {
-  if (e.touches.length === 1) {
-    _tx = e.changedTouches[0].clientX;
-    _ty = e.changedTouches[0].clientY;
-    _tPinchDist = 0;
-  } else if (e.touches.length === 2) {
-    _tPinchDist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-  }
+  _tx = e.changedTouches[0].clientX;
+  _ty = e.changedTouches[0].clientY;
 }, { passive: true });
-
-document.getElementById("modal-stage").addEventListener("touchmove", e => {
-  if (e.touches.length === 2 && _tPinchDist > 0 && modalWork) {
-    const dist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-    // Open zoom if pinch has expanded by more than 15%
-    if (dist / _tPinchDist > 1.15) {
-      _tPinchDist = 0;
-      openZoom();
-    }
-  }
-}, { passive: true });
-
 document.getElementById("modal-stage").addEventListener("touchend", e => {
-  if (_tPinchDist > 0) { _tPinchDist = 0; return; } // was a pinch, not a swipe
   const dx = e.changedTouches[0].clientX - _tx;
   const dy = e.changedTouches[0].clientY - _ty;
   if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5)
@@ -1361,7 +1327,7 @@ function createMediaEl(src, type, autoplay, thumb) {
   if (type === "video") {
     const v = document.createElement("video");
     v.src = orig; v.muted = true; v.loop = true; v.playsInline = true;
-    v.controlsList = "nodownload nofullscreen";
+    v.controlsList = "nodownload";
     v.disablePictureInPicture = true;
     if (thumb) v.poster = "/works/thumbs/" + thumb;
     if (autoplay) v.autoplay = true;
