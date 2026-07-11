@@ -1,0 +1,13 @@
+[title]
+Scientist Spine
+
+[description]
+A stylized depiction of the Scientist's cybernetic augment in my trepidation project. When making the materials in blender, I also experimented with an X-ray style design (image 2).
+
+Image 3 is a viewport screenshot, and Image 4 was my first take on the graphic design, which I later reworked into Image 1.
+
+[tags]
+3D, Blender, Trepidation, Graphic Design
+
+[date]
+2023-11

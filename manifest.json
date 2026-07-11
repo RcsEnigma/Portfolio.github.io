@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-10T07:31:11.337Z",
+  "generated": "2026-07-11T21:40:05.805Z",
   "tags": [
     "2D",
     "3D",
@@ -501,6 +501,31 @@
       "aspectRatio": 1.778,
       "gridSpan": "wide",
       "thumbMedia": "Sword_01.webp"
+    },
+    {
+      "id": "Spine",
+      "primaryMedia": "Spine_01.png",
+      "allMedia": [
+        "Spine_01.png",
+        "Spine_02.png",
+        "Spine_03.png",
+        "Spine_04.png"
+      ],
+      "type": "image",
+      "title": "Scientist Spine",
+      "description": "A stylized depiction of the Scientist's cybernetic augment in my trepidation project. When making the materials in blender, I also experimented with an X-ray style design (image 2).\n\nImage 3 is a viewport screenshot, and Image 4 was my first take on the graphic design, which I later reworked into Image 1.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Trepidation",
+        "Graphic Design"
+      ],
+      "featured": false,
+      "date": "2023-11",
+      "link": "",
+      "aspectRatio": 1,
+      "gridSpan": "normal",
+      "thumbMedia": "Spine_01.webp"
     },
     {
       "id": "Pyroclastic_Elemental",
