@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-11T21:40:05.805Z",
+  "generated": "2026-07-22T12:40:15.260Z",
   "tags": [
     "2D",
     "3D",
@@ -286,10 +286,10 @@
     },
     {
       "id": "Gummy",
-      "primaryMedia": "Gummy.png",
+      "primaryMedia": "Gummy_01.png",
       "allMedia": [
-        "Gummy.png",
-        "Gummy.webp"
+        "Gummy_01.png",
+        "Gummy_02.webp"
       ],
       "type": "image",
       "title": "Gummy Art",
@@ -303,7 +303,7 @@
       "link": "",
       "aspectRatio": 1,
       "gridSpan": "normal",
-      "thumbMedia": "Gummy.webp"
+      "thumbMedia": "Gummy_01.webp"
     },
     {
       "id": "Colleague_Face",
@@ -398,11 +398,13 @@
       "allMedia": [
         "Scientist_Winged_01.png",
         "Scientist_Winged_02.png",
-        "Scientist_Winged_03.jpg"
+        "Scientist_Winged_03.png",
+        "Scientist_Winged_04.png",
+        "Scientist_Winged_05.jpg"
       ],
       "type": "image",
       "title": "Winged Scientist",
-      "description": "A non-canon depiction of a character from my Trepidation project.\n\nThis artwork originally existed only as linework and messy colors from two years prior (2nd image). I felt like drawing but didn't want to think of a pose so I dug this up, dusted it off, and cleaned it up.\n\nThe cityscape in the background was made in blender with a shader to simulate black outlines. After rendering, I did a lot of work to fix the colors and materials to have it fit in with the rest of the scene. The rings around the planet were also rendered in 3D, but as a separate layer from the cityscape. Everything else was done in 2D.\n\nThe entire artwork, from start to finish, was inspired by 'Reaper Hank' by Rhunyc on Newgrounds (3rd image).",
+      "description": "A non-canon depiction of a character from my Trepidation project.\n\nThis artwork originally existed only as linework and messy colors from two years prior (2nd image). I felt like drawing but didn't want to think of a pose so I dug this up, dusted it off, and cleaned it up.\n\nImages 3 & 4 - The cityscape in the background was made in blender with a shader to simulate black outlines. After rendering, I did a lot of work to fix the colors and materials to have it fit in with the rest of the scene. The rings around the planet were also rendered in 3D, but as a separate layer from the cityscape. Everything else was done in 2D.\n\nThe entire artwork, from start to finish, was inspired by 'Reaper Hank' by Rhunyc on Newgrounds (5th image).",
       "tags": [
         "2D",
         "Multimodal",
@@ -574,13 +576,14 @@
     },
     {
       "id": "Spiderman",
-      "primaryMedia": "Spiderman.png",
+      "primaryMedia": "Spiderman_01.png",
       "allMedia": [
-        "Spiderman.png"
+        "Spiderman_01.png",
+        "Spiderman_02.png"
       ],
       "type": "image",
       "title": "Spiderman 2099",
-      "description": "Made a week before the release of Spider-Man: Across the Spider-Verse, because I liked the concept of the character. I knew nothing about him expect that he was probably the villian. After coming out of the theatre seeing him in action, I noticed about a dozen inaccuracies with my depiction of him. But, I never brought myself to alter the final piece.\n\nThe hexagons in the background were made in blender, the lots of filters and effects and edits were made to match it with the subject. I think it help sell the movie's aesthetic of 2D and 3D styles clashing.",
+      "description": "Made a week before the release of Spider-Man: Across the Spider-Verse, because I liked the concept of the character. I knew nothing about him expect that he was probably the villian. After coming out of the theatre seeing him in action, I noticed about a dozen inaccuracies with my depiction of him. But, I never brought myself to alter the final piece.\n\nThe hexagons in the background were made in blender (image 2), the lots of filters and effects and edits were made to match it with the subject. I think it help sell the movie's aesthetic of 2D and 3D styles clashing.",
       "tags": [
         "2D",
         "Illustration",
@@ -591,7 +594,7 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Spiderman.webp"
+      "thumbMedia": "Spiderman_01.webp"
     },
     {
       "id": "Creeping_Shade",

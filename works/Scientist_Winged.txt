@@ -6,9 +6,9 @@ A non-canon depiction of a character from my Trepidation project.
 
 This artwork originally existed only as linework and messy colors from two years prior (2nd image). I felt like drawing but didn't want to think of a pose so I dug this up, dusted it off, and cleaned it up.
 
-The cityscape in the background was made in blender with a shader to simulate black outlines. After rendering, I did a lot of work to fix the colors and materials to have it fit in with the rest of the scene. The rings around the planet were also rendered in 3D, but as a separate layer from the cityscape. Everything else was done in 2D.
+Images 3 & 4 - The cityscape in the background was made in blender with a shader to simulate black outlines. After rendering, I did a lot of work to fix the colors and materials to have it fit in with the rest of the scene. The rings around the planet were also rendered in 3D, but as a separate layer from the cityscape. Everything else was done in 2D.
 
-The entire artwork, from start to finish, was inspired by 'Reaper Hank' by Rhunyc on Newgrounds (3rd image).
+The entire artwork, from start to finish, was inspired by 'Reaper Hank' by Rhunyc on Newgrounds (5th image).
 
 [tags]
 2D, Multimodal, Trepidation, Illustration
