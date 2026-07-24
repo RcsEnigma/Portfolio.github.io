@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-24T13:04:28.699Z",
+  "generated": "2026-07-24T13:12:12.834Z",
   "pages": [
     {
       "slug": "exul-omnium",
@@ -19,7 +19,8 @@
             {
               "file": "CardDisplay.mp4",
               "type": "video",
-              "thumb": null
+              "thumb": null,
+              "zoomThumb": null
             }
           ],
           "background": "#EDEAE4",
@@ -33,12 +34,14 @@
             {
               "file": "Concepts.PNG",
               "type": "image",
-              "thumb": "Concepts.webp"
+              "thumb": "Concepts.webp",
+              "zoomThumb": "Concepts_zoom.webp"
             },
             {
               "file": "Concepts2.PNG",
               "type": "image",
-              "thumb": "Concepts2.webp"
+              "thumb": "Concepts2.webp",
+              "zoomThumb": "Concepts2_zoom.webp"
             }
           ],
           "background": "#18191C",
@@ -52,17 +55,20 @@
             {
               "file": "Concepts3.PNG",
               "type": "image",
-              "thumb": "Concepts3.webp"
+              "thumb": "Concepts3.webp",
+              "zoomThumb": "Concepts3_zoom.webp"
             },
             {
               "file": "Concepts5.PNG",
               "type": "image",
-              "thumb": "Concepts5.webp"
+              "thumb": "Concepts5.webp",
+              "zoomThumb": "Concepts5_zoom.webp"
             },
             {
               "file": "Concepts4.PNG",
               "type": "image",
-              "thumb": "Concepts4.webp"
+              "thumb": "Concepts4.webp",
+              "zoomThumb": "Concepts4_zoom.webp"
             }
           ],
           "background": "#060708",
@@ -76,7 +82,8 @@
             {
               "file": "Concepts6.png",
               "type": "image",
-              "thumb": "Concepts6.webp"
+              "thumb": "Concepts6.webp",
+              "zoomThumb": "Concepts6_zoom.webp"
             }
           ],
           "background": "#292A2E",
@@ -90,7 +97,8 @@
             {
               "file": "Concepts6.png",
               "type": "image",
-              "thumb": "Concepts6.webp"
+              "thumb": "Concepts6.webp",
+              "zoomThumb": "Concepts6_zoom.webp"
             }
           ],
           "background": "#18191C",
@@ -112,12 +120,14 @@
             {
               "file": "Concepts7.png",
               "type": "image",
-              "thumb": "Concepts7.webp"
+              "thumb": "Concepts7.webp",
+              "zoomThumb": "Concepts7_zoom.webp"
             },
             {
               "file": "Concepts10.png",
               "type": "image",
-              "thumb": "Concepts10.webp"
+              "thumb": "Concepts10.webp",
+              "zoomThumb": "Concepts10_zoom.webp"
             }
           ],
           "background": "#18191C",
@@ -131,7 +141,8 @@
             {
               "file": "Concepts9.webp",
               "type": "image",
-              "thumb": "Concepts9.webp"
+              "thumb": "Concepts9.webp",
+              "zoomThumb": "Concepts9_zoom.webp"
             }
           ],
           "background": "#292A2E",
@@ -145,17 +156,20 @@
             {
               "file": "Concepts9.webp",
               "type": "image",
-              "thumb": "Concepts9.webp"
+              "thumb": "Concepts9.webp",
+              "zoomThumb": "Concepts9_zoom.webp"
             },
             {
               "file": "Concepts8.PNG",
               "type": "image",
-              "thumb": "Concepts8.webp"
+              "thumb": "Concepts8.webp",
+              "zoomThumb": "Concepts8_zoom.webp"
             },
             {
               "file": "Concepts11.PNG",
               "type": "image",
-              "thumb": "Concepts11.webp"
+              "thumb": "Concepts11.webp",
+              "zoomThumb": "Concepts11_zoom.webp"
             }
           ],
           "background": "#292A2E",
@@ -169,7 +183,8 @@
             {
               "file": "Concepts6.png",
               "type": "image",
-              "thumb": "Concepts6.webp"
+              "thumb": "Concepts6.webp",
+              "zoomThumb": "Concepts6_zoom.webp"
             }
           ],
           "background": "#18191C",
@@ -183,42 +198,50 @@
             {
               "file": "Card1.png",
               "type": "image",
-              "thumb": "Card1.webp"
+              "thumb": "Card1.webp",
+              "zoomThumb": "Card1_zoom.webp"
             },
             {
               "file": "Card2.png",
               "type": "image",
-              "thumb": "Card2.webp"
+              "thumb": "Card2.webp",
+              "zoomThumb": "Card2_zoom.webp"
             },
             {
               "file": "Card3.png",
               "type": "image",
-              "thumb": "Card3.webp"
+              "thumb": "Card3.webp",
+              "zoomThumb": "Card3_zoom.webp"
             },
             {
               "file": "Card4.png",
               "type": "image",
-              "thumb": "Card4.webp"
+              "thumb": "Card4.webp",
+              "zoomThumb": "Card4_zoom.webp"
             },
             {
               "file": "Card5.png",
               "type": "image",
-              "thumb": "Card5.webp"
+              "thumb": "Card5.webp",
+              "zoomThumb": "Card5_zoom.webp"
             },
             {
               "file": "Card6.png",
               "type": "image",
-              "thumb": "Card6.webp"
+              "thumb": "Card6.webp",
+              "zoomThumb": "Card6_zoom.webp"
             },
             {
               "file": "Card7.png",
               "type": "image",
-              "thumb": "Card7.webp"
+              "thumb": "Card7.webp",
+              "zoomThumb": "Card7_zoom.webp"
             },
             {
               "file": "Card8.png",
               "type": "image",
-              "thumb": "Card8.webp"
+              "thumb": "Card8.webp",
+              "zoomThumb": "Card8_zoom.webp"
             }
           ],
           "background": "#060708",
@@ -232,7 +255,8 @@
             {
               "file": "ShinyDesign.gif",
               "type": "image",
-              "thumb": null
+              "thumb": null,
+              "zoomThumb": null
             }
           ],
           "background": "#CCC7BC",

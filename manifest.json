@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-24T13:04:28.581Z",
+  "generated": "2026-07-24T13:12:04.547Z",
   "tags": [
     "2D",
     "3D",
@@ -39,7 +39,21 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Antagonist_01.webp"
+      "thumbMedia": "Antagonist_01.webp",
+      "modalThumbs": [
+        "Antagonist_01.webp",
+        "Antagonist_02.webp",
+        "Antagonist_03.webp",
+        "Antagonist_04.webp",
+        "Antagonist_05.webp"
+      ],
+      "zoomMedia": [
+        "Antagonist_01_zoom.webp",
+        "Antagonist_02_zoom.webp",
+        "Antagonist_03_zoom.webp",
+        "Antagonist_04_zoom.webp",
+        "Antagonist_05_zoom.webp"
+      ]
     },
     {
       "id": "Hatamoto",
@@ -64,7 +78,17 @@
       "link": "",
       "aspectRatio": 0.773,
       "gridSpan": "tall",
-      "thumbMedia": "Hatamoto_01.webp"
+      "thumbMedia": "Hatamoto_01.webp",
+      "modalThumbs": [
+        "Hatamoto_01.webp",
+        "Hatamoto_02.webp",
+        "Hatamoto_03.webp"
+      ],
+      "zoomMedia": [
+        "Hatamoto_01_zoom.webp",
+        "Hatamoto_02_zoom.webp",
+        "Hatamoto_03_zoom.webp"
+      ]
     },
     {
       "id": "PosterOne",
@@ -90,7 +114,23 @@
       "link": "",
       "aspectRatio": 0.562,
       "gridSpan": "tall",
-      "thumbMedia": "PosterOne_01.webp"
+      "thumbMedia": "PosterOne_01.webp",
+      "modalThumbs": [
+        "PosterOne_01.webp",
+        "PosterOne_02.webp",
+        "PosterOne_03.webp",
+        "PosterOne_04.webp",
+        "PosterOne_05.webp",
+        "PosterOne_06.webp"
+      ],
+      "zoomMedia": [
+        "PosterOne_01_zoom.webp",
+        "PosterOne_02_zoom.webp",
+        "PosterOne_03_zoom.webp",
+        "PosterOne_04_zoom.webp",
+        "PosterOne_05_zoom.webp",
+        "PosterOne_06_zoom.webp"
+      ]
     },
     {
       "id": "Trepidation_Rooms",
@@ -112,7 +152,15 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Trepidation_Rooms_01.webp"
+      "thumbMedia": "Trepidation_Rooms_01.webp",
+      "modalThumbs": [
+        "Trepidation_Rooms_01.webp",
+        "Trepidation_Rooms_02.webp"
+      ],
+      "zoomMedia": [
+        "Trepidation_Rooms_01_zoom.webp",
+        "Trepidation_Rooms_02_zoom.webp"
+      ]
     },
     {
       "id": "MagazineOne",
@@ -136,7 +184,15 @@
       "link": "",
       "aspectRatio": 0.773,
       "gridSpan": "tall",
-      "thumbMedia": "MagazineOne_01.webp"
+      "thumbMedia": "MagazineOne_01.webp",
+      "modalThumbs": [
+        "MagazineOne_01.webp",
+        "MagazineOne_02.webp"
+      ],
+      "zoomMedia": [
+        "MagazineOne_01_zoom.webp",
+        "MagazineOne_02_zoom.webp"
+      ]
     },
     {
       "id": "Grungy_Shower",
@@ -157,7 +213,13 @@
       "link": "",
       "aspectRatio": 0.781,
       "gridSpan": "tall",
-      "thumbMedia": "Grungy_Shower.webp"
+      "thumbMedia": "Grungy_Shower.webp",
+      "modalThumbs": [
+        "Grungy_Shower.webp"
+      ],
+      "zoomMedia": [
+        "Grungy_Shower_zoom.webp"
+      ]
     },
     {
       "id": "MagazineSix",
@@ -179,7 +241,15 @@
       "link": "",
       "aspectRatio": 0.773,
       "gridSpan": "tall",
-      "thumbMedia": "MagazineSix_01.webp"
+      "thumbMedia": "MagazineSix_01.webp",
+      "modalThumbs": [
+        "MagazineSix_01.webp",
+        "MagazineSix_02.webp"
+      ],
+      "zoomMedia": [
+        "MagazineSix_01_zoom.webp",
+        "MagazineSix_02_zoom.webp"
+      ]
     },
     {
       "id": "4Arms",
@@ -201,7 +271,15 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "4Arms_01.webp"
+      "thumbMedia": "4Arms_01.webp",
+      "modalThumbs": [
+        "4Arms_01.webp",
+        "4Arms_02.webp"
+      ],
+      "zoomMedia": [
+        "4Arms_01_zoom.webp",
+        "4Arms_02_zoom.webp"
+      ]
     },
     {
       "id": "MagazineFour",
@@ -222,7 +300,15 @@
       "link": "",
       "aspectRatio": 0.773,
       "gridSpan": "tall",
-      "thumbMedia": "MagazineFour_01.webp"
+      "thumbMedia": "MagazineFour_01.webp",
+      "modalThumbs": [
+        "MagazineFour_01.webp",
+        "MagazineFour_02.webp"
+      ],
+      "zoomMedia": [
+        "MagazineFour_01_zoom.webp",
+        "MagazineFour_02_zoom.webp"
+      ]
     },
     {
       "id": "MagazineThree",
@@ -243,7 +329,15 @@
       "link": "",
       "aspectRatio": 0.773,
       "gridSpan": "tall",
-      "thumbMedia": "MagazineThree_01.webp"
+      "thumbMedia": "MagazineThree_01.webp",
+      "modalThumbs": [
+        "MagazineThree_01.webp",
+        "MagazineThree_02.webp"
+      ],
+      "zoomMedia": [
+        "MagazineThree_01_zoom.webp",
+        "MagazineThree_02_zoom.webp"
+      ]
     },
     {
       "id": "Translation",
@@ -265,7 +359,13 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null
+      "thumbMedia": null,
+      "modalThumbs": [
+        null
+      ],
+      "zoomMedia": [
+        null
+      ]
     },
     {
       "id": "MagazineFive",
@@ -286,7 +386,15 @@
       "link": "",
       "aspectRatio": 0.773,
       "gridSpan": "tall",
-      "thumbMedia": "MagazineFive_01.webp"
+      "thumbMedia": "MagazineFive_01.webp",
+      "modalThumbs": [
+        "MagazineFive_01.webp",
+        "MagazineFive_02.webp"
+      ],
+      "zoomMedia": [
+        "MagazineFive_01_zoom.webp",
+        "MagazineFive_02_zoom.webp"
+      ]
     },
     {
       "id": "MagazineTwo",
@@ -307,7 +415,13 @@
       "link": "",
       "aspectRatio": 0.773,
       "gridSpan": "tall",
-      "thumbMedia": "MagazineTwo.webp"
+      "thumbMedia": "MagazineTwo.webp",
+      "modalThumbs": [
+        "MagazineTwo.webp"
+      ],
+      "zoomMedia": [
+        "MagazineTwo_zoom.webp"
+      ]
     },
     {
       "id": "Gummy",
@@ -328,7 +442,15 @@
       "link": "",
       "aspectRatio": 1,
       "gridSpan": "normal",
-      "thumbMedia": "Gummy_01.webp"
+      "thumbMedia": "Gummy_01.webp",
+      "modalThumbs": [
+        "Gummy_01.webp",
+        "Gummy_02.webp"
+      ],
+      "zoomMedia": [
+        "Gummy_01_zoom.webp",
+        "Gummy_02_zoom.webp"
+      ]
     },
     {
       "id": "Colleague_Face",
@@ -353,7 +475,19 @@
       "link": "",
       "aspectRatio": 1,
       "gridSpan": "normal",
-      "thumbMedia": "Colleague_Face_01.webp"
+      "thumbMedia": "Colleague_Face_01.webp",
+      "modalThumbs": [
+        "Colleague_Face_01.webp",
+        "Colleague_Face_02.webp",
+        "Colleague_Face_03.webp",
+        null
+      ],
+      "zoomMedia": [
+        "Colleague_Face_01_zoom.webp",
+        "Colleague_Face_02_zoom.webp",
+        "Colleague_Face_03_zoom.webp",
+        null
+      ]
     },
     {
       "id": "Procedural_Land",
@@ -375,7 +509,15 @@
       "link": "",
       "aspectRatio": 1.896,
       "gridSpan": "wide",
-      "thumbMedia": "Procedural_Land_01.webp"
+      "thumbMedia": "Procedural_Land_01.webp",
+      "modalThumbs": [
+        "Procedural_Land_01.webp",
+        "Procedural_Land_02.webp"
+      ],
+      "zoomMedia": [
+        "Procedural_Land_01_zoom.webp",
+        "Procedural_Land_02_zoom.webp"
+      ]
     },
     {
       "id": "CardDisplay",
@@ -395,7 +537,13 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null
+      "thumbMedia": null,
+      "modalThumbs": [
+        null
+      ],
+      "zoomMedia": [
+        null
+      ]
     },
     {
       "id": "Skull_ArtOne",
@@ -415,7 +563,13 @@
       "link": "",
       "aspectRatio": 1,
       "gridSpan": "normal",
-      "thumbMedia": "Skull_ArtOne.webp"
+      "thumbMedia": "Skull_ArtOne.webp",
+      "modalThumbs": [
+        "Skull_ArtOne.webp"
+      ],
+      "zoomMedia": [
+        "Skull_ArtOne_zoom.webp"
+      ]
     },
     {
       "id": "Scientist_Winged",
@@ -441,7 +595,21 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Scientist_Winged_01.webp"
+      "thumbMedia": "Scientist_Winged_01.webp",
+      "modalThumbs": [
+        "Scientist_Winged_01.webp",
+        "Scientist_Winged_02.webp",
+        "Scientist_Winged_03.webp",
+        "Scientist_Winged_04.webp",
+        "Scientist_Winged_05.webp"
+      ],
+      "zoomMedia": [
+        "Scientist_Winged_01_zoom.webp",
+        "Scientist_Winged_02_zoom.webp",
+        "Scientist_Winged_03_zoom.webp",
+        "Scientist_Winged_04_zoom.webp",
+        "Scientist_Winged_05_zoom.webp"
+      ]
     },
     {
       "id": "Skull_ArtTwo",
@@ -461,7 +629,13 @@
       "link": "",
       "aspectRatio": 1,
       "gridSpan": "normal",
-      "thumbMedia": "Skull_ArtTwo.webp"
+      "thumbMedia": "Skull_ArtTwo.webp",
+      "modalThumbs": [
+        "Skull_ArtTwo.webp"
+      ],
+      "zoomMedia": [
+        "Skull_ArtTwo_zoom.webp"
+      ]
     },
     {
       "id": "Fossil_Walker",
@@ -483,7 +657,15 @@
       "link": "",
       "aspectRatio": 1.058,
       "gridSpan": "normal",
-      "thumbMedia": "Fossil_Walker_01.webp"
+      "thumbMedia": "Fossil_Walker_01.webp",
+      "modalThumbs": [
+        "Fossil_Walker_01.webp",
+        "Fossil_Walker_02.webp"
+      ],
+      "zoomMedia": [
+        "Fossil_Walker_01_zoom.webp",
+        "Fossil_Walker_02_zoom.webp"
+      ]
     },
     {
       "id": "Frozen Aperture",
@@ -505,7 +687,17 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Frozen Aperture_01.webp"
+      "thumbMedia": "Frozen Aperture_01.webp",
+      "modalThumbs": [
+        "Frozen Aperture_01.webp",
+        "Frozen Aperture_02.webp",
+        "Frozen Aperture_03.webp"
+      ],
+      "zoomMedia": [
+        "Frozen Aperture_01_zoom.webp",
+        "Frozen Aperture_02_zoom.webp",
+        "Frozen Aperture_03_zoom.webp"
+      ]
     },
     {
       "id": "Sword",
@@ -527,7 +719,15 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Sword_01.webp"
+      "thumbMedia": "Sword_01.webp",
+      "modalThumbs": [
+        "Sword_01.webp",
+        null
+      ],
+      "zoomMedia": [
+        "Sword_01_zoom.webp",
+        null
+      ]
     },
     {
       "id": "Spine",
@@ -552,7 +752,19 @@
       "link": "",
       "aspectRatio": 1,
       "gridSpan": "normal",
-      "thumbMedia": "Spine_01.webp"
+      "thumbMedia": "Spine_01.webp",
+      "modalThumbs": [
+        "Spine_01.webp",
+        "Spine_02.webp",
+        "Spine_03.webp",
+        "Spine_04.webp"
+      ],
+      "zoomMedia": [
+        "Spine_01_zoom.webp",
+        "Spine_02_zoom.webp",
+        "Spine_03_zoom.webp",
+        "Spine_04_zoom.webp"
+      ]
     },
     {
       "id": "Pyroclastic_Elemental",
@@ -574,7 +786,15 @@
       "link": "",
       "aspectRatio": 1.088,
       "gridSpan": "normal",
-      "thumbMedia": "Pyroclastic_Elemental_01.webp"
+      "thumbMedia": "Pyroclastic_Elemental_01.webp",
+      "modalThumbs": [
+        "Pyroclastic_Elemental_01.webp",
+        "Pyroclastic_Elemental_02.webp"
+      ],
+      "zoomMedia": [
+        "Pyroclastic_Elemental_01_zoom.webp",
+        "Pyroclastic_Elemental_02_zoom.webp"
+      ]
     },
     {
       "id": "Scientist_Thermal",
@@ -597,7 +817,17 @@
       "link": "",
       "aspectRatio": 1.089,
       "gridSpan": "normal",
-      "thumbMedia": "Scientist_Thermal_01.webp"
+      "thumbMedia": "Scientist_Thermal_01.webp",
+      "modalThumbs": [
+        "Scientist_Thermal_01.webp",
+        "Scientist_Thermal_02.webp",
+        "Scientist_Thermal_03.webp"
+      ],
+      "zoomMedia": [
+        "Scientist_Thermal_01_zoom.webp",
+        "Scientist_Thermal_02_zoom.webp",
+        "Scientist_Thermal_03_zoom.webp"
+      ]
     },
     {
       "id": "Spiderman",
@@ -619,7 +849,15 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Spiderman_01.webp"
+      "thumbMedia": "Spiderman_01.webp",
+      "modalThumbs": [
+        "Spiderman_01.webp",
+        "Spiderman_02.webp"
+      ],
+      "zoomMedia": [
+        "Spiderman_01_zoom.webp",
+        "Spiderman_02_zoom.webp"
+      ]
     },
     {
       "id": "Creeping_Shade",
@@ -641,7 +879,15 @@
       "link": "",
       "aspectRatio": 1.054,
       "gridSpan": "normal",
-      "thumbMedia": "Creeping_Shade_01.webp"
+      "thumbMedia": "Creeping_Shade_01.webp",
+      "modalThumbs": [
+        "Creeping_Shade_01.webp",
+        "Creeping_Shade_02.webp"
+      ],
+      "zoomMedia": [
+        "Creeping_Shade_01_zoom.webp",
+        "Creeping_Shade_02_zoom.webp"
+      ]
     },
     {
       "id": "Dimension_Jumper",
@@ -663,7 +909,15 @@
       "link": "",
       "aspectRatio": 1.047,
       "gridSpan": "normal",
-      "thumbMedia": "Dimension_Jumper_01.webp"
+      "thumbMedia": "Dimension_Jumper_01.webp",
+      "modalThumbs": [
+        "Dimension_Jumper_01.webp",
+        "Dimension_Jumper_02.webp"
+      ],
+      "zoomMedia": [
+        "Dimension_Jumper_01_zoom.webp",
+        "Dimension_Jumper_02_zoom.webp"
+      ]
     },
     {
       "id": "Pixel_Combat_Sprites",
@@ -689,7 +943,25 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Pixel_Combat_Sprites_01.webp"
+      "thumbMedia": "Pixel_Combat_Sprites_01.webp",
+      "modalThumbs": [
+        "Pixel_Combat_Sprites_01.webp",
+        "Pixel_Combat_Sprites_02.webp",
+        "Pixel_Combat_Sprites_03.webp",
+        "Pixel_Combat_Sprites_04.webp",
+        "Pixel_Combat_Sprites_05.webp",
+        null,
+        "Pixel_Combat_Sprites_07.webp"
+      ],
+      "zoomMedia": [
+        "Pixel_Combat_Sprites_01_zoom.webp",
+        "Pixel_Combat_Sprites_02_zoom.webp",
+        "Pixel_Combat_Sprites_03_zoom.webp",
+        "Pixel_Combat_Sprites_04_zoom.webp",
+        "Pixel_Combat_Sprites_05_zoom.webp",
+        null,
+        "Pixel_Combat_Sprites_07_zoom.webp"
+      ]
     },
     {
       "id": "Nephilim",
@@ -712,7 +984,17 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Nephilim_01.webp"
+      "thumbMedia": "Nephilim_01.webp",
+      "modalThumbs": [
+        "Nephilim_01.webp",
+        "Nephilim_02.webp",
+        "Nephilim_03.webp"
+      ],
+      "zoomMedia": [
+        "Nephilim_01_zoom.webp",
+        "Nephilim_02_zoom.webp",
+        "Nephilim_03_zoom.webp"
+      ]
     },
     {
       "id": "Scientist_Sketches",
@@ -733,7 +1015,13 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Scientist_Sketches.webp"
+      "thumbMedia": "Scientist_Sketches.webp",
+      "modalThumbs": [
+        "Scientist_Sketches.webp"
+      ],
+      "zoomMedia": [
+        "Scientist_Sketches_zoom.webp"
+      ]
     },
     {
       "id": "AbstractSeven",
@@ -753,7 +1041,13 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null
+      "thumbMedia": null,
+      "modalThumbs": [
+        null
+      ],
+      "zoomMedia": [
+        null
+      ]
     },
     {
       "id": "AbstractSix",
@@ -773,7 +1067,13 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "normal",
-      "thumbMedia": null
+      "thumbMedia": null,
+      "modalThumbs": [
+        null
+      ],
+      "zoomMedia": [
+        null
+      ]
     },
     {
       "id": "Power",
@@ -793,7 +1093,13 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Power.webp"
+      "thumbMedia": "Power.webp",
+      "modalThumbs": [
+        "Power.webp"
+      ],
+      "zoomMedia": [
+        "Power_zoom.webp"
+      ]
     },
     {
       "id": "AbstractFive",
@@ -813,7 +1119,13 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "normal",
-      "thumbMedia": null
+      "thumbMedia": null,
+      "modalThumbs": [
+        null
+      ],
+      "zoomMedia": [
+        null
+      ]
     },
     {
       "id": "Energy",
@@ -834,7 +1146,15 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Energy_01.webp"
+      "thumbMedia": "Energy_01.webp",
+      "modalThumbs": [
+        "Energy_01.webp",
+        "Energy_02.webp"
+      ],
+      "zoomMedia": [
+        "Energy_01_zoom.webp",
+        "Energy_02_zoom.webp"
+      ]
     },
     {
       "id": "AbstractFour",
@@ -854,7 +1174,13 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null
+      "thumbMedia": null,
+      "modalThumbs": [
+        null
+      ],
+      "zoomMedia": [
+        null
+      ]
     },
     {
       "id": "AbstractOne",
@@ -874,7 +1200,13 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "normal",
-      "thumbMedia": null
+      "thumbMedia": null,
+      "modalThumbs": [
+        null
+      ],
+      "zoomMedia": [
+        null
+      ]
     },
     {
       "id": "AbstractThree",
@@ -894,7 +1226,13 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null
+      "thumbMedia": null,
+      "modalThumbs": [
+        null
+      ],
+      "zoomMedia": [
+        null
+      ]
     },
     {
       "id": "AbstractTwo",
@@ -914,7 +1252,13 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "normal",
-      "thumbMedia": null
+      "thumbMedia": null,
+      "modalThumbs": [
+        null
+      ],
+      "zoomMedia": [
+        null
+      ]
     },
     {
       "id": "Scientist_And_Colleague",
@@ -936,7 +1280,15 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "normal",
-      "thumbMedia": "Scientist_And_Colleague_01.webp"
+      "thumbMedia": "Scientist_And_Colleague_01.webp",
+      "modalThumbs": [
+        "Scientist_And_Colleague_01.webp",
+        "Scientist_And_Colleague_02.webp"
+      ],
+      "zoomMedia": [
+        "Scientist_And_Colleague_01_zoom.webp",
+        "Scientist_And_Colleague_02_zoom.webp"
+      ]
     }
   ]
 }
