@@ -23,8 +23,26 @@ let hasFfmpeg = false;
 try { execSync("ffmpeg -version", { stdio:"pipe" }); hasFfmpeg = true; } catch(_) {}
 
 const THUMB_DIR    = "thumbs";   // subfolder name inside works/ and pages/<slug>/
-const THUMB_MAX_PX = 1200;       // longest side of thumbnail
+const THUMB_MAX_PX = 1200;       // longest side of grid/modal thumbnail
 const THUMB_QUALITY = 82;        // WebP quality (0-100)
+
+// Zoom-tier — what the pan/zoom overlay actually loads, instead of the raw
+// original. This exists to cap DECODED PIXEL DIMENSIONS, not just file size.
+// The overlay renders its image inside a `will-change: transform` layer,
+// which forces the browser to allocate a GPU-backed texture sized to the
+// image's native pixel dimensions — regardless of how small the file is on
+// disk. An oversized original (a 30+ MB photo, or just a very high native
+// resolution) can exceed an older device's texture/compositor limit and
+// crash the tab, even though it displays at a small on-screen scale.
+// Converting to WebP alone would NOT fix this — it shrinks bytes on disk,
+// not decoded pixels. ZOOM_MAX_PX is the part that actually matters; the
+// WebP re-encode is a free bonus (faster download) that rides along with it.
+// 4096px comfortably exceeds what any screen can show pixel-for-pixel even
+// at max pinch-zoom, so this shouldn't be visible as a quality loss — but
+// raise it if you want more headroom on capable devices (at the cost of
+// reintroducing risk on old ones).
+const ZOOM_MAX_PX  = 4096;
+const ZOOM_QUALITY = 90;
 
 const WORKS_DIR   = path.join(__dirname, "works");
 const PAGES_DIR   = path.join(__dirname, "pages");
@@ -154,6 +172,30 @@ async function makeImageThumb(srcPath, thumbDir, srcFilename) {
   }
 }
 
+// Returns the zoom-tier filename (e.g. "mywork_zoom.webp") or null.
+// This is a size-capped stand-in for the raw original — see ZOOM_MAX_PX
+// comment above for why capping dimensions (not just file size) matters.
+async function makeZoomImage(srcPath, thumbDir, srcFilename) {
+  if (!sharp) return null;
+  const ext = path.extname(srcFilename).toLowerCase();
+  if (ext === ".gif") return null; // skip: converting GIF kills animation
+  const baseName = path.basename(srcFilename, path.extname(srcFilename));
+  const zoomName = baseName + "_zoom.webp";
+  const zoomPath = path.join(thumbDir, zoomName);
+  try {
+    const srcMtime = fs.statSync(srcPath).mtimeMs;
+    try { if (fs.statSync(zoomPath).mtimeMs >= srcMtime) return zoomName; } catch(_) {}
+    await sharp(srcPath)
+      .resize(ZOOM_MAX_PX, ZOOM_MAX_PX, { fit:"inside", withoutEnlargement:true })
+      .webp({ quality:ZOOM_QUALITY })
+      .toFile(zoomPath);
+    return zoomName;
+  } catch(e) {
+    process.stdout.write("  zoom image skipped (" + srcFilename + "): " + e.message + "\n");
+    return null;
+  }
+}
+
 // Returns the poster filename (e.g. "myvideo_poster.jpg") or null.
 function makeVideoThumb(srcPath, thumbDir, srcFilename) {
   if (!hasFfmpeg) return null;
@@ -209,21 +251,39 @@ async function buildWorks() {
     const dims     = readDimensions(path.join(WORKS_DIR, primary));
     const ar       = dims ? parseFloat((dims.w/dims.h).toFixed(3)) : null;
 
-    // Generate thumbnail for primary media
-    let thumbMedia = null;
-    const srcPath = path.join(WORKS_DIR, primary);
-    if (type === "image") {
-      thumbMedia = await makeImageThumb(srcPath, thumbDir, primary);
-    } else if (type === "video") {
-      thumbMedia = makeVideoThumb(srcPath, thumbDir, primary);
+    // Per-media thumbnails (webp, capped at THUMB_MAX_PX) for EVERY item in
+    // allMedia — not just the primary. Previously only the primary media got
+    // a thumbnail, so stepping to the 2nd/3rd image in a multi-file gallery
+    // entry loaded the raw original straight into the modal. modalThumbs[0]
+    // doubles as the grid/carousel thumbnail (thumbMedia, kept below for
+    // backward compatibility with the existing grid rendering code).
+    const modalThumbs = [];
+    // Size-capped zoom-tier images for every image in allMedia — what the
+    // pan/zoom overlay opens instead of the raw original (see ZOOM_MAX_PX).
+    const zoomMedia = [];
+    for (const file of allMedia) {
+      const mt = mediaType(file);
+      const fp = path.join(WORKS_DIR, file);
+      const exists = fs.existsSync(fp);
+      if (mt === "image") {
+        modalThumbs.push(exists ? await makeImageThumb(fp, thumbDir, file) : null);
+        zoomMedia.push(exists ? await makeZoomImage(fp, thumbDir, file) : null);
+      } else if (mt === "video") {
+        modalThumbs.push(exists ? makeVideoThumb(fp, thumbDir, file) : null);
+        zoomMedia.push(null);
+      } else {
+        modalThumbs.push(null);
+        zoomMedia.push(null);
+      }
     }
+    const thumbMedia = modalThumbs[0];
 
     entries.push({
       id:canon, primaryMedia:primary, allMedia, type,
       title:meta.title||canon, description:meta.description,
       tags:meta.tags, featured:meta.featured, date:meta.date, link:meta.link,
       aspectRatio:ar, gridSpan: meta.square ? "normal" : deriveSpan(ar,type),
-      thumbMedia,
+      thumbMedia, modalThumbs, zoomMedia,
     });
   }
 
@@ -308,15 +368,21 @@ async function buildPages() {
       const mediaItems = [];
       for (const file of w.media) {
         const mtype = mediaType(file);
-        let thumb = null;
-        if (w.compress) {
-          const srcPath = path.join(pageDir, file);
-          if (fs.existsSync(srcPath)) {
-            if (mtype === "image") thumb = await makeImageThumb(srcPath, thumbDir, file);
-            else if (mtype === "video") thumb = makeVideoThumb(srcPath, thumbDir, file);
-          }
+        const srcPath = path.join(pageDir, file);
+        const srcExists = fs.existsSync(srcPath);
+        let thumb = null, zoomThumb = null;
+        if (w.compress && srcExists) {
+          if (mtype === "image") thumb = await makeImageThumb(srcPath, thumbDir, file);
+          else if (mtype === "video") thumb = makeVideoThumb(srcPath, thumbDir, file);
         }
-        mediaItems.push({ file, type:mtype, thumb });
+        // Zoom-tier generation always runs for images, regardless of
+        // [compress] — that flag controls display-thumbnail quality, but the
+        // zoom-tier cap is a stability safeguard (see ZOOM_MAX_PX above), not
+        // a quality preference, so it shouldn't be opt-out-able per widget.
+        if (mtype === "image" && srcExists) {
+          zoomThumb = await makeZoomImage(srcPath, thumbDir, file);
+        }
+        mediaItems.push({ file, type:mtype, thumb, zoomThumb });
       }
       w.media = mediaItems;
       widgets.push(w);
