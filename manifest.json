@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-22T12:40:15.260Z",
+  "generated": "2026-07-24T13:04:28.581Z",
   "tags": [
     "2D",
     "3D",
@@ -16,6 +16,31 @@
     "Trepidation"
   ],
   "works": [
+    {
+      "id": "Antagonist",
+      "primaryMedia": "Antagonist_01.png",
+      "allMedia": [
+        "Antagonist_01.png",
+        "Antagonist_02.png",
+        "Antagonist_03.webp",
+        "Antagonist_04.webp",
+        "Antagonist_05.webp"
+      ],
+      "type": "image",
+      "title": "Antagonist",
+      "description": "\"Before the duo can react, the crescent of adversaries splits down the middle, revealing an awful, HORRIBLE THING. Facing them, a skinless amalgam of flesh and elegant robotic material in the shape of a person, stands in the middle of the room. A haunted, cursed skull bears cold, metal teeth; its eye sockets possess a beady, piercing red light that rots through the duo's souls.\"\n\nConcept art of the 'main big bad boss' of my Trepidation project. A tiny machine 'mysteriously' propagated into a normal person's brain, which started taking over their body. Bone was converted to metal, and muscle converted to gel-like synthetics.\n\n1st image is the cinematic perspective, the 2nd image is the POV. Image 3 is a viewport look, and image 4 and 5 are concept art from long, long ago.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Trepidation"
+      ],
+      "featured": false,
+      "date": "2026-07",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "Antagonist_01.webp"
+    },
     {
       "id": "Hatamoto",
       "primaryMedia": "Hatamoto_01.png",

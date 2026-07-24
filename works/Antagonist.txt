@@ -1,0 +1,16 @@
+[title]
+Antagonist
+
+[description]
+"Before the duo can react, the crescent of adversaries splits down the middle, revealing an awful, HORRIBLE THING. Facing them, a skinless amalgam of flesh and elegant robotic material in the shape of a person, stands in the middle of the room. A haunted, cursed skull bears cold, metal teeth; its eye sockets possess a beady, piercing red light that rots through the duo's souls."
+
+Concept art of the 'main big bad boss' of my Trepidation project. A tiny machine 'mysteriously' propagated into a normal person's brain, which started taking over their body. Bone was converted to metal, and muscle converted to gel-like synthetics.
+
+1st image is the cinematic perspective, the 2nd image is the POV. Image 3 is a viewport look, and image 4 and 5 are concept art from long, long ago.
+
+
+[tags]
+3D, Blender, Trepidation
+
+[date]
+2026-07

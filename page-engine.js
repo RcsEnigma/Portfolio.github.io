@@ -78,7 +78,7 @@
       "}" +
       "#page-zoom-overlay.open{opacity:1;pointer-events:all;}" +
       "#page-zoom-canvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;}" +
-      "#page-zoom-canvas img{display:block;max-width:none;user-select:none;-webkit-user-drag:none;transition:opacity .15s ease;}" +
+      "#page-zoom-canvas img{display:block;max-width:none;user-select:none;-webkit-user-drag:none;}" +
       "#page-zoom-close{" +
         "position:fixed;top:1rem;right:1rem;" +
         "background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);" +
@@ -193,10 +193,6 @@
 
     const origUrl  = mediaPath(slug, item.file);
     const thumbUrl = item.thumb ? "/pages/" + slug + "/thumbs/" + item.thumb : null;
-    // Zoom-tier: size-capped so the pan/zoom overlay never has to composite
-    // an unbounded image (see generate-manifest.js ZOOM_MAX_PX / makeZoomImage).
-    // Falls back to the raw original if no zoom-tier asset was generated.
-    const zoomUrl  = item.zoomThumb ? "/pages/" + slug + "/thumbs/" + item.zoomThumb : origUrl;
 
     if (item.type === "video") {
       const v = document.createElement("video");
@@ -215,13 +211,12 @@
     const img = document.createElement("img");
     img.alt = ""; img.loading = "lazy";
     img.onerror = () => img.replaceWith(makeMissingPlaceholder());
-    // Display the thumbnail if available; zoom opens the size-capped
-    // zoom-tier image (or the original if no zoom-tier asset exists).
+    // Display the thumbnail if available; always zoom into the original
     img.src = thumbUrl || origUrl;
-    img.dataset.orig = zoomUrl;
+    img.dataset.orig = origUrl; // always points to full-res original
     if (!opts.noZoom) {
       img.style.cursor = "zoom-in";
-      img.onclick = () => openZoom(zoomUrl);
+      img.onclick = () => openZoom(origUrl); // always full-res in zoom
     }
     return img;
   }
@@ -474,7 +469,7 @@
           if (img) {
             img.style.objectFit = "contain";
             img.style.cursor    = "zoom-in";
-            // dataset.orig is set by buildMediaEl to the zoom-tier URL (or original)
+            // dataset.orig is set by buildMediaEl to the full-res URL
             img.onclick = e => { e.stopPropagation(); openZoom(img.dataset.orig || img.src); };
           }
           const vid = el.querySelector("video");
@@ -686,18 +681,9 @@
     initZoom();
     _pzCanvas.innerHTML = "";
     _pzScale = 1; _pzFitScale = 1; _pzX = 0; _pzY = 0;
-    _pzApply();
-
-    // Disable native browser pinch-zoom while our zoom canvas is active —
-    // otherwise iOS intercepts two-finger touches as a page-zoom gesture
-    // instead of delivering them to our touchmove handler. (Matches
-    // index.html's gallery zoom, which already does this.)
-    const _vp = document.querySelector("meta[name=viewport]");
-    if (_vp) { _vp.dataset.savedContent = _vp.content; _vp.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"; }
 
     const img = new Image();
     img.draggable = false;
-    img.style.opacity = "0"; // hidden until sized, so there's no unscaled top-left flash
     img.onload = () => {
       const fw = window.innerWidth  / img.naturalWidth;
       const fh = window.innerHeight / img.naturalHeight;
@@ -706,7 +692,6 @@
       _pzX = (window.innerWidth  - img.naturalWidth  * _pzScale) / 2;
       _pzY = (window.innerHeight - img.naturalHeight * _pzScale) / 2;
       _pzApply();
-      img.style.opacity = "1";
     };
     img.src = origSrc;
     _pzCanvas.appendChild(img);
@@ -725,13 +710,6 @@
     _pzOverlay.classList.remove("open");
     document.body.style.overflow = "";
     setTimeout(() => { if (_pzCanvas) _pzCanvas.innerHTML = ""; }, 230);
-
-    // Re-enable native pinch-zoom.
-    const _vp = document.querySelector("meta[name=viewport]");
-    if (_vp && _vp.dataset.savedContent) {
-      _vp.content = _vp.dataset.savedContent;
-      delete _vp.dataset.savedContent;
-    }
   }
 
   boot();
