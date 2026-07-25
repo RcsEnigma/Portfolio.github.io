@@ -26,21 +26,22 @@ const THUMB_DIR    = "thumbs";   // subfolder name inside works/ and pages/<slug
 const THUMB_MAX_PX = 1200;       // longest side of grid/modal thumbnail
 const THUMB_QUALITY = 82;        // WebP quality (0-100)
 
-// Zoom-tier — what the pan/zoom overlay actually loads, instead of the raw
-// original. This exists to cap DECODED PIXEL DIMENSIONS, not just file size.
-// The overlay renders its image inside a `will-change: transform` layer,
-// which forces the browser to allocate a GPU-backed texture sized to the
-// image's native pixel dimensions — regardless of how small the file is on
-// disk. An oversized original (a 30+ MB photo, or just a very high native
+// Zoom-tier — what the pan/zoom overlay loads on phones/tablets, instead of
+// the raw original. This exists to cap DECODED PIXEL DIMENSIONS, not just
+// file size. The overlay renders its image inside a `will-change: transform`
+// layer, which forces the browser to allocate a GPU-backed texture sized to
+// the image's native pixel dimensions — regardless of how small the file is
+// on disk. An oversized original (a 30+ MB photo, or just a very high native
 // resolution) can exceed an older device's texture/compositor limit and
 // crash the tab, even though it displays at a small on-screen scale.
 // Converting to WebP alone would NOT fix this — it shrinks bytes on disk,
 // not decoded pixels. ZOOM_MAX_PX is the part that actually matters; the
 // WebP re-encode is a free bonus (faster download) that rides along with it.
-// 4096px comfortably exceeds what any screen can show pixel-for-pixel even
-// at max pinch-zoom, so this shouldn't be visible as a quality loss — but
-// raise it if you want more headroom on capable devices (at the cost of
-// reintroducing risk on old ones).
+// Desktop/laptop browsers skip this tier entirely and load the true original
+// instead (see isLikelyDesktop() in index.html / page-engine.js) — so this
+// cap only ever affects what phones and tablets see. 4096px comfortably
+// exceeds what any phone screen can show pixel-for-pixel even at max
+// pinch-zoom, so it shouldn't be visible as a quality loss there.
 const ZOOM_MAX_PX  = 4096;
 const ZOOM_QUALITY = 90;
 
@@ -148,23 +149,45 @@ function deriveSpan(ar, type) {
 }
 
 // ── Thumbnail generation ─────────────────────────────────────
+//
+// Freshness is tracked by file SIZE, in a small ".thumb-cache.json" sidecar
+// inside each thumbs/ folder — not by mtime. git does not preserve mtimes on
+// checkout/pull/clone, so an mtime-based "is the thumb newer than the
+// source?" check can come out true or false almost arbitrarily after any
+// git operation, independent of whether the source actually changed. Byte
+// size only changes when the source file is genuinely replaced, so it
+// survives commits/checkouts across machines correctly. The cache file is
+// meant to be committed alongside the thumbs it describes — don't gitignore
+// it, and don't hand-edit it.
+
+function loadThumbCache(thumbDir) {
+  try { return JSON.parse(fs.readFileSync(path.join(thumbDir, ".thumb-cache.json"), "utf8")); }
+  catch(_) { return {}; }
+}
+function saveThumbCache(thumbDir, cache) {
+  try { fs.writeFileSync(path.join(thumbDir, ".thumb-cache.json"), JSON.stringify(cache)); }
+  catch(_) {}
+}
 
 // Returns the thumb filename (e.g. "mywork.webp") or null on failure.
-// Skips regeneration if the existing thumb is newer than the source.
-async function makeImageThumb(srcPath, thumbDir, srcFilename) {
+// Skips regeneration if the source's byte size matches what's on record
+// for this variant AND the output file still exists on disk.
+async function makeImageThumb(srcPath, thumbDir, srcFilename, cache) {
   if (!sharp) return null;
   const ext = path.extname(srcFilename).toLowerCase();
   if (ext === ".gif") return null; // skip: converting GIF kills animation
   const baseName  = path.basename(srcFilename, path.extname(srcFilename));
   const thumbName = baseName + ".webp";
   const thumbPath = path.join(thumbDir, thumbName);
+  const cacheKey  = srcFilename + "::thumb";
   try {
-    const srcMtime = fs.statSync(srcPath).mtimeMs;
-    try { if (fs.statSync(thumbPath).mtimeMs >= srcMtime) return thumbName; } catch(_) {}
+    const srcSize = fs.statSync(srcPath).size;
+    if (cache[cacheKey] === srcSize && fs.existsSync(thumbPath)) return thumbName;
     await sharp(srcPath)
       .resize(THUMB_MAX_PX, THUMB_MAX_PX, { fit:"inside", withoutEnlargement:true })
       .webp({ quality:THUMB_QUALITY })
       .toFile(thumbPath);
+    cache[cacheKey] = srcSize;
     return thumbName;
   } catch(e) {
     process.stdout.write("  thumb skipped (" + srcFilename + "): " + e.message + "\n");
@@ -175,20 +198,22 @@ async function makeImageThumb(srcPath, thumbDir, srcFilename) {
 // Returns the zoom-tier filename (e.g. "mywork_zoom.webp") or null.
 // This is a size-capped stand-in for the raw original — see ZOOM_MAX_PX
 // comment above for why capping dimensions (not just file size) matters.
-async function makeZoomImage(srcPath, thumbDir, srcFilename) {
+async function makeZoomImage(srcPath, thumbDir, srcFilename, cache) {
   if (!sharp) return null;
   const ext = path.extname(srcFilename).toLowerCase();
   if (ext === ".gif") return null; // skip: converting GIF kills animation
   const baseName = path.basename(srcFilename, path.extname(srcFilename));
   const zoomName = baseName + "_zoom.webp";
   const zoomPath = path.join(thumbDir, zoomName);
+  const cacheKey = srcFilename + "::zoom";
   try {
-    const srcMtime = fs.statSync(srcPath).mtimeMs;
-    try { if (fs.statSync(zoomPath).mtimeMs >= srcMtime) return zoomName; } catch(_) {}
+    const srcSize = fs.statSync(srcPath).size;
+    if (cache[cacheKey] === srcSize && fs.existsSync(zoomPath)) return zoomName;
     await sharp(srcPath)
       .resize(ZOOM_MAX_PX, ZOOM_MAX_PX, { fit:"inside", withoutEnlargement:true })
       .webp({ quality:ZOOM_QUALITY })
       .toFile(zoomPath);
+    cache[cacheKey] = srcSize;
     return zoomName;
   } catch(e) {
     process.stdout.write("  zoom image skipped (" + srcFilename + "): " + e.message + "\n");
@@ -197,18 +222,20 @@ async function makeZoomImage(srcPath, thumbDir, srcFilename) {
 }
 
 // Returns the poster filename (e.g. "myvideo_poster.jpg") or null.
-function makeVideoThumb(srcPath, thumbDir, srcFilename) {
+function makeVideoThumb(srcPath, thumbDir, srcFilename, cache) {
   if (!hasFfmpeg) return null;
   const baseName  = path.basename(srcFilename, path.extname(srcFilename));
   const thumbName = baseName + "_poster.jpg";
   const thumbPath = path.join(thumbDir, thumbName);
+  const cacheKey  = srcFilename + "::poster";
   try {
-    const srcMtime = fs.statSync(srcPath).mtimeMs;
-    try { if (fs.statSync(thumbPath).mtimeMs >= srcMtime) return thumbName; } catch(_) {}
+    const srcSize = fs.statSync(srcPath).size;
+    if (cache[cacheKey] === srcSize && fs.existsSync(thumbPath)) return thumbName;
     execSync(
       `ffmpeg -i "${srcPath}" -vf "thumbnail=300,scale=${THUMB_MAX_PX}:-1" -frames:v 1 "${thumbPath}" -y`,
       { stdio:"pipe" }
     );
+    cache[cacheKey] = srcSize;
     return thumbName;
   } catch(_) { return null; }
 }
@@ -219,9 +246,43 @@ function ensureThumbDir(dir) {
   return d;
 }
 
+// ── Progress bar ──────────────────────────────────────────────
+// Compressing a folder of large photos/videos can take a while (each image
+// gets processed for BOTH the display tier and the zoom tier). Without any
+// feedback, that looks identical to a frozen/crashed script — the single
+// biggest way people (understandably) interrupt this halfway through. This
+// prints a live-updating single-line progress bar instead.
+function countMediaFiles(dir) {
+  if (!fs.existsSync(dir)) return 0;
+  let count = 0;
+  for (const f of fs.readdirSync(dir)) {
+    if (f === THUMB_DIR || f.startsWith(".")) continue;
+    const full = path.join(dir, f);
+    let stat; try { stat = fs.statSync(full); } catch(_) { continue; }
+    if (stat.isDirectory()) count += countMediaFiles(full);
+    else if (MEDIA_EXT.has(path.extname(f).toLowerCase())) count++;
+  }
+  return count;
+}
+
+const progress = { done: 0, total: 0 };
+const PROGRESS_BAR_WIDTH = 28;
+function tickProgress(label) {
+  progress.done++;
+  const frac   = progress.total ? Math.min(1, progress.done / progress.total) : 1;
+  const filled = Math.round(PROGRESS_BAR_WIDTH * frac);
+  const bar    = "#".repeat(filled) + "-".repeat(Math.max(0, PROGRESS_BAR_WIDTH - filled));
+  const line   = "  [" + bar + "] " + progress.done + "/" + progress.total + "  " + label;
+  process.stdout.write("\r" + line.padEnd(80).slice(0, 100));
+}
+function finishProgress() {
+  if (progress.total > 0) process.stdout.write("\r" + " ".repeat(100) + "\r");
+}
+
 async function buildWorks() {
   if (!fs.existsSync(WORKS_DIR)) { fs.mkdirSync(WORKS_DIR); }
   const thumbDir = ensureThumbDir(WORKS_DIR);
+  const cache = loadThumbCache(thumbDir);
   const files = fs.readdirSync(WORKS_DIR).filter(f => fs.statSync(path.join(WORKS_DIR,f)).isFile());
   const txtMap={}, groups={};
 
@@ -266,15 +327,16 @@ async function buildWorks() {
       const fp = path.join(WORKS_DIR, file);
       const exists = fs.existsSync(fp);
       if (mt === "image") {
-        modalThumbs.push(exists ? await makeImageThumb(fp, thumbDir, file) : null);
-        zoomMedia.push(exists ? await makeZoomImage(fp, thumbDir, file) : null);
+        modalThumbs.push(exists ? await makeImageThumb(fp, thumbDir, file, cache) : null);
+        zoomMedia.push(exists ? await makeZoomImage(fp, thumbDir, file, cache) : null);
       } else if (mt === "video") {
-        modalThumbs.push(exists ? makeVideoThumb(fp, thumbDir, file) : null);
+        modalThumbs.push(exists ? makeVideoThumb(fp, thumbDir, file, cache) : null);
         zoomMedia.push(null);
       } else {
         modalThumbs.push(null);
         zoomMedia.push(null);
       }
+      if (exists) tickProgress(file);
     }
     const thumbMedia = modalThumbs[0];
 
@@ -286,6 +348,8 @@ async function buildWorks() {
       thumbMedia, modalThumbs, zoomMedia,
     });
   }
+
+  saveThumbCache(thumbDir, cache);
 
   entries.sort((a,b)=>{
     if (a.date&&b.date) return b.date.localeCompare(a.date);
@@ -348,6 +412,7 @@ async function buildPages() {
     const meta     = parsePageMeta(metaRaw, folderName);
 
     const thumbDir = ensureThumbDir(pageDir);
+    const cache = loadThumbCache(thumbDir);
 
     const allFiles = fs.readdirSync(pageDir).filter(f=>fs.statSync(path.join(pageDir,f)).isFile());
     const widgetFiles = allFiles
@@ -372,16 +437,17 @@ async function buildPages() {
         const srcExists = fs.existsSync(srcPath);
         let thumb = null, zoomThumb = null;
         if (w.compress && srcExists) {
-          if (mtype === "image") thumb = await makeImageThumb(srcPath, thumbDir, file);
-          else if (mtype === "video") thumb = makeVideoThumb(srcPath, thumbDir, file);
+          if (mtype === "image") thumb = await makeImageThumb(srcPath, thumbDir, file, cache);
+          else if (mtype === "video") thumb = makeVideoThumb(srcPath, thumbDir, file, cache);
         }
         // Zoom-tier generation always runs for images, regardless of
         // [compress] — that flag controls display-thumbnail quality, but the
         // zoom-tier cap is a stability safeguard (see ZOOM_MAX_PX above), not
         // a quality preference, so it shouldn't be opt-out-able per widget.
         if (mtype === "image" && srcExists) {
-          zoomThumb = await makeZoomImage(srcPath, thumbDir, file);
+          zoomThumb = await makeZoomImage(srcPath, thumbDir, file, cache);
         }
+        if (srcExists) tickProgress(file);
         mediaItems.push({ file, type:mtype, thumb, zoomThumb });
       }
       w.media = mediaItems;
@@ -394,6 +460,8 @@ async function buildPages() {
       if (firstWithMedia) carouselFile = firstWithMedia.media[0].file;
     }
     const carouselType = carouselFile ? mediaType(carouselFile) : null;
+
+    saveThumbCache(thumbDir, cache);
 
     pages.push({
       slug, folder:folderName,
@@ -476,9 +544,19 @@ async function build() {
   if (!sharp) console.log("\nNote: sharp not installed — skipping image thumbnails. Run: npm install sharp\n");
   if (!hasFfmpeg) console.log("Note: ffmpeg not found — skipping video poster frames.\n");
 
+  progress.total = countMediaFiles(WORKS_DIR) + countMediaFiles(PAGES_DIR);
+  if (progress.total > 0 && sharp) {
+    console.log("Compressing images & videos — this can take a while for large files.");
+    console.log("DO NOT CLOSE this window until you see \"Done compressing\" below.\n");
+  }
+
   const manifest = await buildWorks();
+  const pages = await buildPages();
+  finishProgress();
+  if (progress.total > 0 && sharp) console.log("Done compressing.\n");
+
   fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifest,null,2));
-  console.log("\nmanifest.json: " + manifest.works.length + " work(s), " + manifest.tags.length + " tag(s)\n");
+  console.log("manifest.json: " + manifest.works.length + " work(s), " + manifest.tags.length + " tag(s)\n");
   for (const e of manifest.works) {
     const span  = e.gridSpan.padEnd(10);
     const ar    = e.aspectRatio ? e.aspectRatio+" ar" : "no dims";
@@ -486,7 +564,6 @@ async function build() {
     console.log("  "+span+" "+e.title+"  ("+ar+", "+e.allMedia.length+" file(s))"+thumb);
   }
 
-  const pages = await buildPages();
   fs.writeFileSync(PAGES_OUT, JSON.stringify({generated:new Date().toISOString(),pages},null,2));
   writeStubs(pages);
   console.log("\npages.json: " + pages.length + " page(s)\n");

@@ -216,12 +216,14 @@
     img.alt = ""; img.loading = "lazy";
     img.onerror = () => img.replaceWith(makeMissingPlaceholder());
     // Display the thumbnail if available; zoom opens the size-capped
-    // zoom-tier image (or the original if no zoom-tier asset exists).
+    // zoom-tier image on phones, or the true original on desktop/laptop
+    // (openZoom() decides — see isLikelyDesktop()).
     img.src = thumbUrl || origUrl;
     img.dataset.orig = zoomUrl;
+    img.dataset.origFull = origUrl;
     if (!opts.noZoom) {
       img.style.cursor = "zoom-in";
-      img.onclick = () => openZoom(zoomUrl);
+      img.onclick = () => openZoom(zoomUrl, origUrl);
     }
     return img;
   }
@@ -474,8 +476,9 @@
           if (img) {
             img.style.objectFit = "contain";
             img.style.cursor    = "zoom-in";
-            // dataset.orig is set by buildMediaEl to the zoom-tier URL (or original)
-            img.onclick = e => { e.stopPropagation(); openZoom(img.dataset.orig || img.src); };
+            // dataset.orig/origFull are set by buildMediaEl; openZoom picks
+            // between them based on isLikelyDesktop()
+            img.onclick = e => { e.stopPropagation(); openZoom(img.dataset.orig || img.src, img.dataset.origFull || img.src); };
           }
           const vid = el.querySelector("video");
           if (vid) {
@@ -573,13 +576,21 @@
 
   // ── Pan/zoom overlay — matches the gallery zoom in index.html ────
   // Scroll/pinch to zoom (anchored to cursor/fingers), drag to pan.
-  // Always opens the full-resolution original regardless of whether a
-  // thumbnail was displayed — so 4K detail is available at max zoom.
+  // Opens the size-capped zoom-tier image on phones/tablets (see
+  // generate-manifest.js ZOOM_MAX_PX), or the true full-resolution original
+  // on desktop/laptop (see isLikelyDesktop() below).
   let _pzOverlay = null, _pzCanvas = null, _pzHint = null;
   let _pzScale = 1, _pzFitScale = 1, _pzX = 0, _pzY = 0;
   let _pzDrag = false, _pzDragSX = 0, _pzDragSY = 0, _pzOX = 0, _pzOY = 0;
   let _pzPinchDist = 0;
   const PZ_MAX = 12;
+
+  // See the matching comment in index.html — same heuristic, duplicated
+  // here since subpages don't share a script context with the main page.
+  const PZ_DESKTOP_MIN_WIDTH = 900;
+  function isLikelyDesktop() {
+    return window.matchMedia("(pointer: fine)").matches && window.innerWidth >= PZ_DESKTOP_MIN_WIDTH;
+  }
 
   function _pzApply() {
     _pzCanvas.style.transform = `translate(${_pzX}px,${_pzY}px) scale(${_pzScale})`;
@@ -682,11 +693,16 @@
     });
   }
 
-  function openZoom(origSrc) {
+  function openZoom(cappedSrc, fullSrc) {
     initZoom();
     _pzCanvas.innerHTML = "";
     _pzScale = 1; _pzFitScale = 1; _pzX = 0; _pzY = 0;
     _pzApply();
+
+    // Desktops/laptops have far more memory headroom than phones, so give
+    // them the true full-resolution original; phones/tablets get the
+    // size-capped zoom-tier image instead. See isLikelyDesktop() above.
+    const origSrc = isLikelyDesktop() ? (fullSrc || cappedSrc) : cappedSrc;
 
     // Disable native browser pinch-zoom while our zoom canvas is active —
     // otherwise iOS intercepts two-finger touches as a page-zoom gesture
