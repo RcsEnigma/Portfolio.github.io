@@ -1,0 +1,11 @@
+[title]
+Fixer Cover
+
+[description]
+Found this model, "NotFreedom" by Peregarin on sketchfab and thought there was something I could do with it. Per usual, I overhauled the materials to make the model more photorealistic (bevels, anisotropy, sheen, and roughness layering). The overall result is something I'm content with. 
+
+[tags]
+2D, 3D, Blender, Graphic Design, Multimodal
+
+[date]
+2026-07

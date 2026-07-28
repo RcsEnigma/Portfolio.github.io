@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-25T05:37:58.162Z",
+  "generated": "2026-07-28T14:02:49.661Z",
   "tags": [
     "2D",
     "3D",
@@ -53,6 +53,38 @@
         "Antagonist_03_zoom.webp",
         "Antagonist_04_zoom.webp",
         "Antagonist_05_zoom.webp"
+      ]
+    },
+    {
+      "id": "Fixer",
+      "primaryMedia": "Fixer_01.png",
+      "allMedia": [
+        "Fixer_01.png",
+        "Fixer_02.webp"
+      ],
+      "type": "image",
+      "title": "Fixer Cover",
+      "description": "Found this model, \"NotFreedom\" by Peregarin on sketchfab and thought there was something I could do with it. Per usual, I overhauled the materials to make the model more photorealistic (bevels, anisotropy, sheen, and roughness layering). The overall result is something I'm content with.",
+      "tags": [
+        "2D",
+        "3D",
+        "Blender",
+        "Graphic Design",
+        "Multimodal"
+      ],
+      "featured": false,
+      "date": "2026-07",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall",
+      "thumbMedia": "Fixer_01.webp",
+      "modalThumbs": [
+        "Fixer_01.webp",
+        "Fixer_02.webp"
+      ],
+      "zoomMedia": [
+        "Fixer_01_zoom.webp",
+        "Fixer_02_zoom.webp"
       ]
     },
     {
