@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connections Finder</title>
+<style>
+  :root {
+    --bg: #f5f4f0; --surface: #fff; --border: rgba(0,0,0,0.12);
+    --text: #1a1a1a; --muted: #666; --faint: #aaa;
+    --radius: 12px; --font: Georgia, serif; --mono: 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+  .layout { max-width: 1400px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; display: flex; gap: 2.5rem; align-items: flex-start; }
+  h1 { font-size: 1.9rem; font-weight: normal; letter-spacing: -1px; margin-bottom: .25rem; }
+  .subtitle { color: var(--muted); font-size: .92rem; margin-bottom: 1.5rem; font-style: italic; line-height: 1.5; }
+
+  .sidebar { width: 300px; flex-shrink: 0; position: sticky; top: 2rem; display: flex; flex-direction: column; gap: 12px; }
+  .main-content { flex: 1; min-width: 0; }
+
+  .field-guide { font-size: .82rem; color: var(--muted); font-style: italic; line-height: 1.5; margin-bottom: 4px; }
+
+  .settings-btn { height: 40px; padding: 0 18px; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-family: var(--font); font-size: .88rem; cursor: pointer; transition: border-color .15s; width: 100%; }
+  .settings-btn:hover { border-color: #888; }
+
+  .analyze-btn { height: 48px; padding: 0 28px; background: #1a1a1a; color: #fff; border: none; border-radius: var(--radius); font-size: 1rem; font-family: var(--font); cursor: pointer; transition: opacity .15s, transform .1s; width: 100%; }
+  .analyze-btn:hover:not(:disabled) { opacity: .85; }
+  .analyze-btn:active:not(:disabled) { transform: scale(.98); }
+  .analyze-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* Progress bar (sidebar) */
+  .progress-section { display: none; flex-direction: column; gap: 6px; }
+  .progress-track { width: 100%; height: 8px; border-radius: 100px; background: rgba(0,0,0,0.08); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: #1a1a1a; transition: width .15s ease; }
+  .progress-label { font-size: .78rem; color: var(--muted); font-style: italic; }
+
+  /* Dynamic fields */
+  .bulk-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .bulk-field label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 6px; font-style: italic; }
+  .bulk-field label span { color: var(--faint); }
+  .bulk-textarea { width: 100%; height: 340px; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; font-size: .95rem; font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; background: var(--surface); color: var(--text); outline: none; resize: vertical; transition: border-color .15s; line-height: 1.7; }
+  .bulk-textarea:focus { border-color: #555; }
+  .bulk-hint { font-size: .8rem; color: var(--faint); }
+  .pair-warning { font-size: .8rem; color: #8a5a00; background: #fdf0d5; border: 1px solid #eed7a8; border-radius: 8px; padding: 8px 12px; line-height: 1.5; }
+  .pair-warning label { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-style: normal; cursor: pointer; }
+
+  /* Filter bar */
+  .filter-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: center; }
+  .filter-label { font-size: .8rem; color: var(--muted); margin-right: 4px; font-style: italic; }
+  .filter-btn { height: 28px; padding: 0 13px; border: 1px solid var(--border); border-radius: 100px; font-size: .8rem; font-family: var(--font); cursor: pointer; background: var(--surface); color: var(--muted); transition: all .12s; white-space: nowrap; }
+  .filter-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .filter-btn:hover:not(.active) { border-color: #aaa; color: var(--text); }
+
+  .words-display { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .word-tag { font-family: var(--mono); font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; background: var(--surface); padding: 5px 14px; border-radius: var(--radius); border: 1.5px solid var(--border); font-weight: bold; }
+  .word-sep { color: var(--faint); font-size: .9rem; }
+  .result-count { font-size: .82rem; color: var(--faint); margin-bottom: .75rem; font-style: italic; }
+
+  /* Cards */
+  .cards { display: flex; flex-direction: column; gap: 10px; }
+  .card { border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(0,0,0,0.07); }
+  .card-top { padding: 14px 18px 12px; }
+  .card-meta { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .cat-name { font-size: .77rem; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; font-family: var(--mono); }
+  .card-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .conf { display: flex; align-items: center; gap: 4px; font-size: .72rem; opacity: .7; }
+  .conf-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .src-badge { font-size: .68rem; padding: 1px 7px; border-radius: 100px; font-family: var(--mono); background: rgba(0,0,0,0.08); opacity: .65; }
+  .pair-badge { font-size: .72rem; background: rgba(0,0,0,0.12); padding: 2px 8px; border-radius: 100px; font-family: var(--mono); }
+  .rule-desc { font-size: .9rem; line-height: 1.5; opacity: .75; font-style: italic; }
+  .card-body { padding: 10px 18px 14px; background: rgba(255,255,255,0.3); border-top: 1px solid rgba(0,0,0,0.06); }
+  .fit-line { font-size: .8rem; margin-bottom: 8px; opacity: .7; line-height: 1.6; white-space: pre-line; }
+  .pills { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pill { font-family: var(--mono); font-size: .72rem; padding: 3px 10px; border-radius: 100px; background: rgba(255,255,255,0.45); border: 1px solid rgba(0,0,0,0.12); letter-spacing: .5px; text-transform: uppercase; }
+  /* Bulk pair chips */
+  .pair-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+  .pair-chip { font-family: var(--mono); font-size: .72rem; padding: 3px 10px; border-radius: 100px; background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.15); letter-spacing: .5px; text-transform: uppercase; }
+
+  /* Color themes */
+  .c-yellow { background: #F9DF6D; color: #3d2f00; }
+  .c-green  { background: #A0C35A; color: #1a3a00; }
+  .c-blue   { background: #B0C4EF; color: #001a4a; }
+  .c-purple { background: #BA81C5; color: #2d0040; }
+  .c-orange { background: #F0A653; color: #3a1500; }
+  .c-red    { background: #E8706A; color: #3a0000; }
+
+  /* States */
+  .loading { text-align: center; padding: 3rem 0; }
+  .spinner { width: 28px; height: 28px; border: 2px solid #ddd; border-top-color: #333; border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--muted); font-style: italic; }
+  .empty-state { text-align: center; padding: 3rem 0; color: var(--faint); font-style: italic; font-size: .95rem; line-height: 1.8; }
+  .no-results { text-align: center; padding: 1.5rem 0; color: var(--faint); font-style: italic; font-size: .9rem; }
+
+  /* Bulk summary header */
+  .bulk-summary { margin-bottom: 1.5rem; padding: 14px 18px; background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border); font-size: .9rem; line-height: 1.7; }
+  .bulk-summary strong { font-size: 1.1rem; }
+
+  /* Settings drawer */
+  .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 40; }
+  .drawer-overlay.open { display: block; }
+  .drawer { position: fixed; top: 0; right: 0; width: min(420px, 100vw); height: 100vh; background: var(--bg); z-index: 41;
+    transform: translateX(100%); transition: transform .2s ease; overflow-y: auto; box-shadow: -8px 0 24px rgba(0,0,0,0.15); }
+  .drawer.open { transform: translateX(0); }
+  .drawer-inner { padding: 1.75rem 1.5rem 4rem; }
+  .drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .25rem; }
+  .drawer-head h2 { font-size: 1.4rem; font-weight: normal; }
+  .drawer-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); line-height: 1; }
+  .drawer-sub { font-size: .82rem; color: var(--muted); margin-bottom: 1.4rem; font-style: italic; }
+  .drawer-section { margin-bottom: 1.75rem; }
+  .drawer-section h3 { font-size: .85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: .6rem; }
+  .plugin-status { font-size: .78rem; color: var(--faint); margin-bottom: .6rem; font-style: italic; }
+  .plugin-grid { display: flex; flex-direction: column; gap: 6px; }
+  .plugin-item { display: flex; align-items: flex-start; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .plugin-item.disabled { opacity: .55; }
+  .plugin-item input { margin-top: 3px; flex-shrink: 0; }
+  .plugin-meta { flex: 1; min-width: 0; }
+  .plugin-name { font-size: .85rem; font-weight: bold; }
+  .plugin-desc { font-size: .75rem; color: var(--muted); line-height: 1.4; }
+  .plugin-tag { font-size: .65rem; font-family: var(--mono); padding: 1px 7px; border-radius: 100px; align-self: flex-start; margin-top: 2px; flex-shrink: 0; }
+  .tag-local  { background: #dfe9d8; color: #234; }
+  .tag-api    { background: #d8e4f5; color: #124; }
+  .tag-custom { background: #f5e3d8; color: #421; }
+  .api-note { font-size: .78rem; color: var(--muted); line-height: 1.6; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: .8rem; }
+  .custom-import textarea { width: 100%; height: 110px; font-family: var(--mono); font-size: .8rem; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px; resize: vertical; background: var(--surface); color: var(--text); }
+  .custom-import { display: flex; flex-direction: column; gap: 8px; }
+  .url-input { width: 100%; height: 34px; font-family: var(--mono); font-size: .78rem; border: 1.5px solid var(--border); border-radius: 8px; padding: 0 10px; background: var(--surface); color: var(--text); }
+  .url-input:focus { border-color: #555; outline: none; }
+  .drawer-btn { height: 36px; padding: 0 16px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); font-family: var(--font); font-size: .82rem; cursor: pointer; align-self: flex-start; }
+  .drawer-btn:hover { border-color: #888; }
+  .drawer-btn.primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .import-msg { font-size: .78rem; min-height: 1.1em; }
+  .import-msg.ok { color: #1a6a1a; }
+  .import-msg.err { color: #a02a2a; }
+  .custom-set-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+  .custom-set-row { display: flex; align-items: center; justify-content: space-between; font-size: .78rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 5px 9px; }
+  .custom-set-row button { background: none; border: none; color: #a02a2a; cursor: pointer; font-size: .75rem; }
+
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; }
+    .sidebar { width: 100%; position: static; }
+  }
+
+  @media (max-width: 540px) {
+    h1 { font-size: 1.6rem; }
+    .bulk-fields { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <h1>Connections Finder</h1>
+    <p class="subtitle">Discover shared categories between words — for building NYT-style Connections puzzles.</p>
+
+    <p class="field-guide">One field: see every category each word could belong to. Add a second: cross-reference the two. Add more: every pair of fields gets checked, never all at once.</p>
+
+    <button class="settings-btn" onclick="openDrawer()">⚙ Rules &amp; Plugins</button>
+    <button class="settings-btn" onclick="resetFields()">⟲ Reset All Fields</button>
+
+    <div class="progress-section" id="progressSection">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel"></div>
+    </div>
+
+    <div class="pair-warning" id="pairWarning" style="display:none"></div>
+    <div class="pair-warning" id="datamuseStatus" style="display:none"></div>
+
+    <button class="analyze-btn" id="bulkBtn" onclick="analyzeAll()">Find Connections</button>
+    <p class="bulk-hint">One word or phrase per line in each field.</p>
+  </aside>
+
+  <main class="main-content">
+    <div class="bulk-fields" id="fieldsContainer"></div>
+    <div id="output"><div class="empty-state">Enter words above to get started.</div></div>
+  </main>
+</div>
+
+<!-- SETTINGS DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-inner">
+    <div class="drawer-head">
+      <h2>Rules &amp; Plugins</h2>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <p class="drawer-sub">Every rule is a plugin. Toggle any of them off, or add your own custom word-sets below.</p>
+
+    <div class="drawer-section">
+      <h3>Live word-association APIs</h3>
+      <div class="api-note">These call free, keyless APIs — <strong>Datamuse</strong> for synonyms, statistical associations, and collocations, and <strong>ConceptNet</strong> for structured relations like "used for" and "part of" — that aren't hardcoded anywhere. Results are cached locally for 24h. Requires an internet connection.</div>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Plugins <span id="pluginStatus" class="plugin-status"></span></h3>
+      <div class="plugin-grid" id="pluginGrid"></div>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Custom word sets</h3>
+      <p class="plugin-status">Paste JSON of the shape <code>{"Category Name": ["word1","word2",...]}</code> to add your own permanent categories, or load a pack from a URL (works great with raw JSON files from <a href="https://github.com/dariusk/corpora" target="_blank" rel="noopener">dariusk/corpora</a> on GitHub, using a <code>raw.githubusercontent.com</code> link).</p>
+      <div class="custom-import">
+        <input type="text" id="customSetUrlInput" class="url-input" placeholder="https://raw.githubusercontent.com/.../pack.json" />
+        <button class="drawer-btn" onclick="importCustomSetsFromURL()">Load Pack from URL</button>
+        <textarea id="customSetInput" placeholder='{&#10;  "Parts of a Bicycle": ["frame","fork","chain","spoke","saddle"]&#10;}'></textarea>
+        <button class="drawer-btn primary" onclick="importCustomSets()">Import Pasted JSON</button>
+        <div class="import-msg" id="importMsg"></div>
+        <div class="custom-set-list" id="customSetList"></div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <button class="drawer-btn" onclick="clearApiCache()">Clear API cache</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+const norm = w => w.toLowerCase().replace(/[^a-z]/g, '');
+const sortLetters = w => norm(w).split('').sort().join('');
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+const COLOR_ORDER = ['yellow','green','blue','purple','orange','red'];
+const CONF_COLORS = { high:'#22c55e', medium:'#f59e0b', low:'#94a3b8' };
+
+// ═══════════════════════════════════════════════════
+//  DATA — NAMED SETS
+// ═══════════════════════════════════════════════════
+const NAMED_SETS = [
+  { name:"Deadly Sins",           members:["pride","greed","lust","envy","gluttony","wrath","sloth"] },
+  { name:"Planets",               members:["mercury","venus","earth","mars","jupiter","saturn","uranus","neptune"] },
+  { name:"Santa's Reindeer",      members:["dasher","dancer","prancer","vixen","comet","cupid","donner","blitzen","rudolph"] },
+  { name:"Seven Dwarfs",          members:["happy","grumpy","sleepy","bashful","doc","dopey","sneezy"] },
+  { name:"Greek Olympians",       members:["zeus","hera","poseidon","athena","apollo","artemis","aphrodite","ares","hermes","hephaestus","demeter","dionysus"] },
+  { name:"Roman Gods",            members:["jupiter","juno","neptune","minerva","apollo","diana","venus","mars","mercury","vulcan","ceres","bacchus"] },
+  { name:"Zodiac Signs",          members:["aries","taurus","gemini","cancer","leo","virgo","libra","scorpio","sagittarius","capricorn","aquarius","pisces"] },
+  { name:"Compass Directions",    members:["north","south","east","west","northeast","northwest","southeast","southwest"] },
+  { name:"Seasons",               members:["spring","summer","autumn","fall","winter"] },
+  { name:"Card Suits",            members:["hearts","diamonds","clubs","spades"] },
+  { name:"Chess Pieces",          members:["king","queen","rook","bishop","knight","pawn"] },
+  { name:"Musical Notes (Solfege)",members:["do","re","mi","fa","sol","la","ti","si"] },
+  { name:"NATO Phonetic Alphabet", members:["alpha","bravo","charlie","delta","echo","foxtrot","golf","hotel","india","juliet","kilo","lima","mike","november","oscar","papa","quebec","romeo","sierra","tango","uniform","victor","whiskey","yankee","zulu"] },
+  { name:"Greek Muses",           members:["calliope","clio","erato","euterpe","melpomene","polyhymnia","terpsichore","thalia","urania"] },
+  { name:"Cardinal Virtues",      members:["prudence","justice","fortitude","temperance"] },
+  { name:"Harry Potter Houses",   members:["gryffindor","hufflepuff","ravenclaw","slytherin"] },
+  { name:"Rainbow Colors (ROY G BIV)", members:["red","orange","yellow","green","blue","indigo","violet"] },
+  { name:"Primary Colors",        members:["red","blue","yellow"] },
+  { name:"Oceans",                members:["pacific","atlantic","indian","arctic","southern"] },
+  { name:"Tarot Major Arcana",    members:["fool","magician","priestess","empress","emperor","hierophant","lovers","chariot","strength","hermit","justice","death","temperance","devil","tower","star","moon","sun","judgement","world"] },
+  { name:"Types of Pasta",        members:["spaghetti","penne","fusilli","rigatoni","farfalle","linguine","fettuccine","tortellini","ravioli","gnocchi","lasagna","orzo","conchiglie","capellini","vermicelli","bucatini","manicotti","ziti","cavatappi"] },
+  { name:"Shades of Purple",      members:["amethyst","byzantine","lavender","violet","mauve","plum","lilac","indigo","fuchsia","magenta","periwinkle","heliotrope","wisteria","orchid","mulberry","aubergine"] },
+  { name:"Shades of Blue",        members:["azure","cerulean","cobalt","navy","sapphire","turquoise","ultramarine","teal","cyan","periwinkle","lapis","slate","steel","royal","aquamarine","prussian"] },
+  { name:"Shades of Red",         members:["crimson","scarlet","vermillion","carmine","burgundy","ruby","maroon","cherry","garnet","rose","coral","cinnabar","auburn","cardinal","claret"] },
+  { name:"Shades of Green",       members:["emerald","jade","olive","lime","forest","hunter","sage","mint","chartreuse","seafoam","shamrock","viridian","moss","fern","teal","malachite"] },
+  { name:"Shades of Yellow",      members:["amber","gold","saffron","lemon","canary","ochre","mustard","honey","champagne","straw","flaxen","dandelion","jonquil","goldenrod"] },
+  { name:"Shades of Brown",       members:["chocolate","mahogany","sienna","umber","tan","beige","khaki","tawny","russet","chestnut","walnut","caramel","hazel","sepia","bisque"] },
+  { name:"Types of Cheese",       members:["cheddar","brie","gouda","parmesan","mozzarella","camembert","gorgonzola","emmental","gruyere","ricotta","feta","manchego","roquefort","havarti","colby","muenster","provolone","fontina","asiago","pecorino","stilton","edam","jarlsberg"] },
+  { name:"Types of Trees",        members:["oak","maple","pine","birch","cedar","elm","ash","willow","cherry","walnut","chestnut","mahogany","redwood","sequoia","cypress","poplar","sycamore","beech","spruce","fir","yew","larch","hazel","alder","aspen","baobab","acacia","eucalyptus","banyan","teak"] },
+  { name:"Gemstones",             members:["diamond","ruby","emerald","sapphire","amethyst","topaz","opal","garnet","pearl","turquoise","jade","aquamarine","onyx","citrine","peridot","alexandrite","moonstone","tanzanite","spinel","tourmaline","zircon","malachite"] },
+  { name:"Apostles",              members:["peter","andrew","james","john","philip","bartholomew","matthew","thomas","simon","judas","paul","matthias"] },
+  { name:"Shakespeare Tragedies", members:["hamlet","othello","macbeth","lear","romeo","coriolanus","timon","titus","troilus","cymbeline"] },
+  { name:"US States",             members:["alabama","alaska","arizona","arkansas","california","colorado","connecticut","delaware","florida","georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky","louisiana","maine","maryland","massachusetts","michigan","minnesota","mississippi","missouri","montana","nebraska","nevada","ohio","oklahoma","oregon","pennsylvania","tennessee","texas","utah","vermont","virginia","washington","wisconsin","wyoming"] },
+  { name:"European Countries",    members:["france","germany","spain","italy","portugal","greece","turkey","poland","ukraine","sweden","norway","finland","denmark","netherlands","belgium","austria","switzerland","ireland","croatia","serbia","romania","bulgaria","hungary","czechia","slovakia","albania","moldova","iceland"] },
+  { name:"Types of Clouds",       members:["cumulus","stratus","cirrus","nimbus","cumulonimbus","altostratus","altocumulus","stratocumulus","cirrostratus","cirrocumulus","nimbostratus","lenticular","mammatus"] },
+  { name:"Chemical Elements",     members:["hydrogen","helium","carbon","nitrogen","oxygen","fluorine","neon","sodium","magnesium","silicon","phosphorus","sulfur","chlorine","argon","calcium","iron","copper","zinc","silver","gold","mercury","lead","tin","uranium","plutonium","radium","lithium","potassium","iodine"] },
+  { name:"Types of Dance",        members:["waltz","tango","foxtrot","quickstep","samba","rumba","jive","bolero","polka","mazurka","ballet","jazz","flamenco","salsa","merengue","cumbia","bachata","swing","tap","bhangra"] },
+  { name:"Musical Genres",        members:["jazz","blues","rock","pop","classical","reggae","funk","soul","disco","punk","metal","grunge","indie","folk","country","bluegrass","gospel","opera","techno","house","trance","hip","rap","ska","emo","ambient"] },
+  { name:"Named Winds",           members:["mistral","sirocco","chinook","foehn","khamsin","harmattan","zephyr","boreas","tramontane","levanter","meltemi","bora","libeccio"] },
+  { name:"Collective Nouns (Animals)", members:["pride","murder","parliament","crash","bloat","flamboyance","shrewdness","conspiracy","kettle","cackle","prickle","ambush","troop","army","colony","swarm","school","pod","pack","herd","flock","gaggle","brood","litter","skulk","cloud","mob","drove"] },
+  { name:"Types of Government",   members:["democracy","republic","monarchy","oligarchy","dictatorship","theocracy","aristocracy","plutocracy","anarchy","communism","fascism","socialism","federalism","totalitarianism"] },
+  { name:"Types of Angle",        members:["acute","obtuse","right","straight","reflex","full"] },
+  { name:"Types of Triangle",     members:["equilateral","isosceles","scalene","right","obtuse","acute"] },
+  { name:"Bones in the Body",     members:["femur","tibia","fibula","humerus","radius","ulna","clavicle","scapula","sternum","pelvis","sacrum","coccyx","mandible","patella","calcaneus","talus","vertebra","rib"] },
+  { name:"Poker Hands",           members:["flush","straight","pair","trips","quads","fullhouse"] },
+  { name:"Spice Girls",           members:["scary","sporty","baby","ginger","posh"] },
+  { name:"Teletubbies",           members:["tinky","dipsy","laa","po"] },
+  { name:"Snow White Dwarfs",     members:["happy","grumpy","sleepy","bashful","doc","dopey","sneezy"] },
+  { name:"Parts of a Tent",       members:["peg","sheet","pole","guy","ridge","fly","valance","guy","stake","loop"] },
+  { name:"Empires (Historical)",  members:["roman","byzantine","ottoman","mongol","persian","british","french","russian","austrian","macedonian","carolingian","mughal","qing","han","maurya","aztec","inca"] },
+  { name:"Rhetorical Devices",    members:["metaphor","simile","alliteration","personification","hyperbole","irony","sarcasm","anaphora","assonance","onomatopoeia","oxymoron","paradox","antithesis","synecdoche","metonymy","euphemism","litotes"] },
+  { name:"Keyboard Keys",         members:["alt","shift","ctrl","tab","escape","enter","delete","backspace","space","caps","home","end","insert","command","option","fn","windows","return","print","scroll","pause","num","lock"] },
+  { name:"Metals",                members:["gold","silver","iron","steel","copper","bronze","tin","lead","zinc","brass","chrome","nickel","platinum","titanium","cobalt","tungsten","mercury","aluminum","magnesium","manganese","titanium"] },
+  { name:"Musical Instruments",   members:["guitar","piano","violin","cello","flute","oboe","clarinet","trumpet","trombone","drums","harp","banjo","mandolin","ukulele","saxophone","accordion","organ","harmonica","lute","sitar","bass","keyboard","viola","piccolo","bassoon","tuba","bugle","sousaphone","marimba","xylophone","kazoo","theremin","hurdy"] },
+  { name:"Dances",                members:["waltz","tango","foxtrot","samba","rumba","jive","bolero","polka","ballet","flamenco","salsa","merengue","cumbia","bachata","swing","tap","bhangra","lindy","quickstep","mazurka","twist","hustle","moonwalk","shuffle","stomp","boogaloo","fandango","gavotte","minuet","pavane"] },
+  { name:"Currencies",            members:["dollar","euro","pound","yen","franc","mark","lira","peso","ruble","rupee","dinar","dirham","krona","zloty","forint","baht","won","ringgit","shekel","real","krone","florin","guilder","escudo","bolivar"] },
+  { name:"Fabrics",               members:["cotton","silk","wool","linen","denim","velvet","satin","chiffon","lace","corduroy","tweed","flannel","fleece","polyester","nylon","rayon","cashmere","mohair","angora","muslin","canvas","burlap","taffeta","organza","crepe","jacquard","brocade","gingham","plaid","tartan"] },
+  { name:"Types of Hat",          members:["fedora","trilby","bowler","derby","top","beret","fez","turban","stetson","cowboy","beanie","bonnet","cloche","pillbox","pork","fascinator","deerstalker","mortarboard","mitre","crown","tiara","tam","cap","helmet","balaclava","sombrero","panama","boater","homburg","kepi"] },
+  { name:"Grammatical Tenses",    members:["past","present","future","perfect","continuous","conditional","subjunctive","imperative","infinitive","gerund","participle","pluperfect"] },
+  { name:"Time Perspectives",     members:["past","present","future","yesterday","today","tomorrow","now","then","before","after","soon","already","never","always","once","still"] },
+  { name:"Prepositions",          members:["in","on","at","by","for","of","to","up","off","out","over","into","onto","from","with","near","past","like","amid","down","upon","about","above","below","after","under","since","until","along","among","across","around","behind","beside","between","beyond","during","except","inside","outside","through","toward","within","without"] },
+  { name:"Types of Snake",        members:["cobra","python","boa","viper","mamba","adder","asp","anaconda","rattler","racer","king","garter","corn","bull","milk","water","ribbon","hognose","copperhead","cottonmouth","sidewinder","taipan","krait","fer","bushmaster","indigo","smooth"] },
+  { name:"Card Games",            members:["poker","bridge","rummy","snap","war","solitaire","blackjack","baccarat","canasta","whist","hearts","spades","cribbage","gin","euchre","piquet","pinochle","crazy","go","uno","fish","snap","memory","concentration"] },
+  { name:"Board Games",           members:["chess","checkers","go","risk","clue","monopoly","scrabble","sorry","battleship","othello","reversi","backgammon","draughts","ludo","snakes","candyland","parcheesi","mastermind","connect","stratego","taboo","pictionary","boggle","jenga","life","operation"] },
+  { name:"Phobias",               members:["arachnophobia","acrophobia","agoraphobia","claustrophobia","xenophobia","hydrophobia","pyrophobia","nyctophobia","cynophobia","ophidiophobia","coulrophobia","glossophobia","hemophobia","entomophobia","trypophobia","emetophobia","astraphobia","thanatophobia","mysophobia","aichmophobia"] },
+  { name:"Types of Triangle",     members:["equilateral","isosceles","scalene","right","obtuse","acute","equiangular"] },
+  { name:"Algebra Terms",         members:["variable","constant","coefficient","equation","inequality","expression","function","domain","range","slope","intercept","vertex","root","factor","degree","polynomial","quadratic","linear","exponential","logarithm","matrix","vector","scalar","integer","rational","irrational"] },
+  { name:"Literary Genres",       members:["romance","mystery","thriller","horror","fantasy","scifi","dystopia","utopia","satire","comedy","tragedy","epic","lyric","sonnet","haiku","fable","parable","allegory","biography","autobiography","memoir","essay","journalism","noir","western","gothic","surrealism","realism","modernism","postmodernism"] },
+  { name:"Sports",                members:["football","basketball","baseball","soccer","tennis","golf","hockey","volleyball","cricket","rugby","boxing","wrestling","swimming","cycling","athletics","rowing","sailing","archery","fencing","gymnastics","weightlifting","judo","karate","taekwondo","badminton","squash","polo","lacrosse","handball","netball","curling","bobsled","luge","skeleton","biathlon","pentathlon","triathlon","decathlon"] },
+  { name:"Types of Bread",        members:["sourdough","rye","wheat","white","pumpernickel","brioche","baguette","ciabatta","focaccia","naan","pita","tortilla","croissant","pretzel","bagel","challah","miche","boule","bun","roll","muffin","scone","flatbread","cornbread","banana","zucchini","raisin","multigrain","spelt","gluten"] },
+  { name:"Shades of Orange",      members:["amber","apricot","peach","tangerine","coral","rust","burnt","pumpkin","copper","terracotta","saffron","mango","melon","papaya","persimmon","cheddar","carrot","flame","tiger","harvest"] },
+  { name:"Body Organs",           members:["heart","liver","lungs","kidney","brain","stomach","pancreas","spleen","gallbladder","bladder","uterus","ovary","testis","thyroid","adrenal","appendix","tonsil","thymus","pituitary","hypothalamus"] },
+  { name:"Magic / Sorcery Terms", members:["spell","curse","hex","enchant","ward","rune","glyph","sigil","ritual","incantation","potion","elixir","charm","amulet","talisman","grimoire","cauldron","wand","staff","orb","crystal","familiar","conjure","summon","banish","bind","scry","divine","ward"] },
+  { name:"Parts of a Ship",       members:["bow","stern","hull","mast","sail","rudder","keel","anchor","deck","port","starboard","helm","crow","bilge","bulkhead","capstan","gangway","hatch","porthole","rigging","tiller","winch","bulwark","gunwale","transom"] },
+  { name:"Parts of a Computer",   members:["cpu","ram","rom","gpu","ssd","hdd","motherboard","keyboard","mouse","monitor","speaker","microphone","webcam","router","modem","switch","hub","cable","port","chip","processor","memory","storage","battery","fan","heatsink","psu","case","drive","display","touchpad","trackpad"] },
+  { name:"Emotions",              members:["joy","sadness","anger","fear","disgust","surprise","anticipation","trust","love","hate","envy","pride","shame","guilt","anxiety","grief","hope","despair","contempt","awe","boredom","curiosity","confusion","relief","jealousy","loneliness","nostalgia","euphoria","melancholy","serenity"] },
+  { name:"Trees (Extended)",      members:["oak","maple","pine","birch","cedar","elm","ash","willow","cherry","walnut","chestnut","mahogany","redwood","sequoia","cypress","poplar","sycamore","beech","spruce","fir","yew","larch","hazel","alder","aspen","baobab","acacia","eucalyptus","banyan","teak","palm","bamboo","mangrove","jacaranda","magnolia","dogwood","catalpa","tulip","sassafras","sweetgum","liquidambar","persimmon","mulberry","fig","olive","almond","peach","plum","apricot","nectarine","apple","pear","quince","lemon","lime","orange","grapefruit","avocado","mango","papaya","guava","coconut","date","jujube","loquat","medlar","serviceberry","crabapple","rowan","whitebeam","hornbeam","carpinus","paulownia","empress","mimosa","acacia","wattle","melaleuca","casuarina","arbutus","manzanita","madrone","toyon","ceanothus","coffeeberry"] },
+];
+
+const SET_LOOKUP = {};
+for (const s of NAMED_SETS) {
+  for (const m of s.members) {
+    if (!SET_LOOKUP[m]) SET_LOOKUP[m] = [];
+    SET_LOOKUP[m].push(s);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  DATA — AFFIX GROUPS
+// ═══════════════════════════════════════════════════
+const AFFIX_GROUPS = [
+  { affix:"fry",    pos:"after",  disp:"___FRY",    members:["stir","deep","pan","french","fish","small","air","wok"] },
+  { affix:"super",  pos:"before", disp:"SUPER___",  members:["hero","man","star","natural","nova","market","power","sonic","food","woman","human","charged","size"] },
+  { affix:"fire",   pos:"before", disp:"FIRE___",   members:["man","work","place","side","house","ball","truck","light","arm","brand","starter","fly","wood","proof"] },
+  { affix:"fire",   pos:"after",  disp:"___FIRE",   members:["camp","cross","gun","hell","back","spit","cease","wild","rapid","open","ring"] },
+  { affix:"storm",  pos:"after",  disp:"___STORM",  members:["brain","thunder","snow","hail","wind","sand","rain","ice","dust","fire"] },
+  { affix:"light",  pos:"after",  disp:"___LIGHT",  members:["sun","moon","star","flash","spot","day","twi","high","night","fire","candle","street","lamp","flood","lime","torch"] },
+  { affix:"ball",   pos:"after",  disp:"___BALL",   members:["base","basket","foot","volley","snow","fire","pin","dead","curve","fast","gum","high","eye","meat","hand","soft","cannon","paint"] },
+  { affix:"bird",   pos:"after",  disp:"___BIRD",   members:["black","blue","mock","thunder","humming","lady","snow","fire","sea","song","water","shore"] },
+  { affix:"house",  pos:"after",  disp:"___HOUSE",  members:["ware","jail","court","power","fire","green","farm","town","pent","out","ice","ale","store","safe","road","club"] },
+  { affix:"work",   pos:"after",  disp:"___WORK",   members:["home","team","frame","fire","net","art","ground","patch","wood","clock","field","paper","iron","stone","brick","foot","open"] },
+  { affix:"back",   pos:"after",  disp:"___BACK",   members:["set","draw","kick","pay","flash","cut","hold","horse","paper","quarter","throw","come","feed","fall","pull","green","tail","pig","hard","soft","play"] },
+  { affix:"out",    pos:"before", disp:"OUT___",    members:["come","put","side","look","run","do","last","law","rage","reach","grow","bound","door","fit","right","spoken","take","smart","wit","pace","live","play","rank","vote"] },
+  { affix:"over",   pos:"before", disp:"OVER___",   members:["due","load","come","flow","look","seas","take","work","night","kill","haul","lap","run","time","rate","sleep","throw","turn","whelm","board","cast","coat","dose","joy","lord"] },
+  { affix:"under",  pos:"before", disp:"UNDER___",  members:["water","mine","stand","go","take","line","world","age","cut","dog","tone","cover","ground","pass","score","wear","belly","rated","fed","current","estimate","perform","statement","weight"] },
+  { affix:"black",  pos:"before", disp:"BLACK___",  members:["bird","berry","board","out","smith","mail","jack","hole","list","eye","hawk","cap","guard","print","sheep","thorn","top","currant","pudding","belt","market"] },
+  { affix:"snow",   pos:"before", disp:"SNOW___",   members:["ball","flake","man","fall","storm","board","plow","drop","cap","field","drift","shoe","suit","bound","white","line","mobile"] },
+  { affix:"sun",    pos:"before", disp:"SUN___",    members:["burn","flower","glasses","light","rise","set","shine","screen","stroke","roof","day","dial","down","lit","hat","bath","beam","spot","tan"] },
+  { affix:"fish",   pos:"after",  disp:"___FISH",   members:["sword","jelly","cat","star","blow","clown","angel","lion","puffer","devil","sail","rock","shell","flat","gold","cuttle","sun","drum"] },
+  { affix:"book",   pos:"after",  disp:"___BOOK",   members:["note","text","hand","cook","year","work","guide","pocket","scrap","log","play","comic","audio","sketch","pass","over","check","phrase","case","source","rule"] },
+  { affix:"hand",   pos:"before", disp:"HAND___",   members:["bag","ball","book","craft","made","shake","stand","writing","work","held","rail","wash","gun","pick","cuff","out","bar"] },
+  { affix:"water",  pos:"before", disp:"WATER___",  members:["fall","mark","melon","proof","way","color","front","tight","works","shed","side","wheel","table","logged","bed","board","craft","line","gate","fowl","man"] },
+  { affix:"time",   pos:"after",  disp:"___TIME",   members:["bed","day","night","half","over","any","some","part","full","life","prime","peace","down","play","hard","show","war","meal","dead","air","old"] },
+  { affix:"stone",  pos:"after",  disp:"___STONE",  members:["key","corner","fire","flag","sand","lime","cobble","brown","mile","head","curb","gem","mud","gall","hail","touch","stepping","rolling","heart","moon","tomb","grave"] },
+  { affix:"head",   pos:"after",  disp:"___HEAD",   members:["bed","dead","over","figure","letter","fore","hammer","drum","pot","red","bald","bare","hot","bone","air","fat","bull","sore","god","hard","long","war","block","level","pig"] },
+  { affix:"book",   pos:"before", disp:"BOOK___",   members:["store","shelf","worm","keeper","mark","let","case","end","fair","binder","plate"] },
+  { affix:"heart",  pos:"after",  disp:"___HEART",  members:["sweet","broken","brave","faint","kind","soft","warm","lion","open","good","half","whole","pure","tender","iron","steel","cold","down","heavy"] },
+  { affix:"word",   pos:"after",  disp:"___WORD",   members:["pass","cross","by","key","sword","fore","buzz","watch","code","bad","four","last","catch","compound"] },
+  { affix:"ship",   pos:"after",  disp:"___SHIP",   members:["friend","relation","partner","leader","scholar","citizen","owner","gun","air","flag","battle","hard","war","sports","crafts","member","work"] },
+  { affix:"land",   pos:"after",  disp:"___LAND",   members:["home","farm","green","waste","wood","marsh","grass","water","over","under","main","out","in","low","high","never","wonder","heart","bad"] },
+  { affix:"man",    pos:"after",  disp:"___MAN",    members:["fire","spider","iron","bat","chair","gentle","police","sports","french","service","check","watch","marks","horse","boat","foot","gun","anchor","states","towns","work","black","snow","door","hand","middle","news","post","straw","trigger","weather"] },
+  { affix:"side",   pos:"after",  disp:"___SIDE",   members:["out","in","up","down","road","lake","hill","fire","blind","flip","dark","off","on","court","ring","water","sea","bed","wayside"] },
+  { affix:"dog",    pos:"after",  disp:"___DOG",    members:["hot","corn","sheep","bull","under","watch","lap","fire","sea","sled","gun"] },
+  { affix:"ground", pos:"after",  disp:"___GROUND", members:["back","fore","play","under","camp","battle","above","below","firm","high","low","middle","burial","common","fair","hunting","rally","show","testing","training"] },
+];
+
+const AFFIX_LOOKUP = {};
+for (const g of AFFIX_GROUPS) {
+  for (const m of g.members) {
+    if (!AFFIX_LOOKUP[m]) AFFIX_LOOKUP[m] = [];
+    AFFIX_LOOKUP[m].push(g);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  DATA — HOMOPHONES
+// ═══════════════════════════════════════════════════
+const HOMOPHONES = {
+  "won":"one","too":"two","to":"two","fore":"four","for":"four","ate":"eight",
+  "knot":"not","knight":"night","know":"no","knew":"new","gnu":"new",
+  "night":"knight","sun":"son","son":"sun","sea":"see","see":"sea","be":"bee","bee":"be",
+  "hear":"here","here":"hear","wear":"where","where":"wear",
+  "right":"write","write":"right","rite":"write","plain":"plane","plane":"plain",
+  "rain":"reign","reign":"rain","rein":"rain","peace":"piece","piece":"peace",
+  "flower":"flour","flour":"flower","hour":"our","our":"hour","pear":"pair","pair":"pear",
+  "pare":"pear","bear":"bare","bare":"bear","hair":"hare","hare":"hair","blue":"blew",
+  "blew":"blue","mail":"male","male":"mail","tale":"tail","tail":"tale","sail":"sale",
+  "sale":"sail","weak":"week","week":"weak","meat":"meet","meet":"meat",
+  "cell":"sell","sell":"cell","steel":"steal","steal":"steel","heel":"heal","heal":"heel",
+  "deer":"dear","dear":"deer","real":"reel","reel":"real","feet":"feat","feat":"feet",
+  "waist":"waste","waste":"waist","brake":"break","break":"brake","stake":"steak","steak":"stake",
+  "made":"maid","maid":"made","way":"weigh","weigh":"way","role":"roll","roll":"role",
+  "sole":"soul","soul":"sole","hole":"whole","whole":"hole","road":"rode","rode":"road",
+  "bored":"board","board":"bored","hoarse":"horse","horse":"hoarse","course":"coarse","coarse":"course",
+  "chord":"cord","cord":"chord","altar":"alter","alter":"altar","aisle":"isle","isle":"aisle",
+  "muscle":"mussel","mussel":"muscle","peak":"peek","peek":"peak","cent":"sent","sent":"cent",
+  "scent":"sent","lesson":"lessen","lessen":"lesson","allowed":"aloud","aloud":"allowed",
+  "flew":"flu","flu":"flew","foul":"fowl","fowl":"foul","paws":"pause","pause":"paws",
+  "pray":"prey","prey":"pray","scene":"seen","seen":"scene","slay":"sleigh","sleigh":"slay",
+  "soar":"sore","sore":"soar","stair":"stare","stare":"stair","vale":"veil","veil":"vale",
+  "vain":"vane","vane":"vain","vein":"vain","wrap":"rap","rap":"wrap","yoke":"yolk","yolk":"yoke",
+  "moose":"mousse","mousse":"moose","cellar":"seller","seller":"cellar",
+  "flair":"flare","flare":"flair","days":"daze","daze":"days","gait":"gate","gate":"gait",
+  "site":"sight","sight":"site","cite":"site","whether":"weather","weather":"whether",
+  "some":"sum","sum":"some","birth":"berth","berth":"birth","throne":"thrown","thrown":"throne",
+  "herd":"heard","heard":"herd","medal":"meddle","meddle":"medal","pedal":"peddle","peddle":"pedal",
+};
+const NUMBER_HOMOPHONES = { "won":"one","too":"two","to":"two","fore":"four","for":"four","ate":"eight" };
+
+// ═══════════════════════════════════════════════════
+//  DATA — HETERONYMS
+// ═══════════════════════════════════════════════════
+const HETERONYMS = {
+  "tear":["a teardrop (rhymes with FEAR)","to rip (rhymes with BEAR)"],
+  "wound":["an injury (rhymes with FOUND)","past tense of wind (rhymes with TUNED)"],
+  "lead":["a heavy metal (rhymes with BED)","to guide (rhymes with SPEED)"],
+  "read":["past tense — rhymes with BED","present tense — rhymes with SPEED"],
+  "live":["to be alive (rhymes with GIVE)","a live broadcast (rhymes with DRIVE)"],
+  "close":["nearby (rhymes with DOSE)","to shut (rhymes with FROZE)"],
+  "minute":["60 seconds (MIN-it)","incredibly tiny (my-NYOOT)"],
+  "row":["a line (rhymes with GO)","a quarrel (rhymes with COW)"],
+  "wind":["a breeze (rhymes with SINNED)","to wind up (rhymes with KIND)"],
+  "object":["a thing (OB-ject)","to protest (ob-JECT)"],
+  "permit":["to allow (per-MIT)","an official pass (PER-mit)"],
+  "record":["a vinyl disc (REC-ord)","to capture audio (re-CORD)"],
+  "present":["a gift (PREZ-ent)","to show (pre-ZENT)"],
+  "refuse":["garbage (REF-yoose)","to say no (re-FYOOZ)"],
+  "produce":["fruits & vegetables (PRO-dyoos)","to create (pro-DYOOS)"],
+  "project":["an assignment (PROJ-ect)","to cast forward (pro-JECT)"],
+  "content":["material (CON-tent)","satisfied (con-TENT)"],
+  "desert":["arid landscape (DEZ-ert)","to abandon (de-ZERT)"],
+  "invalid":["a sick person (IN-vah-lid)","not valid (in-VAL-id)"],
+  "bass":["a fish (rhymes with MASS)","a low musical tone (rhymes with FACE)"],
+  "bow":["a weapon for arrows (rhymes with GO)","to bend forward (rhymes with COW)"],
+  "dove":["a bird (rhymes with LOVE)","past tense of dive (rhymes with STOVE)"],
+  "sow":["a female pig (rhymes with COW)","to plant seeds (rhymes with GO)"],
+  "moped":["a motorized bicycle (MO-ped)","was sulky/dejected (rhymes with COPED)"],
+  "entrance":["a doorway (EN-trance)","to enchant (en-TRANCE)"],
+  "moderate":["not extreme (MOD-er-it)","to chair a discussion (MOD-er-ayt)"],
+  "separate":["apart (SEP-rit)","to divide (SEP-ah-rayt)"],
+  "subject":["a topic (SUB-ject)","to expose to something (sub-JECT)"],
+  "rebel":["a defiant person (REB-el)","to resist (re-BEL)"],
+  "console":["a control panel (KON-sole)","to comfort (kon-SOLE)"],
+  "contract":["a legal agreement (KON-trakt)","to shrink (kon-TRAKT)"],
+  "convert":["a new believer (KON-vert)","to change form (kon-VERT)"],
+  "convict":["a prisoner (KON-vikt)","to find guilty (kon-VIKT)"],
+  "exploit":["a brave deed (EX-ploit)","to use unfairly (ex-PLOIT)"],
+  "import":["a brought-in product (IM-port)","to bring in (im-PORT)"],
+  "insult":["an offensive remark (IN-sult)","to offend (in-SULT)"],
+  "progress":["forward movement (PROH-gress)","to move forward (pro-GRESS)"],
+  "upset":["disturbed (UP-set, adj.)","to disturb (up-SET, verb)"],
+  "resume":["a work history document (REZ-oo-may)","to continue (re-ZOOM)"],
+  "polish":["from Poland (POH-lish)","to buff a surface (PAH-lish)"],
+  "axes":["plural of axis (AK-seez)","plural of axe (AK-siz)"],
+  "number":["a numeral (NUM-ber)","more numb (NUM-ber — same spelling, subtle stress shift)"],
+  "lower":["to bring down (LOH-er)","more low (rhymes with COW + er)"],
+};
+
+// ═══════════════════════════════════════════════════
+//  DATA — ACRONYMS
+// ═══════════════════════════════════════════════════
+const ACRONYMS = {
+  "aids":"Acquired Immunodeficiency Syndrome","asap":"As Soon As Possible","atm":"Automated Teller Machine",
+  "awol":"Absent Without Official Leave","captcha":"Completely Automated Public Turing test",
+  "cia":"Central Intelligence Agency","cpu":"Central Processing Unit","dvd":"Digital Versatile Disc",
+  "faq":"Frequently Asked Questions","fbi":"Federal Bureau of Investigation","gif":"Graphics Interchange Format",
+  "gps":"Global Positioning System","html":"HyperText Markup Language",
+  "jpeg":"Joint Photographic Experts Group","laser":"Light Amplification by Stimulated Emission of Radiation",
+  "lcd":"Liquid Crystal Display","led":"Light Emitting Diode","nasa":"National Aeronautics and Space Administration",
+  "nato":"North Atlantic Treaty Organization","nimby":"Not In My Back Yard",
+  "pdf":"Portable Document Format","pin":"Personal Identification Number","radar":"Radio Detection And Ranging",
+  "ram":"Random Access Memory","rom":"Read Only Memory","scuba":"Self-Contained Underwater Breathing Apparatus",
+  "snafu":"Situation Normal All Fouled Up","swat":"Special Weapons and Tactics","taser":"Tom A Swift Electric Rifle",
+  "url":"Uniform Resource Locator","usb":"Universal Serial Bus","vip":"Very Important Person",
+  "wifi":"Wireless Fidelity","yolo":"You Only Live Once","zip":"Zone Improvement Plan",
+  "potus":"President Of The United States","scotus":"Supreme Court Of The United States",
+  "flotus":"First Lady Of The United States","nsa":"National Security Agency",
+  "dea":"Drug Enforcement Administration","fema":"Federal Emergency Management Agency",
+  "fda":"Food and Drug Administration","cdc":"Centers for Disease Control","who":"World Health Organization",
+  "unicef":"United Nations International Children's Emergency Fund",
+  "care":"Cooperative for Assistance and Relief Everywhere","dare":"Drug Abuse Resistance Education",
+  "madd":"Mothers Against Drunk Driving","rico":"Racketeer Influenced and Corrupt Organizations",
+  "smart":"Specific Measurable Achievable Relevant Time-bound","stem":"Science Technology Engineering Mathematics",
+  "dna":"Deoxyribonucleic Acid","rna":"Ribonucleic Acid","iq":"Intelligence Quotient",
+  "bmi":"Body Mass Index","cpr":"Cardiopulmonary Resuscitation","mri":"Magnetic Resonance Imaging",
+  "ufo":"Unidentified Flying Object","diy":"Do It Yourself",
+  "lol":"Laugh Out Loud","fyi":"For Your Information","rsvp":"Répondez S'il Vous Plaît",
+  "ceo":"Chief Executive Officer","cfo":"Chief Financial Officer","cto":"Chief Technology Officer",
+  "ipo":"Initial Public Offering","roi":"Return on Investment","kpi":"Key Performance Indicator",
+  "api":"Application Programming Interface","sql":"Structured Query Language","css":"Cascading Style Sheets",
+  "rap":"Rhythm And Poetry","kiss":"Keep It Simple Stupid","ace":"Allied Command Europe",
+  "rich":"Really Into Cool Hobbies","nice":"Non-Inflammatory Cardiovascular Events",
+  "base":"Building Acquisition and Selective Enrollment","sob":"Son Of a Biscuit (military radio term)",
+};
+
+// ═══════════════════════════════════════════════════
+//  DATA — ANAGRAM GROUPS (minimum 4 words each)
+// ═══════════════════════════════════════════════════
+const ANAGRAM_GROUPS = [
+  ["petal","plate","leapt","pleat"],
+  ["pears","reaps","spare","spear","parse"],
+  ["aster","stare","rates","tears","tares"],
+  ["cater","crate","trace","react","caret"],
+  ["listen","silent","enlist","tinsel","inlets"],
+  ["stream","master","tamers","maters"],
+  ["steam","mates","teams","meats","tames"],
+  ["least","tales","slate","steal","stale","taels"],
+  ["steak","stake","skate","takes","teaks"],
+  ["notes","stone","tones","onset","seton"],
+  ["heart","earth","hater","rathe"],
+  ["stared","trades","treads","daters"],
+  ["name","mane","amen","mean"],
+  ["evil","vile","veil","live"],
+  ["time","mite","emit","item"],
+  ["team","tame","mate","meat"],
+  ["post","stop","tops","spot","opts","pots"],
+  ["cares","races","acres","scare","serac"],
+  ["sale","seal","leas","ales"],
+  ["paste","tapes","septa","pates"],
+  ["snare","earns","nears","saner"],
+  ["pores","prose","repos","ropes","spore"],
+  ["acts","cast","cats","scat"],
+  ["nope","pone","open","peon"],
+  ["reap","rape","pear","pare"],
+  ["rose","roes","ores","sore"],
+  ["gore","ergo","goer","ogre"],
+  ["spine","pines","snipe","inept"],
+  ["stripe","sprite","tripes","esprit","ripest"],
+  ["angle","angel","glean","lange"],
+  ["poets","estop","topes","stope"],
+  ["name","mane","amen","mean"],
+  ["snip","spin","pins","nips"],
+  ["taps","pats","spat","past"],
+  ["pans","naps","span","snap"],
+  ["tips","spit","pits","snit"],
+  ["apes","peas","spae","espy"],
+].filter(g => g.length >= 4 && g.every(w => /^[a-z]+$/.test(w)));
+
+const ANAGRAM_MAP = {};
+for (const group of ANAGRAM_GROUPS) {
+  const key = sortLetters(group[0]);
+  if (!ANAGRAM_MAP[key]) ANAGRAM_MAP[key] = group;
+}
+
+// ═══════════════════════════════════════════════════
+//  DATA — SILENT LETTER GROUPS
+// ═══════════════════════════════════════════════════
+const SILENT_GROUPS = [
+  { test: w => /^kn/.test(w), letter:"K", name:"Silent K (kn-)", others:["knife","knight","knock","know","knew","kneel","knit","knob","knowledge","knack","knave","knapsack","knoll"] },
+  { test: w => /^wr/.test(w), letter:"W", name:"Silent W (wr-)", others:["write","wrong","wrap","wreck","wrestle","wrist","wring","wrote","wrath","wrench","wrinkle","wraith","wry"] },
+  { test: w => /^gn/.test(w), letter:"G", name:"Silent G (gn-)", others:["gnat","gnaw","gnome","gnu","gnarl","gnash","gneiss"] },
+  { test: w => /^ps|^pn|^pt/.test(w), letter:"P", name:"Silent P (ps-/pn-/pt-)", others:["pneumonia","psychology","psychic","pterodactyl","psalm","psyche","pneumatic","pseudonym","psych"] },
+  { test: w => /mb$/.test(w), letter:"B", name:"Silent B (-mb ending)", others:["lamb","bomb","climb","comb","crumb","dumb","limb","numb","plumb","thumb","tomb","womb"] },
+  { test: w => /lm$|lk$|lf$/.test(w), letter:"L", name:"Silent L (before consonant)", others:["calm","palm","half","calf","talk","walk","folk","yolk","salmon","almond","balm","psalm","qualm"] },
+  { test: w => /gh/.test(w), letter:"GH", name:"Silent GH", others:["night","light","right","might","thought","through","though","daughter","eight","freight","weigh","neighbor","sigh","high","ghost"] },
+  { test: w => /^rh/.test(w), letter:"H", name:"Silent H (rh-)", others:["rhythm","rhyme","rhino","rhetoric","rhapsody","rheumatism","rhubarb","rhinoceros"] },
+  { test: w => /tch/.test(w), letter:"T", name:"Silent T (in -tch-)", others:["catch","match","watch","witch","fetch","stitch","hutch","notch","scotch","snatch","scratch","dispatch"] },
+  { test: w => /mn$/.test(w), letter:"N", name:"Silent N (before silent ending)", others:["autumn","column","condemn","damn","hymn","solemn"] },
+];
+
+// ═══════════════════════════════════════════════════
+//  DATA — CULTURAL ICONS
+// ═══════════════════════════════════════════════════
+const CULTURAL_ICONS = [
+  { theme:"Christmas",         words:["mistletoe","tinsel","holly","elf","carol","wreath","eggnog","nativity","advent","chimney","sleigh","ornament","stocking","reindeer","gingerbread","nutcracker","poinsettia","santa","rudolph","angel","present","gift","ribbon","star","bells","frosty","blitzen","dasher","prancer","vixen","comet","cupid","donner","december","candy","pine","snowman","snowflake","elves","manger","xmas"] },
+  { theme:"Halloween",         words:["pumpkin","ghost","witch","skeleton","vampire","zombie","bat","spider","cauldron","broomstick","coffin","haunted","graveyard","lantern","goblin","warlock","mummy","dracula","frankenstein","cobweb"] },
+  { theme:"Easter",            words:["bunny","chick","daffodil","lily","bonnet","basket","resurrection","chocolate","pastel","cross","lamb","egg","hunt"] },
+  { theme:"Thanksgiving",      words:["turkey","pilgrim","harvest","gravy","cranberry","stuffing","cornucopia","mayflower","feast","pumpkin","gratitude"] },
+  { theme:"Valentine's Day",   words:["heart","rose","cupid","chocolate","arrow","cherub","lace","dove","ribbon","diamond","ring","candy","bouquet"] },
+  { theme:"St. Patrick's Day", words:["shamrock","clover","leprechaun","rainbow","pot","parade","celtic","harp","emerald","guinness","ireland","green"] },
+  { theme:"Hanukkah",          words:["menorah","dreidel","latke","gelt","shamash","miracle","oil","temple","maccabee"] },
+  { theme:"New Year's",        words:["champagne","countdown","resolution","midnight","confetti","firework","toast","noisemaker","balloon","clock"] },
+  { theme:"Circus",            words:["clown","trapeze","acrobat","juggler","ringmaster","tightrope","lion","elephant","tent","sawdust","cotton","carousel","cannon"] },
+  { theme:"Pirates",           words:["plank","cannon","jolly","roger","treasure","plunder","parrot","cutlass","galleon","doubloon","buccaneer","corsair","mast","booty"] },
+  { theme:"Space / NASA",      words:["astronaut","galaxy","nebula","supernova","comet","asteroid","meteor","cosmos","orbit","telescope","shuttle","rocket","satellite","quasar","pulsar"] },
+  { theme:"Wild West",         words:["cowboy","saloon","sheriff","outlaw","bandana","lasso","rodeo","rustler","posse","marshal","deputy","frontier","prairie","ranch","holster","stagecoach"] },
+  { theme:"Royalty / Medieval",words:["crown","throne","scepter","castle","knight","dragon","dungeon","moat","herald","tournament","joust","squire","peasant","jester","siege"] },
+  { theme:"Weddings",          words:["bride","groom","veil","bouquet","ring","aisle","altar","honeymoon","reception","chapel","corsage","tuxedo","tiara","confetti"] },
+  { theme:"Superheroes / Comics", words:["cape","mask","shield","villain","kryptonite","radioactive","spider","bat","iron","hulk","thor","wolverine","mutant","sidekick","nemesis","gotham","metropolis","xmen","avengers","batman","superman","manofsteel","darknight","spiderman","ironman","captainamerica","wonderwoman","blackwidow","aquaman","flash","cyclops","magneto","joker","thanos","loki"] },
+];
+
+const ICON_LOOKUP = {};
+for (const icon of CULTURAL_ICONS) {
+  for (const w of icon.words) {
+    const key = norm(w);
+    if (!ICON_LOOKUP[key]) ICON_LOOKUP[key] = [];
+    ICON_LOOKUP[key].push(icon);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  DATA — WORD REVERSAL PAIRS
+// ═══════════════════════════════════════════════════
+const REVERSALS = new Map([
+  ["desserts","stressed"],["stressed","desserts"],["repaid","diaper"],["diaper","repaid"],
+  ["drawer","reward"],["reward","drawer"],["live","evil"],["evil","live"],
+  ["loop","pool"],["pool","loop"],["stop","pots"],["pots","stop"],
+  ["tops","spot"],["spot","tops"],["star","rats"],["rats","star"],
+  ["tap","pat"],["pat","tap"],["war","raw"],["raw","war"],
+  ["god","dog"],["dog","god"],["ten","net"],["net","ten"],
+  ["pot","top"],["top","pot"],["nap","pan"],["pan","nap"],
+  ["gum","mug"],["mug","gum"],["ban","nab"],["nab","ban"],
+  ["bat","tab"],["tab","bat"],["but","tub"],["tub","but"],
+  ["dam","mad"],["mad","dam"],["drab","bard"],["bard","drab"],
+  ["emit","time"],["time","emit"],["loot","tool"],["tool","loot"],
+  ["doom","mood"],["mood","doom"],["keep","peek"],["peek","keep"],
+  ["deer","reed"],["reed","deer"],["gel","leg"],["leg","gel"],
+  ["now","won"],["won","now"],["not","ton"],["ton","not"],
+  ["part","trap"],["trap","part"],["parts","strap"],["strap","parts"],
+  ["plug","gulp"],["gulp","plug"],["smart","trams"],["trams","smart"],
+  ["stew","wets"],["wets","stew"],["stun","nuts"],["nuts","stun"],
+  ["sub","bus"],["bus","sub"],["swap","paws"],["paws","swap"],
+  ["was","saw"],["saw","was"],["wolf","flow"],["flow","wolf"],
+  ["nip","pin"],["pin","nip"],["maps","spam"],["spam","maps"],
+  ["lair","rail"],["rail","lair"],["laid","dial"],["dial","laid"],
+  ["slap","pals"],["pals","slap"],["lap","pal"],["pal","lap"],
+  ["step","pets"],["pets","step"],["gnat","tang"],["tang","gnat"],
+  ["knits","stink"],["stink","knits"],["fires","serif"],["serif","fires"],
+  ["repel","leper"],["leper","repel"],["lager","regal"],["regal","lager"],
+  ["yam","may"],["may","yam"],["brag","garb"],["garb","brag"],
+  ["tips","spit"],["spit","tips"],["taps","spat"],["spat","taps"],
+  ["snip","pins"],["pins","snip"],
+]);
+
+// ═══════════════════════════════════════════════════
+//  DATA — CATEGORIES FOR LETTER-CHANGE RULE
+// ═══════════════════════════════════════════════════
+const WORD_CATEGORIES = {
+  "Birds":    new Set(["robin","raven","wren","crow","dove","lark","swan","ibis","kite","swift","finch","thrush","sparrow","pigeon","eagle","hawk","falcon","owl","crane","heron","stork","goose","duck","jay","teal","snipe","grouse","plover","starling","magpie","jackdaw","rook","goldfinch","greenfinch","bullfinch","chaffinch","warbler","kingfisher","woodpecker","nuthatch","swallow","nightjar","cuckoo","lapwing","curlew","avocet","moorhen","coot","cormorant","gannet","puffin","guillemot","razorbill","tern","gull","shearwater","petrel","albatross","condor","vulture","kestrel","merlin","osprey","harrier","goshawk","buzzard"]),
+  "Countries":new Set(["france","germany","spain","italy","japan","china","india","russia","brazil","canada","mexico","australia","egypt","greece","turkey","iran","iraq","peru","chile","cuba","mali","chad","togo","laos","fiji","palau","tonga","samoa","bhutan","nepal","mongolia","iceland","norway","sweden","finland","denmark","netherlands","belgium","austria","switzerland","portugal","ireland","ukraine","poland","czechia","slovakia","hungary","romania","bulgaria","croatia","serbia","albania","georgia","armenia","jordan","israel","kenya","ghana","nigeria","ethiopia","angola","zambia","uganda","rwanda","malawi","senegal"]),
+  "Colors":   new Set(["red","blue","green","yellow","orange","purple","pink","brown","black","white","gray","grey","gold","silver","cyan","magenta","lime","teal","navy","maroon","olive","coral","salmon","tan","beige","ivory","crimson","scarlet","violet","indigo","azure","turquoise","emerald","jade","ruby","amber","bronze","copper","rose","lavender","mauve","plum","fuchsia","ochre","cream","buff","khaki","chartreuse","periwinkle","sienna","umber","cerulean","cobalt","sapphire"]),
+  "Animals":  new Set(["cat","dog","fox","bear","deer","wolf","lion","tiger","leopard","jaguar","puma","lynx","mink","otter","beaver","badger","weasel","stoat","ferret","rabbit","hare","vole","mouse","rat","squirrel","gerbil","hamster","mole","shrew","hedgehog","bat","dolphin","whale","seal","walrus","horse","donkey","zebra","rhino","hippo","elephant","giraffe","camel","llama","alpaca","bison","buffalo","antelope","gazelle","impala","caribou","moose","elk","reindeer","boar","warthog","tapir","panda","koala","kangaroo","wallaby","wombat","platypus","echidna","monkey","gorilla","chimp","orangutan","baboon","lemur","cobra","python","boa","viper","gecko","iguana","chameleon","crocodile","alligator","tortoise","turtle","frog","toad","salamander","newt","shark","ray","eel","octopus","squid","crab","lobster","shrimp","clam","oyster","mussel"]),
+  "Gemstones":new Set(["diamond","ruby","emerald","sapphire","amethyst","topaz","opal","garnet","pearl","turquoise","jade","aquamarine","onyx","citrine","peridot","alexandrite","moonstone","tanzanite","spinel","tourmaline","zircon","malachite","obsidian","amber","coral","lapis"]),
+  "Flowers":  new Set(["rose","tulip","daisy","lily","iris","aster","poppy","peony","orchid","violet","pansy","hyacinth","crocus","snowdrop","daffodil","narcissus","bluebell","foxglove","hollyhock","lupin","delphinium","cosmos","zinnia","marigold","sunflower","lavender","jasmine","wisteria","honeysuckle","clematis","carnation","chrysanthemum","dahlia","gladiolus","petunia","snapdragon","verbena","salvia","geranium","impatiens","begonia","fuchsia","camellia","azalea","rhododendron","magnolia"]),
+  "Trees":    new Set(["oak","maple","pine","birch","cedar","elm","ash","willow","cherry","walnut","chestnut","mahogany","redwood","sequoia","cypress","poplar","sycamore","beech","spruce","fir","yew","larch","hazel","alder","aspen","baobab","acacia","eucalyptus","teak","banyan","palm"]),
+};
+
+// ═══════════════════════════════════════════════════
+//  COMMON WORDS FOR START/END CHECK
+// ═══════════════════════════════════════════════════
+const COMMON_START_WORDS = ["air","arm","back","ball","bank","bar","bay","bear","bed","bird","black","blue","book","boy","brain","broad","camp","car","cat","cold","corn","cross","dark","day","dead","deep","down","draw","drop","dry","dust","ear","earth","eye","farm","fire","fish","flat","foot","fore","free","frost","gold","grass","green","ground","gun","half","hand","hard","head","heart","high","hill","home","hot","house","ice","iron","key","land","leaf","light","lime","lock","long","low","man","moon","mud","neck","net","new","night","north","oak","off","old","open","out","over","pine","pit","pot","rain","red","road","rock","rose","rough","run","salt","sand","sea","ship","shore","side","sky","snow","soft","south","star","steel","still","stone","sun","surf","sweet","tail","tide","time","top","town","tree","under","up","wall","war","water","west","wild","wind","wood","work"],
+COMMON_END_WORDS =  ["ache","age","back","bag","ball","bank","barn","bath","bay","bed","bell","berry","bird","board","boat","bone","book","born","box","boy","bridge","burn","cake","cap","card","cart","case","cat","coat","corn","craft","cup","day","dock","dog","door","drop","dust","fall","farm","field","fire","fish","fit","folk","foot","gate","gear","girl","goat","grass","ground","gun","hand","head","hill","hole","hood","hook","horn","house","hunt","keep","key","land","leaf","less","lift","light","line","lock","log","man","mark","meal","meat","mill","moon","neck","nest","night","note","oak","path","pick","pine","pit","place","pool","port","pot","race","rail","reef","rest","ring","road","rock","roof","root","run","rush","sail","salt","sand","sea","shed","shell","ship","shop","shore","side","sign","skin","slip","snow","soil","song","star","step","still","stone","storm","stream","street","sun","tail","tank","tide","time","ton","top","town","trail","tree","wall","ward","water","way","well","wood","work","yard"];
+
+// ═══════════════════════════════════════════════════
+//  PREFIX/SUFFIX EXAMPLE BANKS
+// ═══════════════════════════════════════════════════
+const PREFIX_BANK = {
+  "air":["Airborne","Airfield","Airline","Airport","Airship","Airspace","Airwave"],
+  "arm":["Armchair","Armhole","Armor","Army","Armpit","Armrest","Armband"],
+  "back":["Backbone","Background","Backlash","Backpack","Backstage","Backward","Backyard"],
+  "ball":["Ballgame","Balloon","Ballpark","Ballroom","Ballpoint"],
+  "bar":["Barcode","Barefoot","Barnyard","Barricade","Bartender"],
+  "bed":["Bedroom","Bedside","Bedsore","Bedspread","Bedtime","Bedrock"],
+  "bird":["Birdbath","Birdcage","Birdhouse","Birdsong","Birdwatch"],
+  "black":["Blackberry","Blackbird","Blackboard","Blackout","Blacksmith","Blackmail"],
+  "book":["Bookcase","Bookend","Bookkeeper","Bookmark","Bookshelf","Bookworm"],
+  "car":["Carbon","Cardboard","Cargo","Carnival","Carpet","Cartoon","Cardinal"],
+  "cold":["Coldfront","Coldwater","Coldblooded"],
+  "corn":["Cornbread","Cornerstone","Cornfield","Cornstarch","Corncob"],
+  "day":["Daybreak","Daydream","Daylight","Daytime","Daywork","Daycare"],
+  "dead":["Deadline","Deadlock","Deadpan","Deadwood","Deadbeat","Deadbolt"],
+  "down":["Downfall","Downgrade","Download","Downpour","Downstairs","Downtown","Downward"],
+  "ear":["Earache","Eardrum","Earring","Earwig","Earworm","Early","Earn","Earth"],
+  "eye":["Eyeball","Eyebrow","Eyelash","Eyelid","Eyesight","Eyestrain","Eyeliner"],
+  "fire":["Fireball","Firefly","Fireman","Fireplace","Fireside","Firetruck","Firework"],
+  "foot":["Football","Foothold","Footnote","Footpath","Footprint","Footstep","Footwear"],
+  "gold":["Goldenrod","Goldfish","Goldmine","Goldsmith"],
+  "grass":["Grasshopper","Grassland","Grassroots"],
+  "hand":["Handcuff","Handheld","Handle","Handmade","Handout","Handrail","Handshake"],
+  "head":["Headache","Headband","Headboard","Headlight","Headline","Headmaster","Headphones"],
+  "heart":["Heartbeat","Heartburn","Heartfelt","Heartland","Heartthrob","Heartwarming"],
+  "high":["Highland","Highlight","Highway","Highrise","Highschool"],
+  "home":["Homecoming","Homeland","Homeless","Homemade","Homeroom","Hometown","Homework"],
+  "hot":["Hotdog","Hotline","Hotshot","Hotspot","Hothouse"],
+  "house":["Housekeeping","Housemate","Houseplant","Housewarming","Housework"],
+  "key":["Keyboard","Keyhole","Keynote","Keystone"],
+  "land":["Landlord","Landmark","Landscape","Landslide","Landing","Landfill"],
+  "light":["Lighthouse","Lightning","Lightsaber","Lightweight","Lightyear"],
+  "long":["Longbow","Longhand","Longjump","Longshoreman","Longtime"],
+  "man":["Mandate","Mango","Manhole","Maniac","Manifold","Mankind","Manner","Mansion","Mantle"],
+  "moon":["Moonbeam","Moonlight","Moonrise","Moonwalk","Moonshine","Moonstone"],
+  "mud":["Mudflat","Mudslide","Mudslinging","Mudroom"],
+  "neck":["Necklace","Neckline","Necktie","Nectar"],
+  "new":["Newborn","Newsletter","Newspaper","Newsreel","Newsfeed"],
+  "night":["Nightclub","Nightfall","Nightmare","Nighttime","Nightgown","Nightstand"],
+  "north":["Northeast","Northern","Northwest","Northbound","Northland"],
+  "out":["Outbreak","Outcome","Outdoors","Outfield","Outlaw","Outlook","Output","Outrage"],
+  "over":["Overcast","Overcome","Overflow","Overlook","Overrun","Overtime","Overture"],
+  "pine":["Pineapple","Pinecone","Pinewood"],
+  "rain":["Rainbow","Raincoat","Raindrop","Rainfall","Rainforest","Rainstorm","Rainwater"],
+  "red":["Redwood","Redline","Redo","Redhead","Redeem"],
+  "road":["Roadblock","Roadside","Roadtrip","Roadway","Roadwork","Roadrunner"],
+  "rock":["Rockslide","Rockstar","Rockband","Rockhound"],
+  "salt":["Saltine","Saltpeter","Saltwater","Saltshaker","Saltflat"],
+  "sand":["Sandbar","Sandcastle","Sandpaper","Sandstorm","Sandbox","Sandstone"],
+  "sea":["Seabird","Seaboard","Seafood","Seahorse","Seaport","Seascape","Seashell","Seashore","Season"],
+  "ship":["Shipbuilder","Shipmate","Shipment","Shipwreck","Shipyard"],
+  "side":["Sideburn","Sidekick","Sideline","Sidewalk","Sidewinder"],
+  "snow":["Snowball","Snowboard","Snowfall","Snowflake","Snowman","Snowplow","Snowstorm"],
+  "south":["Southeast","Southern","Southwest","Southbound","Southpaw"],
+  "star":["Starfish","Stargate","Starlight","Starship","Starburst","Stardust","Starboard"],
+  "stone":["Stonecold","Stonefish","Stonewall","Stonework","Stonehenge"],
+  "sun":["Sunburn","Sunday","Sunflower","Sunglasses","Sunlight","Sunrise","Sunset","Sunscreen"],
+  "time":["Timeline","Timepiece","Timeout","Timer","Timeworn","Timestamp"],
+  "tree":["Treetop","Treehouse","Treeline"],
+  "under":["Underdog","Underground","Underline","Undermine","Underscore","Understand","Underworld"],
+  "up":["Upcoming","Update","Upgrade","Uphill","Upload","Uproar","Upstairs","Upturn"],
+  "wall":["Wallflower","Wallpaper","Wallstreet","Walmart"],
+  "war":["Wardrobe","Warfare","Warhead","Warlord","Warpath","Warship","Wartime"],
+  "water":["Waterfall","Waterfront","Watermelon","Waterproof","Waterway","Waterskii"],
+  "west":["Westbound","Western","Westward","Westminster"],
+  "wild":["Wildcard","Wilderness","Wildfire","Wildlife","Wildflower"],
+  "wind":["Windfall","Windmill","Window","Windpipe","Windshield","Windstorm","Windsurf"],
+  "wood":["Woodchuck","Woodpecker","Woodland","Woodwork","Woodwind"],
+  "work":["Workbench","Workday","Workforce","Workload","Workplace","Workout","Workshop"],
+};
+
+const SUFFIX_BANK = {
+  "ache":["Backache","Earache","Heartache","Headache","Stomachache","Toothache"],
+  "back":["Cutback","Drawback","Feedback","Flashback","Kickback","Payback","Setback"],
+  "ball":["Baseball","Basketball","Football","Meatball","Snowball","Volleyball","Pinball"],
+  "bird":["Blackbird","Bluebird","Firebird","Hummingbird","Ladybird","Mockingbird","Songbird","Thunderbird"],
+  "board":["Billboard","Cardboard","Chessboard","Clipboard","Dashboard","Keyboard","Skateboard","Snowboard"],
+  "book":["Cookbook","Guidebook","Handbook","Notebook","Pocketbook","Textbook","Workbook","Yearbook"],
+  "box":["Checkbox","Jukebox","Letterbox","Mailbox","Sandbox","Toolbox","Voicebox"],
+  "cake":["Cheesecake","Cupcake","Earthquake","Fishcake","Fruitcake","Pancake","Shortcake"],
+  "card":["Flashcard","Greeting card","Postcard","Scorecard","Wildcard","Bankcard"],
+  "day":["Birthday","Holiday","Midday","Monday","Saturday","Sunday","Tuesday","Wednesday"],
+  "dog":["Bulldog","Corndog","Hotdog","Sheepdog","Underdog","Watchdog"],
+  "door":["Backdoor","Cellar door","Outdoor","Trapdoor"],
+  "fall":["Downfall","Freefall","Nightfall","Pitfall","Rainfall","Snowfall","Waterfall","Windfall"],
+  "fish":["Blowfish","Catfish","Clownfish","Goldfish","Jellyfish","Starfish","Swordfish"],
+  "foot":["Bigfoot","Clubfoot","Flatfoot","Tenderfoot"],
+  "gate":["Citygate","Floodgate","Floodgate","Tollgate","Watergate","Woodgate","Tailgate","Lychgate"],
+  "ground":["Background","Battleground","Campground","Fairground","Playground","Underground"],
+  "hand":["Backhand","Beforehand","Farmhand","Firsthand","Offhand","Secondhand","Underhand"],
+  "head":["Baldhead","Deadhead","Figurehead","Forehead","Godhead","Masthead","Overhead","Pothead"],
+  "hill":["Anthill","Churchill","Dunghill","Foothill","Sandhill","Uphill"],
+  "hole":["Buttonhole","Foxhole","Loophole","Manhole","Pigeonhole","Porthole","Sinkhole","Wormhole"],
+  "house":["Alehouse","Farmhouse","Greenhouse","Jailhouse","Penthouse","Powerhouse","Warehouse"],
+  "land":["Dreamland","Farmland","Heartland","Homeland","Iceland","Mainland","Marshland","Wasteland"],
+  "light":["Candlelight","Daylight","Flashlight","Moonlight","Searchlight","Starlight","Sunlight","Twilight"],
+  "line":["Airline","Baseline","Clothesline","Deadline","Guideline","Headline","Lifeline","Mainline","Online","Outline","Sideline","Streamline","Timeline","Underline"],
+  "lock":["Deadlock","Flintlock","Gridlock","Hemlock","Livestock","Padlock","Warlock","Wedlock"],
+  "man":["Batman","Doorman","Fireman","Footman","Horseman","Postman","Snowman","Spider-Man","Superman"],
+  "mark":["Benchmark","Bookmark","Hallmark","Postmark","Trademark","Watermark"],
+  "night":["Fortnight","Midnight","Overnight"],
+  "out":["Blackout","Burnout","Carryout","Checkout","Cookout","Dropout","Fallout","Hangout","Knockout","Lookout","Printout","Shoutout","Workout"],
+  "place":["Birthplace","Commonplace","Fireplace","Hiding place","Marketplace","Resting place","Workplace"],
+  "road":["Crossroad","Railroad"],
+  "rock":["Bedrock","Gridlock","Hamrock","Shamrock","Woodstock"],
+  "room":["Ballroom","Bathroom","Bedroom","Classroom","Courtroom","Darkroom","Showroom","Stockroom"],
+  "ship":["Airship","Battleship","Courtship","Flagship","Friendship","Hardship","Kinship","Leadership","Ownership","Partnership","Scholarship","Spaceship","Warship","Worship"],
+  "side":["Bedside","Blind side","Fireside","Hillside","Lakeside","Roadside","Ringside","Ringside","Seaside","Wayside"],
+  "star":["All-star","Popstar","Rockstar","Superstar"],
+  "stone":["Brownstone","Cobblestone","Cornerstone","Flagstone","Flintstone","Goldstone","Keystone","Limestone","Milestone","Moonstone","Sandstone"],
+  "storm":["Brainstorm","Firestorm","Hailstorm","Rainstorm","Thunderstorm"],
+  "tail":["Cocktail","Curtail","Dovetail","Foxytail","Ponytail","Thumbnail","Wagtail"],
+  "time":["Bedtime","Daytime","Dinnertime","Halftime","Lifetime","Lunchtime","Nighttime","Overtime","Pastime","Peacetime","Playtime","Showtime","Wartime"],
+  "town":["Downtown","Georgetown","Jamestown","Shantytown","Uptown"],
+  "way":["Broadway","Causeway","Driveway","Freeway","Gateway","Hallway","Highway","Parkway","Pathway","Railway","Runway","Subway","Walkway"],
+  "work":["Clockwork","Framework","Groundwork","Guesswork","Homework","Ironwork","Metalwork","Network","Patchwork","Teamwork","Woodwork"],
+  "yard":["Backyard","Barnyard","Churchyard","Courtyard","Junkyard","Scrapyard","Shipyard","Vineyard"],
+};
+
+// ═══════════════════════════════════════════════════
+//  HIDDEN WORD DATA
+// ═══════════════════════════════════════════════════
+const HIDDEN_HOSTS = {
+  "cat":["sCATter","CATalog","eduCATE","delicATE","CATerpillar","advoCATE","lunATIC","CATfish"],
+  "dog":["DOGma","hotDOG","underDOG","cornDOG","sheeepDOG"],
+  "bear":["BEARable","unBEARable","forBEARance","BEARd"],
+  "eel":["stEEL","hEEL","fEEL","whEEL","knEEL","rEEL"],
+  "asp":["grASP","clASP","wASP","cASPer"],
+  "ant":["pheasANT","restaurANT","pleasANT","militANT","importANT","hesitANT"],
+  "rat":["gRATE","piRATE","narrATE","opERATe","irrirATE","GRATitude"],
+  "ram":["dRAMa","pROGRAM","ramPAGE","dRAMatic"],
+  "carp":["CARPet","disCARD","CARPenter"],
+  "ape":["escAPE","shAPE","gRAPE","tAPE","drAPE","chAPEl","cAPEr","nAPE"],
+  "crow":["CROWd","CROWn","esCROW","CROWbar"],
+  "dove":["DOVEtail","DOVEcote"],
+  "lion":["bilLION","milLION","dandelION","LIONize","zillION"],
+  "pig":["PIGment","asPIGot"],
+  "bee":["BEEtle","oBEEse","BEEhive","frisbEE"],
+  "owl":["bOWLing","scOWL","fOWL","jOWL","grOWLing"],
+  "jay":["JAYbird","JAYwalk","holiDAY"],
+  "cod":["CODex","CODe","accommodATE"],
+  "cub":["CUBe","CUBicle","inCUBate","succUBus"],
+  "mole":["MOLEcule","guacaMOLE","MOLEstation"],
+  "wren":["WRENch","WRENder"],
+  "red":["REDwood","REDuce","REDirect","alREaDy","hundRED"],
+  "tan":["mountAIN","certAIN","curtAIN","fountAIN","susTAIN","porcelAIN"],
+  "gold":["GOLDen","marigOLD","GOLDfish","GOLDsmith"],
+  "rose":["moROSE","pROSE","ROSEbud","ROSEwood","gROSEck"],
+  "teal":["sTEALth"],
+  "lime":["subLIME","sLIMEy","paradiGM","cLIMb"],
+  "rust":["RUSTle","RUSTic","tRUST","cRUST","thRUST"],
+  "plum":["PLUMber","PLUMage","PLUMmet"],
+  "olive":["OLIVEr","bOLIVEr"],
+  "black":["BLACKbird","BLACKout","BLACKsmith"],
+  "amber":["chAMBEr","remEMBER","AMBER-gris"],
+  "cream":["dREAM","sCREAM","ICE CREAM"],
+  "one":["hONEy","mONEy","stONE","phONE","bONE","zONE","lONEly"],
+  "two":["beTWO","beTWEen","TWOsome"],
+  "four":["beFORE","thereFORE","FOURth","FOURsome"],
+  "eight":["wEIGHTy","hEIGHTen","frEIGHTer","EIGHTeen"],
+  "nine":["spINE","vINE","wINE","pINE","mINE","shINE","dINIng"],
+  "ten":["kiTTEN","wriTTEN","lissTEN","ofTEN","TENse","TENder","rOTTEN"],
+  "six":["phySICS","muSIC","clASSIC","SIXth"],
+  "arm":["fARMer","cHARMing","ARMor","disARMing","ARMchair"],
+  "ear":["EARth","hEARt","appEARance","EARly","fEARful"],
+  "rib":["dRIBble","RIBbon","hRIBrid","tRIBute"],
+  "hip":["HIPpo","wHIPper","HIPster","cHIPmunk"],
+  "lip":["LIPid","tuLIP","phLIPper","LIPstick"],
+  "toe":["TOEhold","misTOE","mesToE"],
+  "leg":["LEGend","LEGal","alLEGe","colLEGe","privILEGe"],
+  "eye":["EYEbrow","EYElet","EYEball","EYElash","EYElid"],
+  "jaw":["JAWbone","JAWbreaker","JAWdropping"],
+  "shin":["SHINe","SHINy","SHINdig","SHINiness"],
+  "knee":["KNEEl","KNEEcap","KNEEjerk"],
+  "chest":["orCHESTra","arCHESTra","CHESTnut"],
+  "spine":["inSPIRe","SUBspine"],
+  "liver":["deLIVERance","deLIVERy","cLIVEr"],
+  "heart":["HEARTfelt","dEARth","HEARTland","swEETHEART"],
+  "brain":["BRAINwash","BRAINstorm","BRAIN-dead"],
+  "nail":["sNAIL","detAIL","cocktAIL","curTAIL","toenAIL"],
+  "vein":["conVEIN","soVEIGN","rEVENge"],
+  "palm":["pSALM","bALM","cALMing","eMBALM"],
+  "iron":["envIRONment","IRONy","IRON-clad","IRON-works"],
+  "steel":["sTEELworks","STEEL-drum"],
+  "tin":["sTINg","destINy","valentINe","satIN","routINe","platINum"],
+  "lead":["LEAD-up","misleAD","headLEAD"],
+  "copper":["COPPER-head","COPPER-tone"],
+  "bronze":["BRONZE-age"],
+  "brass":["emBRASS","BRASS-band"],
+  "chrome":["CHROME-dome"],
+  "nickel":["NICKEL-back"],
+  "zinc":["amazING"],
+};
+
+const HIDDEN_CATEGORIES = {
+  "animal": ["cat","dog","fox","bear","deer","wolf","lion","rat","bat","cow","hen","ram","ewe","ape","emu","asp","cod","eel","gnu","yak","ant","bee","fly","cub","elk","boar","crab","carp","frog","mole","vole","mink","newt","moth","wasp","slug","toad","wren","crow","dove","lark","swan","ibis","kite","hawk","jay","owl","pig","ass"],
+  "color":  ["red","blue","green","gold","grey","gray","pink","rose","teal","tan","lime","rust","wine","plum","jade","navy","aqua","amber","black","coral","olive","cream","ochre","lilac","mauve","beige","bronze","silver","violet","indigo","maroon","salmon"],
+  "number": ["one","two","three","four","five","six","seven","eight","nine","ten","nil","eleven","twelve"],
+  "body part": ["arm","ear","rib","hip","lip","toe","leg","eye","jaw","shin","knee","chest","spine","liver","heart","brain","nail","vein","palm","elbow","skull","loin","calf","nape"],
+  "metal":  ["gold","silver","iron","steel","copper","bronze","tin","lead","zinc","brass","chrome","nickel","platinum","titanium","cobalt","tungsten","mercury","aluminum"],
+};
+
+// Used to gate rules (homophones, reversals) so they only fire when the
+// *transformed* word itself belongs to some known category — otherwise
+// "sounds like a random other word" is too open-ended to be a real category.
+function categoriesForWord(w) {
+  const out = [];
+  if (SET_LOOKUP[w]) for (const s of SET_LOOKUP[w]) out.push({ name: s.name, members: s.members });
+  for (const [catName, wordSet] of Object.entries(WORD_CATEGORIES)) {
+    if (wordSet.has(w)) out.push({ name: catName, members: [...wordSet] });
+  }
+  for (const [catName, list] of Object.entries(HIDDEN_CATEGORIES)) {
+    if (list.includes(w)) out.push({ name: cap(catName) + 's', members: list });
+  }
+  return out;
+}
+
+// Scans the curated REVERSALS map for OTHER word pairs whose reversed
+// spelling also lands in this same category — so "other examples" are
+// proven reversal pairs, not just random other members of the category.
+function findVerifiedReversalExamples(catName, excludeTarget, limit = 6) {
+  const out = [];
+  const seen = new Set();
+  for (const [w, rev] of REVERSALS) {
+    if (out.length >= limit) break;
+    if (rev === excludeTarget || seen.has(rev)) continue;
+    if (categoriesForWord(rev).some(c => c.name === catName)) {
+      out.push(`${cap(w)} → ${cap(rev)}`);
+      seen.add(rev);
+    }
+  }
+  return out;
+}
+
+// Same idea for homophones: scans the curated HOMOPHONES map for OTHER
+// entries whose sound-alike target also belongs to this same category.
+function findVerifiedHomophoneExamples(catName, excludeTarget, limit = 6) {
+  const out = [];
+  const seen = new Set();
+  for (const [w, snd] of Object.entries(HOMOPHONES)) {
+    if (out.length >= limit) break;
+    const sndNorm = norm(snd);
+    if (sndNorm === excludeTarget || seen.has(sndNorm)) continue;
+    if (categoriesForWord(sndNorm).some(c => c.name === catName)) {
+      out.push(`${cap(w)} → ${cap(snd)}`);
+      seen.add(sndNorm);
+    }
+  }
+  return out;
+}
+
+function findHostsInData(item) {
+  const found = [];
+  for (const s of NAMED_SETS) {
+    for (const m of s.members) {
+      if (m.includes(item) && m !== item && m.length > item.length) {
+        found.push(cap(m));
+        if (found.length >= 6) return found;
+      }
+    }
+  }
+  return found;
+}
+
+// ═══════════════════════════════════════════════════
+//  VOCAB INDEX (for letter-change/removal/addition rules)
+// ═══════════════════════════════════════════════════
+const VOCAB_BY_LENGTH = new Map();
+(function buildVocabIndex() {
+  const add = (setName, members) => {
+    for (const m of members) {
+      const len = m.length;
+      if (!VOCAB_BY_LENGTH.has(len)) VOCAB_BY_LENGTH.set(len, []);
+      VOCAB_BY_LENGTH.get(len).push({ word: m, setName, allMembers: members });
+    }
+  };
+  for (const s of NAMED_SETS) add(s.name, s.members);
+  for (const [catg, wordSet] of Object.entries(WORD_CATEGORIES)) add(catg, [...wordSet]);
+})();
+
+// Finds OTHER members of the same target category that some word in our
+// own vocabulary genuinely transforms into via the same one-letter rule —
+// e.g. for "drop one letter -> Keyboard Keys", this looks for some other
+// vocabulary word that becomes ALT (or SHIFT, TAB, etc.) by dropping a
+// letter, rather than just listing ALT/SHIFT/TAB as if they were already
+// proven to work. Only genuinely-verified pairs are returned.
+function findVerifiedTransformExamples(setName, allMembers, excludeTarget, mode, limit = 6) {
+  const examples = [];
+  for (const other of allMembers) {
+    if (examples.length >= limit) break;
+    if (other === excludeTarget) continue;
+    const srcLen = mode === 'remove' ? other.length + 1 : mode === 'add' ? other.length - 1 : other.length;
+    if (srcLen < 2 || srcLen > 14) continue;
+    const candidates = VOCAB_BY_LENGTH.get(srcLen) || [];
+    for (const { word: c } of candidates) {
+      if (c === other) continue;
+      let ok = false;
+      if (mode === 'change') {
+        let diffs = 0;
+        for (let i = 0; i < c.length; i++) { if (c[i] !== other[i]) diffs++; if (diffs > 1) break; }
+        ok = diffs === 1;
+      } else if (mode === 'remove') { // c is one letter longer than "other"; dropping a letter from c should give "other"
+        for (let i = 0; i < c.length && !ok; i++) if (c.slice(0, i) + c.slice(i + 1) === other) ok = true;
+      } else if (mode === 'add') { // c is one letter shorter than "other"; inserting a letter into c should give "other"
+        for (let i = 0; i < other.length && !ok; i++) if (other.slice(0, i) + other.slice(i + 1) === c) ok = true;
+      }
+      if (ok) { examples.push(`${cap(c)} → ${cap(other)}`); break; }
+    }
+  }
+  return examples;
+}
+
+// ═══════════════════════════════════════════════════
+//  CACHE MANAGER (localStorage-backed, 24h TTL)
+// ═══════════════════════════════════════════════════
+class CacheManager {
+  static KEY = 'cf_api_cache_v1';
+  static TTL = 1000 * 60 * 60 * 24;
+
+  static get(key) {
+    try {
+      const data = JSON.parse(localStorage.getItem(this.KEY) || '{}');
+      const entry = data[key];
+      if (!entry) return null;
+      if (Date.now() - entry.t > this.TTL) { delete data[key]; localStorage.setItem(this.KEY, JSON.stringify(data)); return null; }
+      return entry.v;
+    } catch { return null; }
+  }
+  static set(key, value) {
+    try {
+      const data = JSON.parse(localStorage.getItem(this.KEY) || '{}');
+      data[key] = { v: value, t: Date.now() };
+      localStorage.setItem(this.KEY, JSON.stringify(data));
+    } catch {}
+  }
+  static clear() { try { localStorage.removeItem(this.KEY); } catch {} }
+}
+
+// ═══════════════════════════════════════════════════
+//  DATAMUSE CLIENT (free, no API key)
+// ═══════════════════════════════════════════════════
+class DatamuseClient {
+  static BASE = 'https://api.datamuse.com';
+
+  static async fetch(rel, word, max = 40) {
+    const cacheKey = `dm:${rel}:${norm(word)}:${max}`;
+    const cached = CacheManager.get(cacheKey);
+    if (cached) return cached;
+    const url = `${this.BASE}/words?${rel}=${encodeURIComponent(norm(word))}&max=${max}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(res.statusText);
+      const data = await res.json();
+      CacheManager.set(cacheKey, data);
+      if (typeof markDatamuseOK === 'function') markDatamuseOK();
+      return data;
+    } catch (e) {
+      console.warn('Datamuse error:', e);
+      if (typeof markDatamuseFailure === 'function') markDatamuseFailure(e);
+      return [];
+    }
+  }
+
+  static synonyms(word)      { return this.fetch('rel_syn', word); }
+  static triggers(word)      { return this.fetch('rel_trg', word); }
+  static meansLike(word)     { return this.fetch('ml', word); }
+  static rhymes(word)        { return this.fetch('rel_rhy', word); }
+  static homophones(word)    { return this.fetch('rel_hom', word); }
+  static soundsLike(word)    { return this.fetch('sl', word); }
+  static followers(word)     { return this.fetch('rel_bga', word); }
+  static predecessors(word)  { return this.fetch('rel_bgb', word); }
+}
+
+// ═══════════════════════════════════════════════════
+//  CONCEPTNET CLIENT (free, no API key) — structured relations like
+//  UsedFor, AtLocation, PartOf, CapableOf, complementing Datamuse's
+//  looser statistical associations with named relation types.
+// ═══════════════════════════════════════════════════
+class ConceptNetClient {
+  static BASE = 'https://api.conceptnet.io';
+
+  static async edgesFor(word, rel, max = 50) {
+    const w = norm(word);
+    const cacheKey = `cn:${rel}:${w}`;
+    const cached = CacheManager.get(cacheKey);
+    if (cached) return cached;
+    const url = `${this.BASE}/query?node=/c/en/${encodeURIComponent(w)}&rel=/r/${rel}&limit=${max}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(res.statusText);
+      const data = await res.json();
+      const edges = (data.edges || [])
+        .map(e => {
+          const startIsWord = e.start && e.start.term === `/c/en/${w}`;
+          const other = startIsWord ? e.end : e.start;
+          return other && other.language === 'en' ? norm(other.label || '') : null;
+        })
+        .filter(Boolean);
+      const deduped = [...new Set(edges)];
+      CacheManager.set(cacheKey, deduped);
+      if (typeof markServiceOK === 'function') markServiceOK('conceptnet');
+      return deduped;
+    } catch (e) {
+      console.warn('ConceptNet error:', e);
+      if (typeof markServiceFailure === 'function') markServiceFailure('conceptnet');
+      return [];
+    }
+  }
+
+  static usedFor(word)     { return this.edgesFor(word, 'UsedFor'); }
+  static atLocation(word)  { return this.edgesFor(word, 'AtLocation'); }
+  static partOf(word)      { return this.edgesFor(word, 'PartOf'); }
+  static capableOf(word)   { return this.edgesFor(word, 'CapableOf'); }
+}
+
+// ═══════════════════════════════════════════════════
+//  PLUGIN BASE CLASSES
+// ═══════════════════════════════════════════════════
+class RulePlugin {
+  constructor(options = {}) {
+    this.id = options.id || this.constructor.name;
+    this.name = options.name || 'Unnamed Rule';
+    this.description = options.description || '';
+    this.color = options.color || 'blue';
+    this.confidence = options.confidence || 'medium';
+    this.enabled = options.enabled !== false;
+    this.supportsSingle = options.supportsSingle !== false;
+    this.supportsPair = options.supportsPair !== false;
+    this.requiresAPI = options.requiresAPI || false;
+    this.source = options.source || 'local'; // 'local' | 'api' | 'custom'
+  }
+
+  // Override. word2 is null in single-word mode. Must return an array of
+  // match-spec objects: {categoryName, ruleDescription, inputWordsFit, otherExamples, confidence, color}
+  async check(word1, word2 = null) { return []; }
+
+  makeMatch(opts) {
+    return {
+      categoryName: opts.categoryName,
+      ruleDescription: opts.ruleDescription,
+      inputWordsFit: opts.inputWordsFit,
+      otherExamples: opts.otherExamples || [],
+      confidence: opts.confidence || this.confidence,
+      color: opts.color || this.color,
+      pluginId: this.id,
+      source: this.source,
+    };
+  }
+}
+
+// A plugin whose logic is defined per single word, and whose pair-mode
+// behavior is simply: run on each word, keep only categories both share.
+// This mirrors the original tool's global AND-logic, scoped per-plugin.
+class SingleWordRulePlugin extends RulePlugin {
+  // Override. Must return an array of match-spec objects (no pluginId needed).
+  evaluate(word, w) { return []; }
+
+  async check(word1, word2 = null) {
+    const w1n = norm(word1);
+    const res1 = this.evaluate(word1, w1n) || [];
+    if (!word2) return res1.map(r => this.makeMatch(r));
+
+    const w2n = norm(word2);
+    const res2 = this.evaluate(word2, w2n) || [];
+    const map2 = new Map(res2.map(r => [r.categoryName, r]));
+    const shared = [];
+    for (const r of res1) {
+      if (map2.has(r.categoryName)) {
+        const o2 = map2.get(r.categoryName);
+        shared.push(this.makeMatch({
+          ...r,
+          inputWordsFit: `${word1.toUpperCase()}: ${r.inputWordsFit}\n${word2.toUpperCase()}: ${o2.inputWordsFit}`,
+        }));
+      }
+    }
+    return shared;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  PLUGIN REGISTRY
+// ═══════════════════════════════════════════════════
+class PluginRegistry {
+  constructor() {
+    this.plugins = new Map();
+  }
+
+  register(plugin) { this.plugins.set(plugin.id, plugin); }
+  getEnabled() { return [...this.plugins.values()].filter(p => p.enabled); }
+
+  toggle(id, state) {
+    const p = this.plugins.get(id);
+    if (p) { p.enabled = state; this.saveState(); }
+  }
+
+  saveState() {
+    const state = {};
+    for (const [id, p] of this.plugins) state[id] = p.enabled;
+    try { localStorage.setItem('cf_plugin_state_v1', JSON.stringify(state)); } catch {}
+  }
+
+  loadState() {
+    try {
+      const state = JSON.parse(localStorage.getItem('cf_plugin_state_v1') || '{}');
+      for (const [id, enabled] of Object.entries(state)) {
+        if (this.plugins.has(id)) this.plugins.get(id).enabled = enabled;
+      }
+    } catch {}
+  }
+
+  async analyze(words, opts = {}) {
+    const isPair = words.length === 2;
+    const results = [];
+    const skipAPI = !!opts.skipAPI;
+
+    const active = this.getEnabled().filter(p => {
+      if (isPair && !p.supportsPair) return false;
+      if (!isPair && !p.supportsSingle) return false;
+      if (skipAPI && p.requiresAPI) return false;
+      return true;
+    });
+
+    const settled = await Promise.allSettled(active.map(p => p.check(...words)));
+    settled.forEach((r, i) => {
+      if (r.status === 'fulfilled' && r.value && r.value.length) results.push(...r.value);
+      else if (r.status === 'rejected') console.error(`Plugin ${active[i].id} failed:`, r.reason);
+    });
+
+    const seen = new Set();
+    return results.filter(r => {
+      if (seen.has(r.categoryName)) return false;
+      seen.add(r.categoryName);
+      return true;
+    });
+  }
+
+  async analyzeBulk(list1, list2, opts = {}) {
+    const categoryMap = new Map();
+    const total = list1.length * list2.length;
+    const skipAPI = typeof opts.skipAPI === 'boolean' ? opts.skipAPI : total > 300;
+    let done = 0;
+
+    for (const w1 of list1) {
+      for (const w2 of list2) {
+        if (!norm(w1) || !norm(w2)) continue;
+        if (norm(w1) === norm(w2)) continue;
+
+        const results = await this.analyze([w1, w2], { skipAPI });
+        for (const r of results) {
+          if (!categoryMap.has(r.categoryName)) {
+            categoryMap.set(r.categoryName, {
+              categoryName: r.categoryName, ruleDescription: r.ruleDescription,
+              color: r.color, confidence: r.confidence, otherExamples: r.otherExamples,
+              source: r.source, pairs: [],
+            });
+          }
+          categoryMap.get(r.categoryName).pairs.push({ w1, w2 });
+        }
+
+        done++;
+        if (opts.onProgress) opts.onProgress(done, total);
+        if (done % 8 === 0) await new Promise(r => setTimeout(r, 0));
+      }
+    }
+
+    return {
+      results: [...categoryMap.values()].sort((a, b) => {
+        if (b.pairs.length !== a.pairs.length) return b.pairs.length - a.pairs.length;
+        return COLOR_ORDER.indexOf(a.color) - COLOR_ORDER.indexOf(b.color);
+      }),
+      skippedAPI: skipAPI,
+    };
+  }
+}
+
+const registry = new PluginRegistry();
+
+// ═══════════════════════════════════════════════════
+//  LOCAL PLUGINS — ported 1:1 from the original hardcoded rules
+// ═══════════════════════════════════════════════════
+
+class AlphabeticalPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'alphabetical', name:'Alphabetical Order', description:'Letters appear in strict A→Z sequence.', color:'blue', confidence:'high' }); }
+  evaluate(word, w) {
+    if (w.length < 4) return [];
+    if (w.split('').sort().join('') !== w) return [];
+    return [{ categoryName:"LETTERS IN ALPHABETICAL ORDER", ruleDescription:"Every letter appears in strict A→Z sequence.", inputWordsFit:`${word.toUpperCase()}: ${w.split('').join(' < ')}`, otherExamples:["Ghost","First","Almost","Biopsy","Effort","Begin","Abort","Chintz","Floor"] }];
+  }
+}
+
+class ReverseAlphabeticalPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'reverseAlphabetical', name:'Reverse Alphabetical Order', description:'Letters appear in strict Z→A sequence.', color:'purple', confidence:'high' }); }
+  evaluate(word, w) {
+    if (w.length < 4) return [];
+    if (w.split('').sort().reverse().join('') !== w) return [];
+    return [{ categoryName:"LETTERS IN REVERSE ALPHABETICAL ORDER", ruleDescription:"Every letter appears in strict Z→A sequence.", inputWordsFit:`${word.toUpperCase()}: ${w.split('').join(' > ')}`, otherExamples:["Spun","Rolf","Pond","Mink","Numb","Trod"] }];
+  }
+}
+
+class PalindromePlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'palindrome', name:'Palindromes', description:'Reads identically forwards and backwards.', color:'yellow', confidence:'high' }); }
+  evaluate(word, w) {
+    if (w.length < 3) return [];
+    if (w !== w.split('').reverse().join('')) return [];
+    return [{ categoryName:"PALINDROMES", ruleDescription:"Reads identically forwards and backwards.", inputWordsFit:`${word.toUpperCase()} is a palindrome`, otherExamples:["Radar","Level","Civic","Kayak","Madam","Racecar","Noon","Tenet","Refer","Rotator"] }];
+  }
+}
+
+class ReversalPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'reversal', name:'Spells a Category Member Backwards', description:'Reversed spelling makes a word that belongs to a known category.', color:'green', confidence:'high' }); }
+  evaluate(word, w) {
+    const rev = REVERSALS.get(w);
+    if (!rev) return [];
+    const cats = categoriesForWord(rev);
+    if (!cats.length) return [];
+    return cats
+      .map(c => {
+        const verified = findVerifiedReversalExamples(c.name, rev);
+        const otherExamples = [cap(rev), ...verified];
+        if (otherExamples.length < 2) return null;
+        return {
+          categoryName: `SPELLS BACKWARDS → ${c.name.toUpperCase()}`,
+          ruleDescription: `Reversed spelling makes "${rev.toUpperCase()}" — a member of "${c.name}".`,
+          inputWordsFit: `${word.toUpperCase()} reversed = ${rev.toUpperCase()} (${c.name})`,
+          otherExamples,
+        };
+      })
+      .filter(Boolean);
+  }
+}
+
+class HeteronymPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'heteronym', name:'Heteronyms', description:'Same spelling, two pronunciations & meanings.', color:'orange', confidence:'high' }); }
+  evaluate(word, w) {
+    const het = HETERONYMS[w];
+    if (!het) return [];
+    return [{ categoryName:"HETERONYMS", ruleDescription:"Same spelling, two different pronunciations and meanings.", inputWordsFit:`${word.toUpperCase()}: (1) ${het[0]}  (2) ${het[1]}`, otherExamples:["Tear (crying/ripping)","Lead (metal/to guide)","Minute (time/tiny)","Bass (fish/music)","Wound (injury/past of wind)","Live (to live/broadcast)","Row (line/quarrel)"] }];
+  }
+}
+
+class HomophonePlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'homophone', name:'Homophones (Categorized)', description:'Sounds like a word that itself belongs to a known category.', color:'yellow', confidence:'high' }); }
+  evaluate(word, w) {
+    const sounds = HOMOPHONES[w];
+    if (!sounds) return [];
+    const soundsNorm = norm(sounds);
+    if (NUMBER_HOMOPHONES[w]) {
+      return [{ categoryName:"HOMOPHONE → NUMBERS", ruleDescription:"Sounds identical to a number when spoken aloud.", inputWordsFit:`${word.toUpperCase()} sounds like the number "${sounds.toUpperCase()}"`, otherExamples:["Won (one)","Too (two)","Fore (four)","Ate (eight)","For (four)","To (two)"] }];
+    }
+    const cats = categoriesForWord(soundsNorm);
+    if (!cats.length) return [];
+    return cats
+      .map(c => {
+        const verified = findVerifiedHomophoneExamples(c.name, soundsNorm);
+        const otherExamples = [cap(sounds), ...verified];
+        if (otherExamples.length < 2) return null;
+        return {
+          categoryName: `HOMOPHONE → ${c.name.toUpperCase()}`,
+          ruleDescription: `Sounds identical to "${sounds.toUpperCase()}" — a member of "${c.name}".`,
+          inputWordsFit: `${word.toUpperCase()} sounds like "${sounds.toUpperCase()}" (${c.name})`,
+          otherExamples,
+        };
+      })
+      .filter(Boolean);
+  }
+}
+
+class AcronymPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'acronym', name:'Known Acronyms', description:'Also a well-known acronym.', color:'blue', confidence:'high' }); }
+  evaluate(word, w) {
+    const meaning = ACRONYMS[w];
+    if (!meaning) return [];
+    return [{ categoryName:"KNOWN ACRONYMS", ruleDescription:"Also a well-known acronym where each letter stands for a word.", inputWordsFit:`${word.toUpperCase()} = ${meaning}`, otherExamples:["LASER","SCUBA","RADAR","PIN","GIF","NASA","ASAP","SWAT"] }];
+  }
+}
+
+class AnagramPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'anagram', name:'Anagram Groups (4+ words)', description:'Rearranges into 4+ total valid words.', color:'green', confidence:'high' }); }
+  evaluate(word, w) {
+    if (w.length < 3) return [];
+    const key = sortLetters(w);
+    const group = ANAGRAM_MAP[key];
+    if (!group || group.length < 4) return [];
+    const others = group.filter(g => g !== w);
+    return [{ categoryName:"ANAGRAM GROUP (4+ WORDS)", ruleDescription:"Letters can be rearranged to spell multiple other words (min. 4 total).", inputWordsFit:`${word.toUpperCase()} anagrams: ${others.map(s=>s.toUpperCase()).join(', ')}`, otherExamples:others.map(cap) }];
+  }
+}
+
+class SilentLetterPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'silentLetter', name:'Silent Letters', description:'Contains a letter present in spelling but not pronunciation.', color:'blue', confidence:'high' }); }
+  evaluate(word, w) {
+    for (const g of SILENT_GROUPS) {
+      if (g.test(w)) return [{ categoryName:`SILENT LETTER — ${g.name.toUpperCase()}`, ruleDescription:`Contains a silent "${g.letter}" — present in spelling but not pronunciation.`, inputWordsFit:`${word.toUpperCase()} has a silent ${g.letter}`, otherExamples:g.others.map(cap) }];
+    }
+    return [];
+  }
+}
+
+class AllVowelsPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'allVowels', name:'Contains All Five Vowels', description:'Uses A, E, I, O, and U at least once.', color:'orange', confidence:'high' }); }
+  evaluate(word, w) {
+    const V = new Set(['a','e','i','o','u']);
+    const found = new Set(w.split('').filter(c => V.has(c)));
+    if (found.size !== 5) return [];
+    return [{ categoryName:"CONTAINS ALL FIVE VOWELS (A E I O U)", ruleDescription:"This word uses every vowel at least once.", inputWordsFit:`${word.toUpperCase()} contains A, E, I, O, and U`, otherExamples:["Sequoia","Education","Euphoria","Facetious","Cautioned","Abstemious","Dialogue","Obsequious"] }];
+  }
+}
+
+class NoVowelsPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'noVowels', name:'No Vowels', description:'All consonants — zero traditional vowels.', color:'purple', confidence:'high' }); }
+  evaluate(word, w) {
+    if (w.length < 3) return [];
+    if (w.split('').some(c => 'aeiou'.includes(c))) return [];
+    return [{ categoryName:"NO VOWELS (A E I O U)", ruleDescription:"Contains zero traditional vowels — all consonants.", inputWordsFit:`${word.toUpperCase()} has no A, E, I, O, or U`, otherExamples:["Cwm","Crwth","Nth","Psych","Glyph","Tryst","Lynch","Crypt","Gypsy","Lynx","Nymph","Pygmy","Rhythms","Sylph"] }];
+  }
+}
+
+class SetMembershipPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'setMembership', name:'Named Set Membership', description:'Belongs to a famous named group (Deadly Sins, Planets, etc.)', color:'yellow', confidence:'high' }); }
+  evaluate(word, w) {
+    const sets = SET_LOOKUP[w];
+    if (!sets || !sets.length) return [];
+    return sets.map(s => ({ categoryName:`MEMBER OF: ${s.name.toUpperCase()}`, ruleDescription:`This word belongs to the named group: "${s.name}".`, inputWordsFit:`${word.toUpperCase()} is one of the ${s.name}`, otherExamples:s.members.filter(m => m !== w).slice(0, 6).map(cap) }));
+  }
+}
+
+class CulturalIconPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'culturalIcon', name:'Cultural Icons', description:'Strongly associated with a holiday/theme by convention.', color:'yellow', confidence:'high' }); }
+  evaluate(word, w) {
+    const icons = ICON_LOOKUP[w];
+    if (!icons || !icons.length) return [];
+    return icons.map(icon => ({ categoryName:`ASSOCIATED WITH: ${icon.theme.toUpperCase()}`, ruleDescription:`Strongly associated with ${icon.theme} by cultural convention.`, inputWordsFit:`${word.toUpperCase()} is a classic symbol of ${icon.theme}`, otherExamples:icon.words.filter(x => x !== w).slice(0, 6).map(cap) }));
+  }
+}
+
+class AffixGroupPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'affixGroup', name:'Compound Word Affixes', description:'Combines with a common word to make a compound.', color:'green', confidence:'high' }); }
+  evaluate(word, w) {
+    const groups = AFFIX_LOOKUP[w];
+    if (!groups || !groups.length) return [];
+    return groups.map(g => {
+      const compound = g.pos === "after" ? `${w}${g.affix}` : `${g.affix}${w}`;
+      const others = g.members.filter(m => m !== w).slice(0, 5).map(m => cap(g.pos === "after" ? m + g.affix : g.affix + m));
+      return { categoryName:`${g.disp} — COMBINE WITH "${g.affix.toUpperCase()}"`, ruleDescription:`Adding "${g.affix.toUpperCase()}" ${g.pos === "after" ? "after" : "before"} these words makes a valid compound word.`, inputWordsFit:`${word.toUpperCase()} → ${compound.toUpperCase()}`, otherExamples:others };
+    });
+  }
+}
+
+class LetterChangePlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'letterChange', name:'One Letter Change', description:'Changing one letter makes a named category member.', color:'purple', confidence:'medium' }); }
+  evaluate(word, w) {
+    if (w.length < 2 || w.length > 13) return [];
+    const candidates = VOCAB_BY_LENGTH.get(w.length) || [];
+    const found = new Map();
+    for (const { word: target, setName, allMembers } of candidates) {
+      if (target === w) continue;
+      let diffs = 0, pos = -1, fromCh = '', toCh = '';
+      for (let i = 0; i < w.length; i++) {
+        if (w[i] !== target[i]) { diffs++; if (diffs === 1) { pos = i; fromCh = w[i]; toCh = target[i]; } else break; }
+      }
+      if (diffs !== 1) continue;
+      const key = `ONE LETTER CHANGE → ${setName.toUpperCase()}`;
+      if (!found.has(key)) {
+        const verified = findVerifiedTransformExamples(setName, allMembers, target, 'change');
+        const otherExamples = [cap(target), ...verified];
+        if (otherExamples.length < 2) continue;
+        found.set(key, { categoryName:key, ruleDescription:`Changing one letter transforms this word into a member of "${setName}".`, inputWordsFit:`${word.toUpperCase()}: "${fromCh.toUpperCase()}"→"${toCh.toUpperCase()}" at pos ${pos+1} → ${target.toUpperCase()}`, otherExamples });
+      }
+    }
+    return [...found.values()];
+  }
+}
+
+class LetterRemovalPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'letterRemoval', name:'Drop One Letter', description:'Removing one letter makes a named category member.', color:'red', confidence:'medium' }); }
+  evaluate(word, w) {
+    if (w.length < 3 || w.length > 13) return [];
+    const candidates = VOCAB_BY_LENGTH.get(w.length - 1) || [];
+    const found = new Map();
+    for (const { word: target, setName, allMembers } of candidates) {
+      let removedPos = -1, removedCh = '';
+      for (let i = 0; i < w.length; i++) {
+        if (w.slice(0, i) + w.slice(i + 1) === target) { removedPos = i; removedCh = w[i]; break; }
+      }
+      if (removedPos === -1) continue;
+      const key = `DROP ONE LETTER → ${setName.toUpperCase()}`;
+      if (!found.has(key)) {
+        const verified = findVerifiedTransformExamples(setName, allMembers, target, 'remove');
+        const otherExamples = [cap(target), ...verified];
+        if (otherExamples.length < 2) continue;
+        found.set(key, { categoryName:key, ruleDescription:`Removing one letter transforms this word into a member of "${setName}".`, inputWordsFit:`${word.toUpperCase()}: drop "${removedCh.toUpperCase()}" at pos ${removedPos+1} → ${target.toUpperCase()}`, otherExamples });
+      }
+    }
+    return [...found.values()];
+  }
+}
+
+class LetterAdditionPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'letterAddition', name:'Add One Letter', description:'Inserting one letter makes a named category member.', color:'red', confidence:'medium' }); }
+  evaluate(word, w) {
+    if (w.length < 2 || w.length > 11) return [];
+    const candidates = VOCAB_BY_LENGTH.get(w.length + 1) || [];
+    const found = new Map();
+    for (const { word: target, setName, allMembers } of candidates) {
+      let insertedPos = -1, insertedCh = '';
+      for (let i = 0; i < target.length; i++) {
+        if (target.slice(0, i) + target.slice(i + 1) === w) { insertedPos = i; insertedCh = target[i]; break; }
+      }
+      if (insertedPos === -1) continue;
+      const key = `ADD ONE LETTER → ${setName.toUpperCase()}`;
+      if (!found.has(key)) {
+        const verified = findVerifiedTransformExamples(setName, allMembers, target, 'add');
+        const otherExamples = [cap(target), ...verified];
+        if (otherExamples.length < 2) continue;
+        found.set(key, { categoryName:key, ruleDescription:`Inserting one letter transforms this word into a member of "${setName}".`, inputWordsFit:`${word.toUpperCase()}: insert "${insertedCh.toUpperCase()}" at pos ${insertedPos+1} → ${target.toUpperCase()}`, otherExamples });
+      }
+    }
+    return [...found.values()];
+  }
+}
+
+class StartsEndsWordPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'startsEndsWord', name:'Starts/Ends With a Word', description:'A whole other word is hidden at the front or back.', color:'blue', confidence:'medium' }); }
+  evaluate(word, w) {
+    if (w.length <= 3) return [];
+    const sortedStart = [...COMMON_START_WORDS].sort((a,b) => b.length - a.length);
+    for (const sw of sortedStart) {
+      if (w.startsWith(sw) && sw.length < w.length && sw.length >= 3) {
+        const bank = PREFIX_BANK[sw] || [];
+        const fromSets = [];
+        for (const s of NAMED_SETS) for (const m of s.members) if (m.startsWith(sw) && m !== sw && m.length > sw.length) fromSets.push(cap(m));
+        const examples = [...new Set([...bank, ...fromSets])].slice(0, 7);
+        return [{ categoryName:`STARTS WITH THE WORD "${sw.toUpperCase()}"`, ruleDescription:`The complete word "${sw.toUpperCase()}" is hidden at the front.`, inputWordsFit:`${word.toUpperCase()} = ${sw.toUpperCase()} + ${w.slice(sw.length).toUpperCase()}`, otherExamples: examples.length ? examples : [`${sw.toUpperCase()}work`,`${sw.toUpperCase()}side`,`${sw.toUpperCase()}light`] }];
+      }
+    }
+    const sortedEnd = [...COMMON_END_WORDS].sort((a,b) => b.length - a.length);
+    for (const ew of sortedEnd) {
+      if (w.endsWith(ew) && ew.length < w.length && ew.length >= 3) {
+        const bank = SUFFIX_BANK[ew] || [];
+        const fromSets = [];
+        for (const s of NAMED_SETS) for (const m of s.members) if (m.endsWith(ew) && m !== ew && m.length > ew.length) fromSets.push(cap(m));
+        const examples = [...new Set([...bank, ...fromSets])].slice(0, 7);
+        return [{ categoryName:`ENDS WITH THE WORD "${ew.toUpperCase()}"`, ruleDescription:`The complete word "${ew.toUpperCase()}" is hidden at the end.`, inputWordsFit:`${word.toUpperCase()} = ${w.slice(0, w.length - ew.length).toUpperCase()} + ${ew.toUpperCase()}`, otherExamples: examples.length ? examples : [`fire${ew}`,`over${ew}`,`under${ew}`] }];
+      }
+    }
+    return [];
+  }
+}
+
+class HiddenWordPlugin extends SingleWordRulePlugin {
+  constructor() { super({ id:'hiddenWord', name:'Hidden Word Inside', description:'Conceals an animal/color/number/body part/metal inside its spelling.', color:'orange', confidence:'medium' }); }
+  evaluate(word, w) {
+    for (const [catName, list] of Object.entries(HIDDEN_CATEGORIES)) {
+      for (const item of list) {
+        if (w.includes(item) && item !== w && w.length > item.length) {
+          const idx = w.indexOf(item);
+          const curated = HIDDEN_HOSTS[item] || [];
+          const fromData = findHostsInData(item);
+          const examples = [...new Set([...curated, ...fromData])].filter(e => norm(e).includes(item) && norm(e) !== item).slice(0, 6);
+          return [{ categoryName:`HIDES A ${catName.toUpperCase()} — CONTAINS "${item.toUpperCase()}"`, ruleDescription:`The ${catName} "${item.toUpperCase()}" is concealed inside this word.`, inputWordsFit:`${word.toUpperCase()} contains "${item.toUpperCase()}" (position ${idx+1})`, otherExamples: examples.length >= 2 ? examples : [`Any word containing "${item.toUpperCase()}"`] }];
+        }
+      }
+    }
+    return [];
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  API-POWERED PLUGINS (Datamuse) — pair-only, live word association
+// ═══════════════════════════════════════════════════
+
+// NOTE ON CATEGORIZATION: in bulk mode, pairs are grouped into the same
+// category bucket whenever their `categoryName` strings match. For a rule
+// like "shared synonym", the actual shared word is different for every
+// pair, so the categoryName MUST include that specific shared word —
+// otherwise pairs that share nothing in particular with each other get
+// falsely lumped under one generic label (e.g. "SHARED ASSOCIATIONS")
+// just because they each separately matched *something*. Each plugin
+// below picks a genuine anchor (the specific shared word, or — for rhyme/
+// homophone, which are directional lookups — the target word) so that
+// only pairs that truly share that same concrete thing get merged.
+
+// MIN_LIVE_EXAMPLES: the anchor word itself (e.g. "freeze" in "SHARED
+// SYNONYM: FREEZE") is the category, not an example of it — showing it
+// again as a suggested word is circular. So we require at least this many
+// OTHER genuinely shared words beyond the anchor before showing the
+// category at all; anchor + 1 real extra is the "2 supporting words"
+// bar this whole thing is about.
+const MIN_LIVE_EXAMPLES = 1;
+
+class DatamuseSharedSynonymPlugin extends RulePlugin {
+  constructor() { super({ id:'dmSharedSynonyms', name:'Shared Synonyms (Datamuse)', description:'Both words are synonyms of a common word.', color:'green', confidence:'medium', source:'api', requiresAPI:true, supportsSingle:false }); }
+  async check(word1, word2) {
+    if (!word2) return [];
+    const [syn1, syn2] = await Promise.all([DatamuseClient.synonyms(word1), DatamuseClient.synonyms(word2)]);
+    const map1 = new Set(syn1.map(x => x.word));
+    const shared = [...new Set(syn2.filter(x => map1.has(x.word)).map(x => x.word))];
+    if (!shared.length) return [];
+    const anchor = shared[0];
+    // The anchor word IS the category name — it doesn't also count as an
+    // "other example" of itself, so it's excluded from the examples list.
+    const extra = shared.filter(w => w !== anchor && w !== norm(word1) && w !== norm(word2));
+    if (extra.length < MIN_LIVE_EXAMPLES) return [];
+    return [this.makeMatch({ categoryName:`SHARED SYNONYM: ${anchor.toUpperCase()}`, ruleDescription:`Both words are synonyms of "${anchor}".`, inputWordsFit:`${word1.toUpperCase()} & ${word2.toUpperCase()} are both synonyms of "${anchor.toUpperCase()}"`, otherExamples: extra.slice(0,8).map(cap) })];
+  }
+}
+
+class DatamuseSharedTriggerPlugin extends RulePlugin {
+  constructor() { super({ id:'dmSharedTriggers', name:'Shared Associations (Datamuse)', description:'Statistically co-occur with the same concept.', color:'blue', confidence:'medium', source:'api', requiresAPI:true, supportsSingle:false }); }
+  async check(word1, word2) {
+    if (!word2) return [];
+    const [t1, t2] = await Promise.all([DatamuseClient.triggers(word1), DatamuseClient.triggers(word2)]);
+    const map1 = new Set(t1.map(x => x.word));
+    const shared = [...new Set(t2.filter(x => map1.has(x.word)).map(x => x.word))];
+    if (!shared.length) return [];
+    const anchor = shared[0];
+    const extra = shared.filter(w => w !== anchor && w !== norm(word1) && w !== norm(word2));
+    if (extra.length < MIN_LIVE_EXAMPLES) return [];
+    return [this.makeMatch({ categoryName:`SHARED ASSOCIATION: ${anchor.toUpperCase()}`, ruleDescription:`Both words are statistically associated with "${anchor}".`, inputWordsFit:`${word1.toUpperCase()} & ${word2.toUpperCase()} both evoke "${anchor.toUpperCase()}"`, otherExamples: extra.slice(0,8).map(cap) })];
+  }
+}
+
+class DatamuseMeansLikePlugin extends RulePlugin {
+  constructor() { super({ id:'dmMeansLike', name:'Shared Loose Meaning (Datamuse)', description:'Both words share a loose/fuzzy meaning match.', color:'green', confidence:'low', source:'api', requiresAPI:true, supportsSingle:false }); }
+  async check(word1, word2) {
+    if (!word2) return [];
+    const [m1, m2] = await Promise.all([DatamuseClient.meansLike(word1), DatamuseClient.meansLike(word2)]);
+    const map1 = new Set(m1.map(x => x.word));
+    const shared = [...new Set(m2.filter(x => map1.has(x.word) && x.word !== norm(word1) && x.word !== norm(word2)).map(x => x.word))];
+    if (!shared.length) return [];
+    const anchor = shared[0];
+    const extra = shared.filter(w => w !== anchor);
+    if (extra.length < MIN_LIVE_EXAMPLES) return [];
+    return [this.makeMatch({ categoryName:`SHARED LOOSE MEANING: ${anchor.toUpperCase()}`, ruleDescription:`Both words are conceptually close to "${anchor}".`, inputWordsFit:`${word1.toUpperCase()} & ${word2.toUpperCase()} are both near "${anchor.toUpperCase()}"`, otherExamples: extra.slice(0,8).map(cap) })];
+  }
+}
+
+class DatamuseRhymePlugin extends RulePlugin {
+  constructor() { super({ id:'dmRhymes', name:'Rhymes (Datamuse)', description:'The two words rhyme with each other.', color:'yellow', confidence:'high', source:'api', requiresAPI:true, supportsSingle:false }); }
+  async check(word1, word2) {
+    if (!word2) return [];
+    const rhymes1 = await DatamuseClient.rhymes(word1);
+    const isRhyme = rhymes1.some(x => x.word === norm(word2));
+    if (!isRhyme) return [];
+    // Anchor on word2: two pairs only merge if they both genuinely rhyme
+    // with that same specific word, rather than "rhyming" in general.
+    const extra = rhymes1.filter(x => x.word !== norm(word2) && x.word !== norm(word1)).map(x => x.word);
+    if (extra.length < MIN_LIVE_EXAMPLES) return [];
+    return [this.makeMatch({ categoryName:`RHYMES WITH: ${word2.toUpperCase()}`, ruleDescription:`Rhymes with "${word2.toUpperCase()}".`, inputWordsFit:`${word1.toUpperCase()} rhymes with ${word2.toUpperCase()}`, otherExamples: extra.slice(0,8).map(cap) })];
+  }
+}
+
+class DatamuseHomophonePlugin extends RulePlugin {
+  constructor() { super({ id:'dmHomophones', name:'Homophones (Datamuse, live)', description:'Sound identical, beyond the curated local list.', color:'yellow', confidence:'high', source:'api', requiresAPI:true, supportsSingle:false }); }
+  async check(word1, word2) {
+    if (!word2) return [];
+    const hom1 = await DatamuseClient.homophones(word1);
+    const isHom = hom1.some(x => x.word === norm(word2));
+    if (!isHom) return [];
+    const extra = hom1.filter(x => x.word !== norm(word2) && x.word !== norm(word1)).map(x => x.word);
+    if (extra.length < MIN_LIVE_EXAMPLES) return [];
+    return [this.makeMatch({ categoryName:`HOMOPHONES OF: ${word2.toUpperCase()}`, ruleDescription:`Sounds identical to "${word2.toUpperCase()}" when spoken aloud.`, inputWordsFit:`${word1.toUpperCase()} sounds like ${word2.toUpperCase()}`, otherExamples: extra.slice(0,8).map(cap) })];
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  CONCEPTNET PLUGINS — structured relations (UsedFor, AtLocation, PartOf,
+//  CapableOf) as a live source, complementing Datamuse's looser triggers.
+//  Same anchor+min-examples discipline as the Datamuse plugins above.
+// ═══════════════════════════════════════════════════
+class ConceptNetSharedRelationPlugin extends RulePlugin {
+  constructor(rel, label, color) {
+    super({ id:`cn${rel}`, name:`Shared "${label}" (ConceptNet)`, description:`Both words are linked to the same concept via "${label}".`, color, confidence:'medium', source:'api', requiresAPI:true, supportsSingle:false });
+    this.rel = rel;
+    this.label = label;
+  }
+  async check(word1, word2) {
+    if (!word2) return [];
+    const [e1, e2] = await Promise.all([ConceptNetClient.edgesFor(word1, this.rel), ConceptNetClient.edgesFor(word2, this.rel)]);
+    const set1 = new Set(e1);
+    const shared = [...new Set(e2.filter(x => set1.has(x)))];
+    if (!shared.length) return [];
+    const anchor = shared[0];
+    const extra = shared.filter(x => x !== anchor && x !== norm(word1) && x !== norm(word2));
+    if (extra.length < MIN_LIVE_EXAMPLES) return [];
+    return [this.makeMatch({
+      categoryName: `${this.label.toUpperCase()}: ${anchor.toUpperCase()}`,
+      ruleDescription: `Both words are related to "${anchor}" via "${this.label}".`,
+      inputWordsFit: `${word1.toUpperCase()} & ${word2.toUpperCase()} both connect to "${anchor.toUpperCase()}" (${this.label})`,
+      otherExamples: extra.slice(0,8).map(cap),
+    })];
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  CUSTOM USER-DEFINED SETS PLUGIN
+// ═══════════════════════════════════════════════════
+class CustomSetPlugin extends SingleWordRulePlugin {
+  constructor() {
+    super({ id:'customSet', name:'Custom User Sets', description:'Your own imported word categories.', color:'orange', confidence:'high', source:'custom' });
+    this.sets = [];
+    this.load();
+  }
+  load() { try { this.sets = JSON.parse(localStorage.getItem('cf_custom_sets_v1') || '[]'); } catch { this.sets = []; } }
+  save() { try { localStorage.setItem('cf_custom_sets_v1', JSON.stringify(this.sets)); } catch {} }
+
+  importSets(jsonObj) {
+    let added = 0;
+    for (const [name, members] of Object.entries(jsonObj)) {
+      if (!Array.isArray(members) || !members.length) continue;
+      this.sets.push({ name: String(name), members: members.map(norm).filter(Boolean) });
+      added++;
+    }
+    this.save();
+    return added;
+  }
+  removeSet(idx) { this.sets.splice(idx, 1); this.save(); }
+  buildLookup() {
+    const lookup = {};
+    for (const s of this.sets) for (const m of s.members) { if (!lookup[m]) lookup[m] = []; lookup[m].push(s); }
+    return lookup;
+  }
+  evaluate(word, w) {
+    const lookup = this.buildLookup();
+    const sets = lookup[w];
+    if (!sets || !sets.length) return [];
+    return sets.map(s => ({ categoryName:`CUSTOM: ${s.name.toUpperCase()}`, ruleDescription:`User-defined category: "${s.name}".`, inputWordsFit:`${word.toUpperCase()} is in your "${s.name}" set`, otherExamples:s.members.filter(m => m !== w).slice(0,6).map(cap) }));
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  REGISTER ALL PLUGINS
+// ═══════════════════════════════════════════════════
+const customSetPlugin = new CustomSetPlugin();
+
+[
+  new AlphabeticalPlugin(),
+  new ReverseAlphabeticalPlugin(),
+  new PalindromePlugin(),
+  new ReversalPlugin(),
+  new HeteronymPlugin(),
+  new HomophonePlugin(),
+  new AcronymPlugin(),
+  new AnagramPlugin(),
+  new SilentLetterPlugin(),
+  new AllVowelsPlugin(),
+  new NoVowelsPlugin(),
+  new SetMembershipPlugin(),
+  new CulturalIconPlugin(),
+  new AffixGroupPlugin(),
+  new LetterChangePlugin(),
+  new LetterRemovalPlugin(),
+  new LetterAdditionPlugin(),
+  new StartsEndsWordPlugin(),
+  new HiddenWordPlugin(),
+  customSetPlugin,
+  new DatamuseSharedSynonymPlugin(),
+  new DatamuseSharedTriggerPlugin(),
+  new DatamuseMeansLikePlugin(),
+  new DatamuseRhymePlugin(),
+  new DatamuseHomophonePlugin(),
+  new ConceptNetSharedRelationPlugin('UsedFor', 'Used For', 'blue'),
+  new ConceptNetSharedRelationPlugin('AtLocation', 'At Location', 'green'),
+  new ConceptNetSharedRelationPlugin('PartOf', 'Part Of', 'orange'),
+  new ConceptNetSharedRelationPlugin('CapableOf', 'Capable Of', 'purple'),
+].forEach(p => registry.register(p));
+
+registry.loadState();
+
+// ═══════════════════════════════════════════════════
+//  SETTINGS DRAWER
+// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+//  API STATUS — surface fetch failures in the UI, not just the console.
+//  Tracked per-service (not one shared flag) so if only one of Datamuse
+//  or ConceptNet is unreachable, the banner says which — rather than
+//  vaguely blaming "Datamuse" for a ConceptNet-specific problem.
+// ═══════════════════════════════════════════════════
+const apiStatus = { datamuse: 'unknown', conceptnet: 'unknown' };
+const API_LABELS = { datamuse: 'Datamuse', conceptnet: 'ConceptNet' };
+
+function renderApiStatusBanner() {
+  const el = document.getElementById('datamuseStatus');
+  if (!el) return;
+  const down = Object.entries(apiStatus).filter(([, v]) => v === 'fail').map(([k]) => API_LABELS[k]);
+  if (!down.length) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = `⚠ Live ${down.join(' and ')} plugin${down.length > 1 ? 's are' : ' rules are'} unreachable right now (network blocked, offline, or this domain isn't allowed from wherever you opened this file). Local rules are unaffected and still run normally.<br><span style="font-size:.75rem">Try serving this from a local web server or your own site instead of opening it directly — browsers restrict outgoing requests from file:// pages, and some APIs don't allow file:// origins even when hosted requests work fine.</span>`;
+}
+
+function markServiceFailure(service) {
+  if (apiStatus[service] === 'fail') return;
+  apiStatus[service] = 'fail';
+  renderApiStatusBanner();
+}
+
+function markServiceOK(service) {
+  if (apiStatus[service] === 'ok') return;
+  apiStatus[service] = 'ok';
+  renderApiStatusBanner();
+}
+
+// Back-compat aliases used by DatamuseClient
+function markDatamuseFailure() { markServiceFailure('datamuse'); }
+function markDatamuseOK() { markServiceOK('datamuse'); }
+
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  renderPluginGrid();
+  renderCustomSetList();
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+}
+
+const SOURCE_LABEL = { local:'local', api:'live api', custom:'custom' };
+
+function renderPluginGrid() {
+  const grid = document.getElementById('pluginGrid');
+  grid.innerHTML = '';
+  for (const [id, plugin] of registry.plugins) {
+    const div = document.createElement('div');
+    div.className = `plugin-item ${plugin.enabled ? '' : 'disabled'}`;
+    div.innerHTML = `
+      <input type="checkbox" ${plugin.enabled ? 'checked' : ''} onchange="registry.toggle('${id}', this.checked); renderPluginGrid();">
+      <div class="plugin-meta">
+        <div class="plugin-name">${plugin.name}</div>
+        <div class="plugin-desc">${plugin.description}</div>
+      </div>
+      <span class="plugin-tag tag-${plugin.source}">${SOURCE_LABEL[plugin.source] || plugin.source}</span>
+    `;
+    grid.appendChild(div);
+  }
+  document.getElementById('pluginStatus').textContent = `${registry.getEnabled().length}/${registry.plugins.size} enabled`;
+}
+
+function renderCustomSetList() {
+  const list = document.getElementById('customSetList');
+  if (!customSetPlugin.sets.length) { list.innerHTML = ''; return; }
+  list.innerHTML = customSetPlugin.sets.map((s, i) =>
+    `<div class="custom-set-row"><span>${s.name} (${s.members.length})</span><button onclick="removeCustomSet(${i})">remove</button></div>`
+  ).join('');
+}
+
+function removeCustomSet(idx) {
+  customSetPlugin.removeSet(idx);
+  renderCustomSetList();
+}
+
+// Handles both the simple {"Category": ["word1","word2"]} shape and the
+// more nested shape common in data repos like dariusk/corpora (an object
+// wrapping further objects/arrays) by flattening any array-of-strings it
+// finds into its own category, named after the path of keys to get there.
+function flattenPackJSON(obj, fallbackName) {
+  const out = {};
+  function walk(node, pathName) {
+    if (Array.isArray(node)) {
+      if (node.length && node.every(x => typeof x === 'string')) {
+        out[pathName || fallbackName] = node;
+      }
+      return;
+    }
+    if (node && typeof node === 'object') {
+      for (const k of Object.keys(node)) {
+        walk(node[k], pathName ? `${pathName} — ${cap(k)}` : cap(k));
+      }
+    }
+  }
+  walk(obj, '');
+  return out;
+}
+
+function deriveNameFromUrl(url) {
+  try {
+    const file = url.split('/').filter(Boolean).pop().replace(/\.json$/i, '');
+    return file.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Imported Pack';
+  } catch { return 'Imported Pack'; }
+}
+
+// Silently checks for a "packs.json" manifest next to this file (same
+// directory) and auto-imports any packs it lists. Shape can be either
+// {"packs": ["mcu-characters.json", "..."]} or a plain array of filenames.
+// This is entirely optional — if packs.json isn't there, or can't be
+// fetched (e.g. this page was opened directly as file:// rather than
+// served over http/https), it just quietly does nothing.
+async function autoLoadPacksManifest() {
+  try {
+    const res = await fetch('./packs.json');
+    if (!res.ok) return;
+    const data = await res.json();
+    const files = Array.isArray(data) ? data : (Array.isArray(data.packs) ? data.packs : []);
+    if (!files.length) return;
+
+    let totalAdded = 0;
+    for (const file of files) {
+      try {
+        const r2 = await fetch(file);
+        if (!r2.ok) continue;
+        const raw = await r2.json();
+        const flattened = flattenPackJSON(raw, deriveNameFromUrl(file));
+        totalAdded += customSetPlugin.importSets(flattened);
+      } catch (e) {
+        console.warn(`Couldn't auto-load pack "${file}":`, e);
+      }
+    }
+    if (totalAdded) {
+      const msg = document.getElementById('importMsg');
+      if (msg) { msg.textContent = `Auto-loaded ${totalAdded} categor${totalAdded === 1 ? 'y' : 'ies'} from packs.json.`; msg.className = 'import-msg ok'; }
+    }
+  } catch (e) {
+    // No packs.json present, or it's unreachable (e.g. file:// restrictions) — this is fine, it's opt-in.
+    console.warn('No packs.json manifest found (optional feature):', e);
+  }
+}
+
+async function importCustomSetsFromURL() {
+  const url = document.getElementById('customSetUrlInput').value.trim();
+  const msg = document.getElementById('importMsg');
+  if (!url) { msg.textContent = 'Paste a URL first.'; msg.className = 'import-msg err'; return; }
+  msg.textContent = 'Fetching…';
+  msg.className = 'import-msg';
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.json();
+    const flattened = (Array.isArray(raw) || (typeof raw === 'object' && raw !== null))
+      ? flattenPackJSON(raw, deriveNameFromUrl(url))
+      : {};
+    const added = customSetPlugin.importSets(flattened);
+    if (!added) throw new Error('No array-of-words categories found in that JSON.');
+    msg.textContent = `Imported ${added} categor${added === 1 ? 'y' : 'ies'} from URL.`;
+    msg.className = 'import-msg ok';
+    document.getElementById('customSetUrlInput').value = '';
+    renderCustomSetList();
+  } catch (e) {
+    msg.textContent = `Couldn't load that URL: ${e.message}`;
+    msg.className = 'import-msg err';
+  }
+}
+
+function importCustomSets() {
+  const raw = document.getElementById('customSetInput').value.trim();
+  const msg = document.getElementById('importMsg');
+  if (!raw) { msg.textContent = 'Paste some JSON first.'; msg.className = 'import-msg err'; return; }
+  try {
+    const obj = JSON.parse(raw);
+    if (typeof obj !== 'object' || Array.isArray(obj)) throw new Error('Expected a JSON object of {"Category Name": ["word1","word2"]}');
+    const added = customSetPlugin.importSets(obj);
+    msg.textContent = `Imported ${added} categor${added === 1 ? 'y' : 'ies'}.`;
+    msg.className = 'import-msg ok';
+    document.getElementById('customSetInput').value = '';
+    renderCustomSetList();
+  } catch (e) {
+    msg.textContent = `Couldn't parse that: ${e.message}`;
+    msg.className = 'import-msg err';
+  }
+}
+
+function clearApiCache() {
+  CacheManager.clear();
+  const msg = document.getElementById('importMsg');
+  msg.textContent = 'API cache cleared.';
+  msg.className = 'import-msg ok';
+}
+
+// ═══════════════════════════════════════════════════
+//  DYNAMIC FIELDS — one field grows to N as you fill them in
+// ═══════════════════════════════════════════════════
+const API_PAIR_THRESHOLD = 300;
+const FIELD_PLACEHOLDERS = ["GREED\nWRATH\nSLOTH\nENVY", "PRIDE\nGLUTTONY\nLUST\nMARS"];
+
+function fieldsContainerEl() { return document.getElementById('fieldsContainer'); }
+
+function addFieldElement(idx) {
+  const container = fieldsContainerEl();
+  const div = document.createElement('div');
+  div.className = 'bulk-field';
+  const placeholder = FIELD_PLACEHOLDERS[idx] || 'more words…';
+  div.innerHTML = `<label>Field ${idx + 1} <span>— one word or phrase per line</span></label><textarea class="bulk-textarea" id="field${idx}" placeholder="${placeholder}"></textarea>`;
+  container.appendChild(div);
+  div.querySelector('textarea').addEventListener('input', onFieldInput);
+}
+
+function ensureFieldCount(n) {
+  const container = fieldsContainerEl();
+  while (container.children.length < n) addFieldElement(container.children.length);
+  while (container.children.length > n) container.removeChild(container.lastElementChild);
+}
+
+function maintainFields() {
+  const textareas = [...fieldsContainerEl().querySelectorAll('textarea')];
+  let lastNonEmpty = -1;
+  textareas.forEach((t, i) => { if (t.value.trim()) lastNonEmpty = i; });
+  ensureFieldCount(lastNonEmpty === -1 ? 1 : lastNonEmpty + 2);
+}
+
+function onFieldInput() {
+  maintainFields();
+  updatePairEstimate();
+}
+
+function getFieldLists() {
+  return [...fieldsContainerEl().querySelectorAll('textarea')]
+    .map(t => [...new Set(t.value.split('\n').map(w => w.trim()).filter(Boolean))]);
+}
+
+function updatePairEstimate() {
+  const lists = getFieldLists();
+  const nonEmpty = lists.filter(l => l.length);
+  const warningEl = document.getElementById('pairWarning');
+  if (nonEmpty.length < 2) { warningEl.style.display = 'none'; return; }
+
+  let totalPairs = 0, combos = 0;
+  for (let i = 0; i < nonEmpty.length; i++) {
+    for (let j = i + 1; j < nonEmpty.length; j++) {
+      totalPairs += nonEmpty[i].length * nonEmpty[j].length;
+      combos++;
+    }
+  }
+
+  if (totalPairs > API_PAIR_THRESHOLD) {
+    warningEl.style.display = '';
+    warningEl.innerHTML = `⚠ ~${totalPairs} pairs across ${combos} field-combination${combos !== 1 ? 's' : ''}. Live Datamuse plugins will be skipped this run to stay fast — local rules still run in full.
+      <label><input type="checkbox" id="forceApiCheckbox"> Include live plugins anyway (slower)</label>`;
+  } else {
+    warningEl.style.display = 'none';
+  }
+}
+
+ensureFieldCount(1);
+autoLoadPacksManifest();
+
+// ═══════════════════════════════════════════════════
+//  RENDER HELPERS
+// ═══════════════════════════════════════════════════
+let allResults = [];
+let currentFilter = 'all';
+let currentRenderMode = 'pairs'; // 'single' | 'pairs'
+
+function applyFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.f === f));
+  renderCards();
+}
+
+function renderFilters(results) {
+  const colorCounts = {};
+  results.forEach(r => { colorCounts[r.color] = (colorCounts[r.color] || 0) + 1; });
+  const highCount = results.filter(r => r.confidence === 'high').length;
+
+  const filters = [
+    { f:'all',  label:`All (${results.length})` },
+    { f:'high', label:`⬤ Strong (${highCount})` },
+    ...COLOR_ORDER.filter(c => colorCounts[c]).map(c => ({ f:c, label:`${cap(c)} (${colorCounts[c]})` })),
+  ];
+  return `<div class="filter-row"><span class="filter-label">Filter:</span>${filters.map(f => `<button class="filter-btn${f.f==='all'?' active':''}" data-f="${f.f}" onclick="applyFilter('${f.f}')">${f.label}</button>`).join('')}</div>`;
+}
+
+function srcBadge(cat) {
+  if (!cat.source || cat.source === 'local') return '';
+  return `<span class="src-badge">${cat.source === 'api' ? 'live' : 'custom'}</span>`;
+}
+
+function renderBulkCard(cat) {
+  const pairChips = cat.pairs.map(p => `<span class="pair-chip">${p.w1.toUpperCase()} + ${p.w2.toUpperCase()}</span>`).join('');
+  const pairCount = cat.pairs.length;
+  return `<div class="card c-${cat.color}">
+    <div class="card-top">
+      <div class="card-meta">
+        <span class="cat-name">${cat.categoryName}</span>
+        <div class="card-right">
+          ${srcBadge(cat)}
+          <span class="pair-badge">${pairCount} pair${pairCount !== 1 ? 's' : ''}</span>
+          <span class="conf"><span class="conf-dot" style="background:${CONF_COLORS[cat.confidence]}"></span>${cap(cat.confidence)}</span>
+        </div>
+      </div>
+      <div class="rule-desc">${cat.ruleDescription}</div>
+    </div>
+    <div class="card-body">
+      <div class="pair-chips">${pairChips}</div>
+      <div class="pills">${cat.otherExamples.map(e => `<span class="pill">${e}</span>`).join('')}</div>
+    </div>
+  </div>`;
+}
+
+function renderItemCard(cat) {
+  const chips = cat.items.map(w => `<span class="pair-chip">${w.toUpperCase()}</span>`).join('');
+  const n = cat.items.length;
+  return `<div class="card c-${cat.color}">
+    <div class="card-top">
+      <div class="card-meta">
+        <span class="cat-name">${cat.categoryName}</span>
+        <div class="card-right">
+          ${srcBadge(cat)}
+          <span class="pair-badge">${n} word${n !== 1 ? 's' : ''}</span>
+          <span class="conf"><span class="conf-dot" style="background:${CONF_COLORS[cat.confidence]}"></span>${cap(cat.confidence)}</span>
+        </div>
+      </div>
+      <div class="rule-desc">${cat.ruleDescription}</div>
+    </div>
+    <div class="card-body">
+      <div class="pair-chips">${chips}</div>
+      <div class="pills">${cat.otherExamples.map(e => `<span class="pill">${e}</span>`).join('')}</div>
+    </div>
+  </div>`;
+}
+
+function renderCards() {
+  const filtered = currentFilter === 'all' ? allResults
+    : currentFilter === 'high' ? allResults.filter(r => r.confidence === 'high')
+    : allResults.filter(r => r.color === currentFilter);
+
+  document.getElementById('resultCount').textContent =
+    `${filtered.length} categor${filtered.length === 1 ? 'y' : 'ies'}${currentFilter !== 'all' ? ' (filtered)' : ''}`;
+
+  const grid = document.getElementById('cardGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results">No categories match this filter.</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(cat => currentRenderMode === 'single' ? renderItemCard(cat) : renderBulkCard(cat)).join('');
+}
+
+function renderResults(words, results, modeType, totalCount, skippedAPI) {
+  allResults = results;
+  currentFilter = 'all';
+  currentRenderMode = modeType;
+
+  let summaryHtml = '';
+  if (modeType === 'single') {
+    const wordTags = words.map(w => `<span class="word-tag">${w.toUpperCase()}</span>`).join('');
+    summaryHtml = `<div class="words-display">${wordTags}</div><p class="bulk-hint">Showing every category each individual word could belong to — nothing is cross-referenced yet. Add a second field to start comparing.</p>`;
+  } else {
+    const totalMatchingPairs = new Set(results.flatMap(r => r.pairs.map(p => p.w1 + '|' + p.w2))).size;
+    summaryHtml = `<div class="bulk-summary"><strong>${results.length} connection${results.length !== 1 ? 's' : ''}</strong> found across <strong>${totalMatchingPairs}</strong> of ${totalCount} possible pair${totalCount !== 1 ? 's' : ''}.<br><span style="font-size:.85rem;color:var(--muted)">Sorted by number of matching pairs, most to least.${skippedAPI ? ' Live API plugins were skipped for this run.' : ''}</span></div>`;
+  }
+
+  document.getElementById('output').innerHTML = `
+    ${summaryHtml}
+    ${renderFilters(results)}
+    <div class="result-count" id="resultCount">${results.length} categories found</div>
+    <div class="cards" id="cardGrid"></div>
+  `;
+  renderCards();
+}
+
+// ═══════════════════════════════════════════════════
+//  ANALYSIS — single field, or every pair of filled fields
+// ═══════════════════════════════════════════════════
+function setProgress(done, total, label) {
+  const section = document.getElementById('progressSection');
+  section.style.display = 'flex';
+  document.getElementById('progressFill').style.width = `${total ? Math.min(100, Math.round(done / total * 100)) : 0}%`;
+  document.getElementById('progressLabel').textContent = label;
+}
+function hideProgress() {
+  document.getElementById('progressSection').style.display = 'none';
+}
+
+function resetFields() {
+  ensureFieldCount(1);
+  const first = document.getElementById('field0');
+  if (first) first.value = '';
+  document.getElementById('pairWarning').style.display = 'none';
+  hideProgress();
+  document.getElementById('output').innerHTML = '<div class="empty-state">Enter words above to get started.</div>';
+  allResults = [];
+  currentFilter = 'all';
+}
+
+async function analyzeSingleList(list, onProgress) {
+  const categoryMap = new Map();
+  let done = 0;
+  for (const w of list) {
+    if (!norm(w)) { done++; continue; }
+    const results = await registry.analyze([w]);
+    for (const r of results) {
+      if (!categoryMap.has(r.categoryName)) {
+        categoryMap.set(r.categoryName, { categoryName:r.categoryName, ruleDescription:r.ruleDescription, color:r.color, confidence:r.confidence, otherExamples:r.otherExamples, source:r.source, items: [] });
+      }
+      categoryMap.get(r.categoryName).items.push(w);
+    }
+    done++;
+    if (onProgress) onProgress(done, list.length);
+  }
+  const results = [...categoryMap.values()].sort((a, b) => {
+    if (b.items.length !== a.items.length) return b.items.length - a.items.length;
+    return COLOR_ORDER.indexOf(a.color) - COLOR_ORDER.indexOf(b.color);
+  });
+  return { results };
+}
+
+async function analyzeAll() {
+  const lists = getFieldLists();
+  const nonEmptyIdx = [];
+  lists.forEach((l, i) => { if (l.length) nonEmptyIdx.push(i); });
+  if (nonEmptyIdx.length === 0) return;
+
+  const forceCheckbox = document.getElementById('forceApiCheckbox');
+  const forceLive = !!(forceCheckbox && forceCheckbox.checked);
+
+  document.getElementById('bulkBtn').disabled = true;
+  document.getElementById('bulkBtn').textContent = 'Analyzing…';
+
+  try {
+    if (nonEmptyIdx.length === 1) {
+      const list = lists[nonEmptyIdx[0]];
+      setProgress(0, list.length, `Checking ${list.length} word${list.length !== 1 ? 's' : ''} individually…`);
+      const { results } = await analyzeSingleList(list, (done, total) => setProgress(done, total, `Checked ${done} of ${total} words…`));
+      hideProgress();
+      if (!results.length) {
+        document.getElementById('output').innerHTML = `<div class="empty-state">No categories found for any of these words.<br>Could be a candidate for a new rule plugin.</div>`;
+      } else {
+        renderResults(list, results, 'single', list.length, false);
+      }
+    } else {
+      const combos = [];
+      for (let a = 0; a < nonEmptyIdx.length; a++)
+        for (let b = a + 1; b < nonEmptyIdx.length; b++)
+          combos.push([nonEmptyIdx[a], nonEmptyIdx[b]]);
+
+      let totalPairs = 0;
+      combos.forEach(([i, j]) => { totalPairs += lists[i].length * lists[j].length; });
+      const skipAPI = forceLive ? false : totalPairs > API_PAIR_THRESHOLD;
+
+      const merged = new Map();
+      let doneBefore = 0;
+      for (const [i, j] of combos) {
+        const comboTotal = lists[i].length * lists[j].length;
+        setProgress(doneBefore, totalPairs, `Field ${i + 1} × Field ${j + 1}…`);
+        const { results } = await registry.analyzeBulk(lists[i], lists[j], {
+          skipAPI,
+          onProgress: (done) => setProgress(doneBefore + done, totalPairs, `Field ${i + 1} × Field ${j + 1}: pair ${done} of ${comboTotal}…`),
+        });
+        for (const r of results) {
+          if (!merged.has(r.categoryName)) merged.set(r.categoryName, { ...r, pairs: [...r.pairs] });
+          else merged.get(r.categoryName).pairs.push(...r.pairs);
+        }
+        doneBefore += comboTotal;
+      }
+      hideProgress();
+
+      const finalResults = [...merged.values()].sort((a, b) => {
+        if (b.pairs.length !== a.pairs.length) return b.pairs.length - a.pairs.length;
+        return COLOR_ORDER.indexOf(a.color) - COLOR_ORDER.indexOf(b.color);
+      });
+
+      if (!finalResults.length) {
+        document.getElementById('output').innerHTML = `<div class="empty-state">No shared connections found across any of the ${totalPairs} pairs checked (${combos.length} field-combination${combos.length !== 1 ? 's' : ''}).<br>Try a more focused list.</div>`;
+      } else {
+        renderResults(nonEmptyIdx.flatMap(i => lists[i]), finalResults, 'pairs', totalPairs, skipAPI);
+      }
+    }
+  } catch (e) {
+    hideProgress();
+    document.getElementById('output').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+  document.getElementById('bulkBtn').disabled = false;
+  document.getElementById('bulkBtn').textContent = 'Find Connections';
+}
+</script>
+</body>
+</html>
