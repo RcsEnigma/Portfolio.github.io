@@ -1,4 +1,21 @@
 {
+  "MCU Characters": [
+    "Iron Man", "Thor", "Hulk", "Black Widow", "Hawkeye", "Captain America",
+    "Nick Fury", "Loki", "War Machine", "Pepper Potts", "Spider Man",
+    "Black Panther", "Shuri", "Okoye", "Scarlet Witch", "Vision", "Quicksilver",
+    "Falcon", "Winter Soldier", "Ant Man", "Wasp", "Hank Pym", "Janet Van Dyne",
+    "Captain Marvel", "Star Lord", "Gamora", "Drax", "Rocket Raccoon", "Groot",
+    "Nebula", "Mantis", "Yondu", "Doctor Strange", "Wong", "Maria Hill",
+    "Phil Coulson", "Thanos", "Ultron", "Ego", "Ronan", "Killmonger",
+    "Vulture", "Mysterio", "Zemo", "Kingpin", "Kang", "Sylvie", "Mobius",
+    "Shang Chi", "Wenwu", "Ms Marvel", "America Chavez", "Sersi", "Ikaris",
+    "Sprite", "Kingo", "Phastos", "Makkari", "Druig", "Ajak", "Gilgamesh",
+    "Namor", "Ironheart", "Yelena Belova", "Moon Knight", "Marc Spector",
+    "Steven Grant", "Agatha Harkness", "Daredevil", "Matt Murdock", "Tony Stark",
+    "Steve Rogers", "Bruce Banner", "Natasha Romanoff", "Clint Barton",
+    "Peter Parker", "T Challa", "Wanda Maximoff", "Sam Wilson", "Bucky Barnes",
+    "Scott Lang", "Hope Van Dyne", "Carol Danvers", "Peter Quill", "Stephen Strange"
+  ],
   "Oscar Best Picture Winners": [
     "Wings", "The Broadway Melody", "All Quiet on the Western Front", "Cimarron",
     "Grand Hotel", "Cavalcade", "It Happened One Night", "Mutiny on the Bounty",
@@ -8,7 +25,7 @@
     "Gentlemans Agreement", "Hamlet", "All the Kings Men", "All About Eve",
     "An American in Paris", "The Greatest Show on Earth", "From Here to Eternity",
     "On the Waterfront", "Marty", "Around the World in 80 Days",
-    "The Bridge on the River Kwai", "Gigi", "BenHur", "The Apartment",
+    "The Bridge on the River Kwai", "Gigi", "Ben Hur", "The Apartment",
     "West Side Story", "Lawrence of Arabia", "Tom Jones", "My Fair Lady",
     "The Sound of Music", "A Man for All Seasons", "In the Heat of the Night",
     "Oliver", "Midnight Cowboy", "Patton", "The French Connection",

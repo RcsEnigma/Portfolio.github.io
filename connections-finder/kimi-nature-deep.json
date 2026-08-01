@@ -1,0 +1,120 @@
+{
+  "Volcanic Rock Types": [
+    "obsidian",
+    "pumice",
+    "basalt",
+    "andesite",
+    "rhyolite",
+    "tuff",
+    "scoria",
+    "dacite",
+    "komatiite",
+    "pegmatite"
+  ],
+  "Soil Orders": [
+    "alfisol",
+    "andisol",
+    "aridisol",
+    "entisol",
+    "gelisol",
+    "histosol",
+    "inceptisol",
+    "mollisol",
+    "oxisol",
+    "spodosol",
+    "ultisol",
+    "vertisol"
+  ],
+  "Symbiotic Relationships": [
+    "mutualism",
+    "commensalism",
+    "parasitism",
+    "predation",
+    "competition",
+    "neutralism",
+    "amensalism",
+    "synergism"
+  ],
+  "Blood Cell Types": [
+    "erythrocyte",
+    "neutrophil",
+    "eosinophil",
+    "basophil",
+    "lymphocyte",
+    "monocyte",
+    "thrombocyte",
+    "macrophage"
+  ],
+  "Neuron Types": [
+    "sensory",
+    "motor",
+    "interneuron",
+    "pyramidal",
+    "purkinje",
+    "bipolar",
+    "multipolar",
+    "pseudounipolar",
+    "mirror",
+    "chandelier"
+  ],
+  "Biomolecule Classes": [
+    "carbohydrate",
+    "lipid",
+    "protein",
+    "nucleic acid",
+    "enzyme",
+    "hormone",
+    "steroid",
+    "alkaloid",
+    "terpene",
+    "flavonoid"
+  ],
+  "Reproductive Strategies": [
+    "asexual",
+    "sexual",
+    "budding",
+    "binary fission",
+    "fragmentation",
+    "parthenogenesis",
+    "regeneration",
+    "sporulation",
+    "conjugation",
+    "hermaphroditism"
+  ],
+  "Ecosystem Classifications": [
+    "freshwater",
+    "marine",
+    "terrestrial",
+    "lentic",
+    "lotic",
+    "intertidal",
+    "pelagic",
+    "benthic",
+    "abyssal",
+    "estuarine"
+  ],
+  "Fossil Categories": [
+    "amber",
+    "mold",
+    "cast",
+    "trace",
+    "body",
+    "petrified",
+    "carbon film",
+    "coprolite",
+    "gastrolith",
+    "ichnofossil"
+  ],
+  "Tectonic Plate Boundaries": [
+    "divergent",
+    "convergent",
+    "transform",
+    "subduction",
+    "collision",
+    "spreading ridge",
+    "trench",
+    "hotspot",
+    "rift valley",
+    "accretionary wedge"
+  ]
+}
