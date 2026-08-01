@@ -1,0 +1,16 @@
+{
+  "Subatomic Particles": ["quark", "lepton", "boson", "fermion", "neutrino", "gluon", "photon", "muon"],
+  "Geological Periods": ["cambrian", "ordovician", "silurian", "devonian", "carboniferous", "permian", "triassic", "jurassic", "cretaceous", "paleogene"],
+  "Taxonomic Ranks": ["domain", "kingdom", "phylum", "class", "order", "family", "genus", "species"],
+  "Cell Organelles": ["nucleus", "mitochondria", "ribosome", "lysosome", "golgi apparatus", "endoplasmic reticulum", "chloroplast", "vacuole"],
+  "Programming Paradigms": ["object oriented", "functional", "procedural", "declarative", "logic", "event driven", "imperative"],
+  "Cryptography Algorithms": ["aes", "rsa", "blowfish", "twofish", "des", "md5", "sha", "elliptic curve"],
+  "Logical Fallacies": ["ad hominem", "straw man", "slippery slope", "false dilemma", "red herring", "tu quoque", "post hoc", "circular reasoning"],
+  "Poetic Meters": ["iambic", "trochaic", "anapestic", "dactylic", "spondaic", "pyrrhic"],
+  "Architectural Orders": ["doric", "ionic", "corinthian", "tuscan", "composite"],
+  "Book Binding Types": ["perfect", "saddle stitch", "coptic", "spiral", "wire o", "case binding", "smyth sewn", "thermal"],
+  "Theatrical Stages": ["proscenium", "thrust", "arena", "black box", "traverse", "profile"],
+  "Mythological Monsters": ["minotaur", "chimera", "hydra", "gorgon", "cerberus", "sphinx", "manticore", "basilisk"],
+  "Literary Devices": ["foreshadowing", "flashback", "motif", "allegory", "irony", "juxtaposition", "foil", "satire"],
+  "Classic Pigments": ["ultramarine", "ochre", "sienna", "umber", "titanium white", "crimson", "cadmium", "cobalt"]
+}

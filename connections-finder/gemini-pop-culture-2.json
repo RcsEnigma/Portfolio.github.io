@@ -1,0 +1,18 @@
+{
+  "One-Hit Wonders": ["Ice Ice Baby", "Mambo Number Five", "Tainted Love", "The Macarena", "Tubthumping", "Take On Me", "Come On Eileen", "Stacy's Mom", "Cotton Eye Joe", "Who Let The Dogs Out"],
+  "Olympic Track Events": ["Pole Vault", "High Jump", "Triple Jump", "Long Jump", "Shot Put", "Discus Throw", "Hammer Throw", "Javelin Throw", "Relay Race", "Steeplechase"],
+  "Oscar Best Pictures": ["Forrest Gump", "The Godfather", "Schindler's List", "Parasite", "Moonlight", "Gladiator", "Titanic", "Braveheart", "Rocky", "Slumdog Millionaire"],
+  "Video Game Franchises": ["Super Mario", "Final Fantasy", "Resident Evil", "Call of Duty", "The Legend of Zelda", "Grand Theft Auto", "Tomb Raider", "Street Fighter", "Mortal Kombat", "Animal Crossing"],
+  "Reality TV Shows": ["The Amazing Race", "Big Brother", "Top Chef", "Project Runway", "American Idol", "The Real Housewives", "Love Island", "RuPaul's Drag Race", "Hell's Kitchen", "Survivor"],
+  "Famous Sports Trophies": ["Stanley Cup", "Vince Lombardi Trophy", "Commissioner's Trophy", "Claret Jug", "Larry O'Brien Trophy", "FIFA World Cup", "Webb Ellis Cup", "Ryder Cup", "Heisman Trophy", "Borg-Warner Trophy"],
+  "Iconic Movie Quotes": ["I'll be back", "May the Force be with you", "Here's looking at you kid", "You can't handle the truth", "I am your father", "There's no place like home", "Show me the money", "I see dead people"],
+  "Music Theory Terms": ["Time Signature", "Key Signature", "Treble Clef", "Bass Clef", "Sheet Music", "Whole Note", "Half Rest", "Chord Progression"],
+  "Basketball Fouls": ["Personal Foul", "Technical Foul", "Flagrant Foul", "Charging Foul", "Blocking Foul", "Shooting Foul", "Loose Ball Foul", "Intentional Foul"],
+  "Internet Slang": ["Spill the tea", "Throw shade", "No cap", "Main character energy", "Touch grass", "Rent free", "Vibe check", "Girl math", "Side eye"],
+  "Late Night Hosts": ["Johnny Carson", "David Letterman", "Conan O'Brien", "Jay Leno", "Jimmy Fallon", "Jimmy Kimmel", "Stephen Colbert", "Seth Meyers", "Craig Ferguson", "Jon Stewart"],
+  "Tabletop Games": ["Dungeons and Dragons", "Settlers of Catan", "Ticket to Ride", "Cards Against Humanity", "Betrayal at House on the Hill", "Twilight Imperium", "Arkham Horror", "Secret Hitler"],
+  "Classic Board Games": ["Monopoly", "Scrabble", "Trivial Pursuit", "Chutes and Ladders", "Candy Land", "The Game of Life", "Battleship", "Hungry Hungry Hippos"],
+  "Famous Concert Venues": ["Madison Square Garden", "Red Rocks Amphitheatre", "The Hollywood Bowl", "Royal Albert Hall", "Sydney Opera House", "Radio City Music Hall", "Wembley Stadium", "The Fillmore"],
+  "Wrestling Pay-Per-Views": ["WrestleMania", "Royal Rumble", "SummerSlam", "Survivor Series", "Money in the Bank", "Hell in a Cell", "Elimination Chamber", "Clash of the Champions"],
+  "Album of the Year Winners": ["Rumours", "Thriller", "Random Access Memories", "The Bodyguard", "Fearless", "Golden Hour", "Morning Phase", "Speakerboxxx", "Supernatural", "Jagged Little Pill"]
+}

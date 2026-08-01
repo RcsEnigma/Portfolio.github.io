@@ -2,6 +2,10 @@
   "packs": [
     "mcu-characters.json",
     "oscar-best-picture-winners.json",
-    "gemini-lists"
+    "gemini-lists",
+    "gemini-pop-culture",
+    "gemini-pop-culture-2",
+    "gemini-specialization",
+    "gemini-specialization-2"
   ]
 }
