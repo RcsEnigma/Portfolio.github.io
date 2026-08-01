@@ -1,6 +1,7 @@
 {
   "packs": [
     "mcu-characters.json",
-    "oscar-best-picture-winners.json"
+    "oscar-best-picture-winners.json",
+    "gemini-lists"
   ]
 }

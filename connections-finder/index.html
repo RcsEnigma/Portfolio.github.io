@@ -137,6 +137,20 @@
   .custom-set-row { display: flex; align-items: center; justify-content: space-between; font-size: .78rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 5px 9px; }
   .custom-set-row button { background: none; border: none; color: #a02a2a; cursor: pointer; font-size: .75rem; }
 
+  /* Random Loop generator */
+  .loop-toolbar { display: flex; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .loop-toolbar .settings-btn, .loop-toolbar .analyze-btn { width: auto; }
+  .loop-generate-btn { padding: 0 22px; }
+  .loop-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 1.25rem; }
+  .loop-legend-item { display: flex; align-items: center; gap: 7px; font-size: .85rem; }
+  .loop-swatch { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+  .loop-legend-label { font-weight: bold; }
+  .loop-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 560px; }
+  .loop-cell { border: 1.5px solid var(--border); border-radius: 10px; padding: 16px 10px; text-align: center; font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; background: var(--surface); font-size: .9rem; }
+  .loop-hook { font-weight: bold; background: #fff3c4; border-color: #e0c76a; }
+  .loop-empty { border: none; background: transparent; }
+  .loop-fail { font-style: italic; color: var(--muted); padding: 2rem 0; text-align: center; }
+
   @media (max-width: 900px) {
     .layout { flex-direction: column; }
     .sidebar { width: 100%; position: static; }
@@ -158,6 +172,7 @@
 
     <button class="settings-btn" onclick="openDrawer()">⚙ Rules &amp; Plugins</button>
     <button class="settings-btn" onclick="resetFields()">⟲ Reset All Fields</button>
+    <button class="settings-btn" onclick="showLoopView()">🎲 Random Loop</button>
 
     <div class="progress-section" id="progressSection">
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -172,8 +187,17 @@
   </aside>
 
   <main class="main-content">
-    <div class="bulk-fields" id="fieldsContainer"></div>
-    <div id="output"><div class="empty-state">Enter words above to get started.</div></div>
+    <div id="finderView">
+      <div class="bulk-fields" id="fieldsContainer"></div>
+      <div id="output"><div class="empty-state">Enter words above to get started.</div></div>
+    </div>
+    <div id="loopView" style="display:none">
+      <div class="loop-toolbar">
+        <button class="settings-btn" onclick="showFinderView()">← Back to Finder</button>
+        <button class="analyze-btn loop-generate-btn" onclick="renderNewLoop()">🎲 Generate Another</button>
+      </div>
+      <div id="loopContent"></div>
+    </div>
   </main>
 </div>
 
@@ -916,6 +940,38 @@ const VOCAB_BY_LENGTH = new Map();
   for (const [catg, wordSet] of Object.entries(WORD_CATEGORIES)) add(catg, [...wordSet]);
 })();
 
+// ═══════════════════════════════════════════════════
+//  CATEGORY POOL — a flat list of {name, members[]} combining NAMED_SETS
+//  and WORD_CATEGORIES, plus a reverse index (word -> categories it's in).
+//  Used by the random loop generator below to answer "what else does this
+//  word belong to?" quickly, without re-scanning everything each time.
+// ═══════════════════════════════════════════════════
+const CATEGORY_POOL = [];
+for (const s of NAMED_SETS) if (s.members.length >= 4) CATEGORY_POOL.push({ name: s.name, members: [...new Set(s.members)] });
+for (const [name, wordSet] of Object.entries(WORD_CATEGORIES)) if (wordSet.size >= 4) CATEGORY_POOL.push({ name, members: [...wordSet] });
+
+const MEMBERSHIP_INDEX = new Map();
+CATEGORY_POOL.forEach((cat, idx) => {
+  for (const m of cat.members) {
+    if (!MEMBERSHIP_INDEX.has(m)) MEMBERSHIP_INDEX.set(m, []);
+    MEMBERSHIP_INDEX.get(m).push(idx);
+  }
+});
+
+function categoriesContaining(word, excludeIdx = new Set()) {
+  const idxs = MEMBERSHIP_INDEX.get(norm(word)) || [];
+  return idxs.filter(i => !excludeIdx.has(i)).map(i => CATEGORY_POOL[i]);
+}
+
+function shuffled(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 // Finds OTHER members of the same target category that some word in our
 // own vocabulary genuinely transforms into via the same one-letter rule —
 // e.g. for "drop one letter -> Keyboard Keys", this looks for some other
@@ -1526,10 +1582,24 @@ class HiddenWordPlugin extends SingleWordRulePlugin {
 // bar this whole thing is about.
 const MIN_LIVE_EXAMPLES = 1;
 
+// Bounds how many of a word's own relations (synonyms, triggers, etc.) we
+// turn into candidate categories in single-field mode, so one word with a
+// huge Datamuse result list doesn't spam dozens of one-off categories.
+const SINGLE_MODE_RELATION_CAP = 15;
+
 class DatamuseSharedSynonymPlugin extends RulePlugin {
-  constructor() { super({ id:'dmSharedSynonyms', name:'Shared Synonyms (Datamuse)', description:'Both words are synonyms of a common word.', color:'green', confidence:'medium', source:'api', requiresAPI:true, supportsSingle:false }); }
+  constructor() { super({ id:'dmSharedSynonyms', name:'Shared Synonyms (Datamuse)', description:'Both words are synonyms of a common word.', color:'green', confidence:'medium', source:'api', requiresAPI:true }); }
   async check(word1, word2) {
-    if (!word2) return [];
+    if (!word2) {
+      const list = await DatamuseClient.synonyms(word1);
+      const w1n = norm(word1);
+      return list.filter(x => x.word !== w1n).slice(0, SINGLE_MODE_RELATION_CAP).map(x => this.makeMatch({
+        categoryName: `SHARED SYNONYM: ${x.word.toUpperCase()}`,
+        ruleDescription: `Both words are synonyms of "${x.word}".`,
+        inputWordsFit: `${word1.toUpperCase()} is a synonym of "${x.word.toUpperCase()}"`,
+        otherExamples: [],
+      }));
+    }
     const [syn1, syn2] = await Promise.all([DatamuseClient.synonyms(word1), DatamuseClient.synonyms(word2)]);
     const map1 = new Set(syn1.map(x => x.word));
     const shared = [...new Set(syn2.filter(x => map1.has(x.word)).map(x => x.word))];
@@ -1544,9 +1614,18 @@ class DatamuseSharedSynonymPlugin extends RulePlugin {
 }
 
 class DatamuseSharedTriggerPlugin extends RulePlugin {
-  constructor() { super({ id:'dmSharedTriggers', name:'Shared Associations (Datamuse)', description:'Statistically co-occur with the same concept.', color:'blue', confidence:'medium', source:'api', requiresAPI:true, supportsSingle:false }); }
+  constructor() { super({ id:'dmSharedTriggers', name:'Shared Associations (Datamuse)', description:'Statistically co-occur with the same concept.', color:'blue', confidence:'medium', source:'api', requiresAPI:true }); }
   async check(word1, word2) {
-    if (!word2) return [];
+    if (!word2) {
+      const list = await DatamuseClient.triggers(word1);
+      const w1n = norm(word1);
+      return list.filter(x => x.word !== w1n).slice(0, SINGLE_MODE_RELATION_CAP).map(x => this.makeMatch({
+        categoryName: `SHARED ASSOCIATION: ${x.word.toUpperCase()}`,
+        ruleDescription: `Both words are statistically associated with "${x.word}".`,
+        inputWordsFit: `${word1.toUpperCase()} evokes "${x.word.toUpperCase()}"`,
+        otherExamples: [],
+      }));
+    }
     const [t1, t2] = await Promise.all([DatamuseClient.triggers(word1), DatamuseClient.triggers(word2)]);
     const map1 = new Set(t1.map(x => x.word));
     const shared = [...new Set(t2.filter(x => map1.has(x.word)).map(x => x.word))];
@@ -1559,9 +1638,18 @@ class DatamuseSharedTriggerPlugin extends RulePlugin {
 }
 
 class DatamuseMeansLikePlugin extends RulePlugin {
-  constructor() { super({ id:'dmMeansLike', name:'Shared Loose Meaning (Datamuse)', description:'Both words share a loose/fuzzy meaning match.', color:'green', confidence:'low', source:'api', requiresAPI:true, supportsSingle:false }); }
+  constructor() { super({ id:'dmMeansLike', name:'Shared Loose Meaning (Datamuse)', description:'Both words share a loose/fuzzy meaning match.', color:'green', confidence:'low', source:'api', requiresAPI:true }); }
   async check(word1, word2) {
-    if (!word2) return [];
+    if (!word2) {
+      const list = await DatamuseClient.meansLike(word1);
+      const w1n = norm(word1);
+      return list.filter(x => x.word !== w1n).slice(0, SINGLE_MODE_RELATION_CAP).map(x => this.makeMatch({
+        categoryName: `SHARED LOOSE MEANING: ${x.word.toUpperCase()}`,
+        ruleDescription: `Both words are conceptually close to "${x.word}".`,
+        inputWordsFit: `${word1.toUpperCase()} is conceptually near "${x.word.toUpperCase()}"`,
+        otherExamples: [],
+      }));
+    }
     const [m1, m2] = await Promise.all([DatamuseClient.meansLike(word1), DatamuseClient.meansLike(word2)]);
     const map1 = new Set(m1.map(x => x.word));
     const shared = [...new Set(m2.filter(x => map1.has(x.word) && x.word !== norm(word1) && x.word !== norm(word2)).map(x => x.word))];
@@ -1574,9 +1662,18 @@ class DatamuseMeansLikePlugin extends RulePlugin {
 }
 
 class DatamuseRhymePlugin extends RulePlugin {
-  constructor() { super({ id:'dmRhymes', name:'Rhymes (Datamuse)', description:'The two words rhyme with each other.', color:'yellow', confidence:'high', source:'api', requiresAPI:true, supportsSingle:false }); }
+  constructor() { super({ id:'dmRhymes', name:'Rhymes (Datamuse)', description:'The two words rhyme with each other.', color:'yellow', confidence:'high', source:'api', requiresAPI:true }); }
   async check(word1, word2) {
-    if (!word2) return [];
+    if (!word2) {
+      const list = await DatamuseClient.rhymes(word1);
+      const w1n = norm(word1);
+      return list.filter(x => x.word !== w1n).slice(0, SINGLE_MODE_RELATION_CAP).map(x => this.makeMatch({
+        categoryName: `RHYMES WITH: ${x.word.toUpperCase()}`,
+        ruleDescription: `Rhymes with "${x.word.toUpperCase()}".`,
+        inputWordsFit: `${word1.toUpperCase()} rhymes with ${x.word.toUpperCase()}`,
+        otherExamples: [],
+      }));
+    }
     const rhymes1 = await DatamuseClient.rhymes(word1);
     const isRhyme = rhymes1.some(x => x.word === norm(word2));
     if (!isRhyme) return [];
@@ -1589,9 +1686,18 @@ class DatamuseRhymePlugin extends RulePlugin {
 }
 
 class DatamuseHomophonePlugin extends RulePlugin {
-  constructor() { super({ id:'dmHomophones', name:'Homophones (Datamuse, live)', description:'Sound identical, beyond the curated local list.', color:'yellow', confidence:'high', source:'api', requiresAPI:true, supportsSingle:false }); }
+  constructor() { super({ id:'dmHomophones', name:'Homophones (Datamuse, live)', description:'Sound identical, beyond the curated local list.', color:'yellow', confidence:'high', source:'api', requiresAPI:true }); }
   async check(word1, word2) {
-    if (!word2) return [];
+    if (!word2) {
+      const list = await DatamuseClient.homophones(word1);
+      const w1n = norm(word1);
+      return list.filter(x => x.word !== w1n).slice(0, SINGLE_MODE_RELATION_CAP).map(x => this.makeMatch({
+        categoryName: `HOMOPHONES OF: ${x.word.toUpperCase()}`,
+        ruleDescription: `Sounds identical to "${x.word.toUpperCase()}" when spoken aloud.`,
+        inputWordsFit: `${word1.toUpperCase()} sounds like ${x.word.toUpperCase()}`,
+        otherExamples: [],
+      }));
+    }
     const hom1 = await DatamuseClient.homophones(word1);
     const isHom = hom1.some(x => x.word === norm(word2));
     if (!isHom) return [];
@@ -1608,12 +1714,21 @@ class DatamuseHomophonePlugin extends RulePlugin {
 // ═══════════════════════════════════════════════════
 class ConceptNetSharedRelationPlugin extends RulePlugin {
   constructor(rel, label, color) {
-    super({ id:`cn${rel}`, name:`Shared "${label}" (ConceptNet)`, description:`Both words are linked to the same concept via "${label}".`, color, confidence:'medium', source:'api', requiresAPI:true, supportsSingle:false });
+    super({ id:`cn${rel}`, name:`Shared "${label}" (ConceptNet)`, description:`Both words are linked to the same concept via "${label}".`, color, confidence:'medium', source:'api', requiresAPI:true });
     this.rel = rel;
     this.label = label;
   }
   async check(word1, word2) {
-    if (!word2) return [];
+    if (!word2) {
+      const list = await ConceptNetClient.edgesFor(word1, this.rel);
+      const w1n = norm(word1);
+      return list.filter(x => x !== w1n).slice(0, SINGLE_MODE_RELATION_CAP).map(x => this.makeMatch({
+        categoryName: `${this.label.toUpperCase()}: ${x.toUpperCase()}`,
+        ruleDescription: `Related to "${x}" via "${this.label}".`,
+        inputWordsFit: `${word1.toUpperCase()} connects to "${x.toUpperCase()}" (${this.label})`,
+        otherExamples: [],
+      }));
+    }
     const [e1, e2] = await Promise.all([ConceptNetClient.edgesFor(word1, this.rel), ConceptNetClient.edgesFor(word2, this.rel)]);
     const set1 = new Set(e1);
     const shared = [...new Set(e2.filter(x => set1.has(x)))];
@@ -1723,7 +1838,7 @@ function renderApiStatusBanner() {
   const down = Object.entries(apiStatus).filter(([, v]) => v === 'fail').map(([k]) => API_LABELS[k]);
   if (!down.length) { el.style.display = 'none'; return; }
   el.style.display = '';
-  el.innerHTML = `⚠ Live ${down.join(' and ')} plugin${down.length > 1 ? 's are' : ' rules are'} unreachable right now (network blocked, offline, or this domain isn't allowed from wherever you opened this file). Local rules are unaffected and still run normally.<br><span style="font-size:.75rem"></span>`;
+  el.innerHTML = `⚠ Live ${down.join(' and ')} plugin${down.length > 1 ? 's are' : ' rules are'} unreachable right now (network blocked, offline, or this domain isn't allowed from wherever you opened this file). Local rules are unaffected and still run normally.<br><span style="font-size:.75rem">Try serving this from a local web server or your own site instead of opening it directly — browsers restrict outgoing requests from file:// pages, and some APIs don't allow file:// origins even when hosted requests work fine.</span>`;
 }
 
 function markServiceFailure(service) {
@@ -1944,10 +2059,25 @@ function getFieldLists() {
     .map(t => [...new Set(t.value.split('\n').map(w => w.trim()).filter(Boolean))]);
 }
 
+const SINGLE_MODE_WORD_THRESHOLD = 40;
+
 function updatePairEstimate() {
   const lists = getFieldLists();
   const nonEmpty = lists.filter(l => l.length);
   const warningEl = document.getElementById('pairWarning');
+
+  if (nonEmpty.length === 1) {
+    const n = nonEmpty[0].length;
+    if (n > SINGLE_MODE_WORD_THRESHOLD) {
+      warningEl.style.display = '';
+      warningEl.innerHTML = `⚠ ${n} words × 9 live plugins is a lot of requests. Live Datamuse/ConceptNet plugins will be skipped this run to stay fast — local rules still run in full.
+        <label><input type="checkbox" id="forceApiCheckbox"> Include live plugins anyway (slower)</label>`;
+    } else {
+      warningEl.style.display = 'none';
+    }
+    return;
+  }
+
   if (nonEmpty.length < 2) { warningEl.style.display = 'none'; return; }
 
   let totalPairs = 0, combos = 0;
@@ -2068,7 +2198,7 @@ function renderResults(words, results, modeType, totalCount, skippedAPI) {
 
   let summaryHtml = '';
   if (modeType === 'single') {
-    summaryHtml = `<p class="bulk-hint">Showing every category each individual word could belong to — nothing is cross-referenced yet. Add a second field to start comparing.</p>`;
+    summaryHtml = `<p class="bulk-hint">Showing every category each individual word could belong to, including live synonym/association matches shared between words in this same field. Add a second field to cross-reference against a separate list instead.</p>`;
   } else {
     const totalMatchingPairs = new Set(results.flatMap(r => r.pairs.map(p => p.w1 + '|' + p.w2))).size;
     summaryHtml = `<div class="bulk-summary"><strong>${results.length} connection${results.length !== 1 ? 's' : ''}</strong> found across <strong>${totalMatchingPairs}</strong> of ${totalCount} possible pair${totalCount !== 1 ? 's' : ''}.<br><span style="font-size:.85rem;color:var(--muted)">Sorted by number of matching pairs, most to least.${skippedAPI ? ' Live API plugins were skipped for this run.' : ''}</span></div>`;
@@ -2107,12 +2237,128 @@ function resetFields() {
   currentFilter = 'all';
 }
 
-async function analyzeSingleList(list, onProgress) {
+// ═══════════════════════════════════════════════════
+//  RANDOM LOOP GENERATOR
+//  A "loop" is 4 categories arranged in a ring: a TOP category, a LEFT and
+//  a RIGHT category that each share one of TOP's words (at the top-left
+//  and top-right corners), and a BOTTOM category that shares one word
+//  each with LEFT and RIGHT (at the bottom corners) — closing the loop
+//  without ever touching TOP directly. The middle 2×2 is left hollow.
+//  Entirely offline — uses only the local category pool, so it can
+//  regenerate instantly on every click.
+// ═══════════════════════════════════════════════════
+function categoryIndicesContaining(word, excludeIdx = new Set()) {
+  const idxs = MEMBERSHIP_INDEX.get(norm(word)) || [];
+  return idxs.filter(i => !excludeIdx.has(i));
+}
+
+function generateLoop(maxAttempts = 80) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const cat1Idx = Math.floor(Math.random() * CATEGORY_POOL.length);
+    const cat1 = CATEGORY_POOL[cat1Idx];
+    const members = shuffled(cat1.members);
+    if (members.length < 4) continue;
+    const leftHook = members[0];
+    const rightHook = members[1];
+    const filler1 = members.slice(2, 4);
+    if (filler1.length < 2) continue;
+
+    const cat2Idxs = shuffled(categoryIndicesContaining(leftHook, new Set([cat1Idx])));
+    let found = null;
+
+    for (const cat2Idx of cat2Idxs) {
+      const cat2 = CATEGORY_POOL[cat2Idx];
+      const cat3Idxs = shuffled(categoryIndicesContaining(rightHook, new Set([cat1Idx, cat2Idx])));
+
+      for (const cat3Idx of cat3Idxs) {
+        const cat3 = CATEGORY_POOL[cat3Idx];
+        const xCandidates = shuffled(cat2.members.filter(m => m !== leftHook)).slice(0, 25);
+        const yCandidates = shuffled(cat3.members.filter(m => m !== rightHook)).slice(0, 25);
+
+        outer:
+        for (const x of xCandidates) {
+          const xCatIdxs = new Set(categoryIndicesContaining(x, new Set([cat1Idx, cat2Idx, cat3Idx])));
+          if (!xCatIdxs.size) continue;
+          for (const y of yCandidates) {
+            if (y === x) continue;
+            const yCatIdxs = categoryIndicesContaining(y, new Set([cat1Idx, cat2Idx, cat3Idx]));
+            const shared = yCatIdxs.find(i => xCatIdxs.has(i));
+            if (shared !== undefined) { found = { cat2Idx, cat3Idx, cat4Idx: shared, x, y }; break outer; }
+          }
+        }
+        if (found) break;
+      }
+      if (found) break;
+    }
+
+    if (!found) continue;
+
+    const cat2 = CATEGORY_POOL[found.cat2Idx];
+    const cat3 = CATEGORY_POOL[found.cat3Idx];
+    const cat4 = CATEGORY_POOL[found.cat4Idx];
+    const cat2Filler = shuffled(cat2.members.filter(m => m !== leftHook && m !== found.x)).slice(0, 2);
+    const cat3Filler = shuffled(cat3.members.filter(m => m !== rightHook && m !== found.y)).slice(0, 2);
+    const cat4Filler = shuffled(cat4.members.filter(m => m !== found.x && m !== found.y)).slice(0, 2);
+    if (cat2Filler.length < 2 || cat3Filler.length < 2 || cat4Filler.length < 2) continue;
+
+    return {
+      top:    { name: cat1.name, words: [leftHook, ...filler1, rightHook] },
+      left:   { name: cat2.name, words: [leftHook, ...cat2Filler, found.x] },
+      right:  { name: cat3.name, words: [rightHook, ...cat3Filler, found.y] },
+      bottom: { name: cat4.name, words: [found.x, ...cat4Filler, found.y] },
+    };
+  }
+  return null;
+}
+
+function renderLoopGrid(loop) {
+  const colorFor = { top: 'yellow', left: 'blue', right: 'green', bottom: 'purple' };
+  const legend = ['top', 'left', 'right', 'bottom'].map(pos =>
+    `<div class="loop-legend-item"><span class="loop-swatch c-${colorFor[pos]}"></span><span class="loop-legend-label">${loop[pos].name}</span></div>`
+  ).join('');
+
+  const cell = (word, isHook) => word
+    ? `<div class="loop-cell${isHook ? ' loop-hook' : ''}">${cap(word)}</div>`
+    : `<div class="loop-cell loop-empty"></div>`;
+
+  const grid = `<div class="loop-grid">
+    ${cell(loop.top.words[0], true)}${cell(loop.top.words[1])}${cell(loop.top.words[2])}${cell(loop.top.words[3], true)}
+    ${cell(loop.left.words[1])}${cell()}${cell()}${cell(loop.right.words[1])}
+    ${cell(loop.left.words[2])}${cell()}${cell()}${cell(loop.right.words[2])}
+    ${cell(loop.bottom.words[0], true)}${cell(loop.bottom.words[1])}${cell(loop.bottom.words[2])}${cell(loop.bottom.words[3], true)}
+  </div>`;
+
+  return `<div class="loop-legend">${legend}</div>${grid}`;
+}
+
+function renderNewLoop() {
+  const container = document.getElementById('loopContent');
+  container.innerHTML = '<div class="loop-fail">Shuffling…</div>';
+  setTimeout(() => {
+    const loop = generateLoop();
+    container.innerHTML = loop
+      ? renderLoopGrid(loop)
+      : '<div class="loop-fail">Couldn\'t close a loop that time — hit "Generate Another" to try again.</div>';
+  }, 10);
+}
+
+function showLoopView() {
+  document.getElementById('finderView').style.display = 'none';
+  document.getElementById('loopView').style.display = '';
+  renderNewLoop();
+}
+
+function showFinderView() {
+  document.getElementById('loopView').style.display = 'none';
+  document.getElementById('finderView').style.display = '';
+}
+
+async function analyzeSingleList(list, onProgress, skipAPI) {
   const categoryMap = new Map();
   let done = 0;
   for (const w of list) {
     if (!norm(w)) { done++; continue; }
-    const results = await registry.analyze([w]);
+    const results = await registry.analyze([w], { skipAPI });
     for (const r of results) {
       if (!categoryMap.has(r.categoryName)) {
         categoryMap.set(r.categoryName, { categoryName:r.categoryName, ruleDescription:r.ruleDescription, color:r.color, confidence:r.confidence, otherExamples:r.otherExamples, source:r.source, items: [] });
@@ -2122,7 +2368,13 @@ async function analyzeSingleList(list, onProgress) {
     done++;
     if (onProgress) onProgress(done, list.length);
   }
-  const results = [...categoryMap.values()].sort((a, b) => {
+  // Live-plugin categories only found via ONE word aren't a real "shared"
+  // category — that's just one word's own synonym/association list. Local
+  // and custom-set categories are still shown even with a single match,
+  // since e.g. "this word is a palindrome" is meaningful on its own.
+  const results = [...categoryMap.values()]
+    .filter(c => c.source !== 'api' || c.items.length >= 2)
+    .sort((a, b) => {
     if (b.items.length !== a.items.length) return b.items.length - a.items.length;
     return COLOR_ORDER.indexOf(a.color) - COLOR_ORDER.indexOf(b.color);
   });
@@ -2144,8 +2396,9 @@ async function analyzeAll() {
   try {
     if (nonEmptyIdx.length === 1) {
       const list = lists[nonEmptyIdx[0]];
+      const skipAPI = forceLive ? false : list.length > SINGLE_MODE_WORD_THRESHOLD;
       setProgress(0, list.length, `Checking ${list.length} word${list.length !== 1 ? 's' : ''} individually…`);
-      const { results } = await analyzeSingleList(list, (done, total) => setProgress(done, total, `Checked ${done} of ${total} words…`));
+      const { results } = await analyzeSingleList(list, (done, total) => setProgress(done, total, `Checked ${done} of ${total} words…`), skipAPI);
       hideProgress();
       if (!results.length) {
         document.getElementById('output').innerHTML = `<div class="empty-state">No categories found for any of these words.<br>Could be a candidate for a new rule plugin.</div>`;
