@@ -1838,7 +1838,7 @@ function renderApiStatusBanner() {
   const down = Object.entries(apiStatus).filter(([, v]) => v === 'fail').map(([k]) => API_LABELS[k]);
   if (!down.length) { el.style.display = 'none'; return; }
   el.style.display = '';
-  el.innerHTML = `⚠ Live ${down.join(' and ')} plugin${down.length > 1 ? 's are' : ' rules are'} unreachable right now (network blocked, offline, or this domain isn't allowed from wherever you opened this file). Local rules are unaffected and still run normally.<br><span style="font-size:.75rem">Try serving this from a local web server or your own site instead of opening it directly — browsers restrict outgoing requests from file:// pages, and some APIs don't allow file:// origins even when hosted requests work fine.</span>`;
+  el.innerHTML = `⚠ Live ${down.join(' and ')} plugin${down.length > 1 ? 's are' : ' rules are'} unreachable right now (network blocked, offline, or this domain isn't allowed from wherever you opened this file). Local rules are unaffected and still run normally.<br><span style="font-size:.75rem"></span>`;
 }
 
 function markServiceFailure(service) {
