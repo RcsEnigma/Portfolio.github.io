@@ -141,15 +141,15 @@
   .loop-toolbar { display: flex; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap; }
   .loop-toolbar .settings-btn, .loop-toolbar .analyze-btn { width: auto; }
   .loop-generate-btn { padding: 0 22px; }
-  .loop-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 1.25rem; }
-  .loop-legend-item { display: flex; align-items: center; gap: 7px; font-size: .85rem; }
-  .loop-swatch { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
-  .loop-legend-label { font-weight: bold; }
-  .loop-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 560px; }
-  .loop-cell { border: 1.5px solid var(--border); border-radius: 10px; padding: 16px 10px; text-align: center; font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; background: var(--surface); font-size: .9rem; }
+  .loop-table { border-collapse: separate; border-spacing: 6px; max-width: 720px; }
+  .loop-col-header, .loop-row-header { font-size: .78rem; font-weight: bold; color: var(--text); padding: 4px 8px; text-align: left; vertical-align: bottom; white-space: nowrap; }
+  .loop-row-header { text-align: right; vertical-align: middle; max-width: 160px; white-space: normal; }
+  .loop-corner { }
+  .loop-cell { border: 1.5px solid var(--border); border-radius: 10px; padding: 16px 14px; text-align: center; font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; background: var(--surface); font-size: .9rem; min-width: 100px; }
   .loop-hook { font-weight: bold; background: #fff3c4; border-color: #e0c76a; }
   .loop-empty { border: none; background: transparent; }
   .loop-fail { font-style: italic; color: var(--muted); padding: 2rem 0; text-align: center; }
+  .loop-toggle { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--muted); margin-bottom: 1rem; }
 
   @media (max-width: 900px) {
     .layout { flex-direction: column; }
@@ -196,6 +196,7 @@
         <button class="settings-btn" onclick="showFinderView()">← Back to Finder</button>
         <button class="analyze-btn loop-generate-btn" onclick="renderNewLoop()">🎲 Generate Another</button>
       </div>
+      <label class="loop-toggle"><input type="checkbox" id="loopDatamuseToggle"> Seed the top category from live Datamuse synonyms instead of local lists (slower, needs network)</label>
       <div id="loopContent"></div>
     </div>
   </main>
@@ -947,16 +948,56 @@ const VOCAB_BY_LENGTH = new Map();
 //  word belong to?" quickly, without re-scanning everything each time.
 // ═══════════════════════════════════════════════════
 const CATEGORY_POOL = [];
-for (const s of NAMED_SETS) if (s.members.length >= 4) CATEGORY_POOL.push({ name: s.name, members: [...new Set(s.members)] });
-for (const [name, wordSet] of Object.entries(WORD_CATEGORIES)) if (wordSet.size >= 4) CATEGORY_POOL.push({ name, members: [...wordSet] });
-
 const MEMBERSHIP_INDEX = new Map();
-CATEGORY_POOL.forEach((cat, idx) => {
-  for (const m of cat.members) {
-    if (!MEMBERSHIP_INDEX.has(m)) MEMBERSHIP_INDEX.set(m, []);
-    MEMBERSHIP_INDEX.get(m).push(idx);
+// "Types of Trees" is a strict subset of "Trees (Extended)", and
+// WORD_CATEGORIES.Trees duplicates it again for the letter-change engine —
+// keeping all three in the loop generator's pool triples up "trees" as a
+// candidate for no real reason, which is exactly the kind of monotony
+// this pool construction should avoid.
+const CATEGORY_POOL_EXCLUDE_NAMED_SETS = new Set(['Types of Trees']);
+const CATEGORY_POOL_EXCLUDE_WORD_CATEGORIES = new Set(['Trees']);
+
+// Rebuildable (not built once and forgotten) so custom sets imported later
+// — pasted, loaded from a URL, or auto-loaded from packs.json — actually
+// show up as candidates for the loop generator too, not just the regular
+// finder. Each entry is tagged with its source `type` so the generator can
+// deliberately mix TYPES of category (named lists vs wordplay vs custom)
+// instead of just sampling the flattened pool, where whichever source
+// happens to contribute the most raw entries (affix groups, in practice)
+// dominates purely by count.
+function rebuildCategoryPool() {
+  CATEGORY_POOL.length = 0;
+  MEMBERSHIP_INDEX.clear();
+
+  for (const s of NAMED_SETS) {
+    if (CATEGORY_POOL_EXCLUDE_NAMED_SETS.has(s.name)) continue;
+    if (s.members.length >= 4) CATEGORY_POOL.push({ name: s.name, members: [...new Set(s.members)], type: 'named' });
   }
-});
+  for (const [name, wordSet] of Object.entries(WORD_CATEGORIES)) {
+    if (CATEGORY_POOL_EXCLUDE_WORD_CATEGORIES.has(name)) continue;
+    if (wordSet.size >= 4) CATEGORY_POOL.push({ name, members: [...wordSet], type: 'wordcat' });
+  }
+  // Affix groups add real wordplay variety ("___FRY", "SUPER___", etc.)
+  // instead of the pool being 100% "trivia groupings of things".
+  for (const g of AFFIX_GROUPS) {
+    if (g.members.length >= 4) CATEGORY_POOL.push({ name: g.disp, members: [...new Set(g.members)], type: 'affix' });
+  }
+  // Cultural-icon themes (Christmas, Halloween, etc.) as another non-trivia source.
+  for (const icon of CULTURAL_ICONS) {
+    if (icon.words.length >= 4) CATEGORY_POOL.push({ name: `Associated with ${icon.theme}`, members: [...new Set(icon.words)], type: 'icon' });
+  }
+  // Custom imported sets (paste / URL / packs.json manifest).
+  for (const s of customSetPlugin.sets) {
+    if (s.members.length >= 4) CATEGORY_POOL.push({ name: `Custom: ${s.name}`, members: [...new Set(s.members)], type: 'custom' });
+  }
+
+  CATEGORY_POOL.forEach((cat, idx) => {
+    for (const m of cat.members) {
+      if (!MEMBERSHIP_INDEX.has(m)) MEMBERSHIP_INDEX.set(m, []);
+      MEMBERSHIP_INDEX.get(m).push(idx);
+    }
+  });
+}
 
 function categoriesContaining(word, excludeIdx = new Set()) {
   const idxs = MEMBERSHIP_INDEX.get(norm(word)) || [];
@@ -1714,7 +1755,7 @@ class DatamuseHomophonePlugin extends RulePlugin {
 // ═══════════════════════════════════════════════════
 class ConceptNetSharedRelationPlugin extends RulePlugin {
   constructor(rel, label, color) {
-    super({ id:`cn${rel}`, name:`Shared "${label}" (ConceptNet)`, description:`Both words are linked to the same concept via "${label}".`, color, confidence:'medium', source:'api', requiresAPI:true });
+    super({ id:`cn${rel}`, name:`Shared "${label}" (ConceptNet)`, description:`Both words are linked to the same concept via "${label}".`, color, confidence:'medium', source:'api', requiresAPI:true, enabled:false });
     this.rel = rel;
     this.label = label;
   }
@@ -1785,6 +1826,7 @@ class CustomSetPlugin extends SingleWordRulePlugin {
 //  REGISTER ALL PLUGINS
 // ═══════════════════════════════════════════════════
 const customSetPlugin = new CustomSetPlugin();
+rebuildCategoryPool();
 
 [
   new AlphabeticalPlugin(),
@@ -1899,6 +1941,7 @@ function renderCustomSetList() {
 
 function removeCustomSet(idx) {
   customSetPlugin.removeSet(idx);
+  rebuildCategoryPool();
   renderCustomSetList();
 }
 
@@ -1959,6 +2002,7 @@ async function autoLoadPacksManifest() {
       }
     }
     if (totalAdded) {
+      rebuildCategoryPool();
       const msg = document.getElementById('importMsg');
       if (msg) { msg.textContent = `Auto-loaded ${totalAdded} categor${totalAdded === 1 ? 'y' : 'ies'} from packs.json.`; msg.className = 'import-msg ok'; }
     }
@@ -1983,6 +2027,7 @@ async function importCustomSetsFromURL() {
       : {};
     const added = customSetPlugin.importSets(flattened);
     if (!added) throw new Error('No array-of-words categories found in that JSON.');
+    rebuildCategoryPool();
     msg.textContent = `Imported ${added} categor${added === 1 ? 'y' : 'ies'} from URL.`;
     msg.className = 'import-msg ok';
     document.getElementById('customSetUrlInput').value = '';
@@ -2001,6 +2046,7 @@ function importCustomSets() {
     const obj = JSON.parse(raw);
     if (typeof obj !== 'object' || Array.isArray(obj)) throw new Error('Expected a JSON object of {"Category Name": ["word1","word2"]}');
     const added = customSetPlugin.importSets(obj);
+    rebuildCategoryPool();
     msg.textContent = `Imported ${added} categor${added === 1 ? 'y' : 'ies'}.`;
     msg.className = 'import-msg ok';
     document.getElementById('customSetInput').value = '';
@@ -2252,94 +2298,231 @@ function categoryIndicesContaining(word, excludeIdx = new Set()) {
   return idxs.filter(i => !excludeIdx.has(i));
 }
 
-function generateLoop(maxAttempts = 80) {
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const cat1Idx = Math.floor(Math.random() * CATEGORY_POOL.length);
-    const cat1 = CATEGORY_POOL[cat1Idx];
-    const members = shuffled(cat1.members);
-    if (members.length < 4) continue;
-    const leftHook = members[0];
-    const rightHook = members[1];
-    const filler1 = members.slice(2, 4);
-    if (filler1.length < 2) continue;
+function pickStratifiedCategoryIdx() {
+  const byType = {};
+  CATEGORY_POOL.forEach((c, i) => { (byType[c.type] ||= []).push(i); });
+  const types = Object.keys(byType);
+  const type = types[Math.floor(Math.random() * types.length)];
+  const options = byType[type];
+  return options[Math.floor(Math.random() * options.length)];
+}
 
-    const cat2Idxs = shuffled(categoryIndicesContaining(leftHook, new Set([cat1Idx])));
-    let found = null;
+// Puts candidates whose TYPE isn't already used elsewhere in this loop
+// first (still shuffled within each bucket) — without this, a hook word
+// belonging to 5 affix groups and 1 named set would statistically pick
+// another affix group almost every time, purely because there are more
+// of them, not because that's actually more interesting.
+function prioritizeByType(idxs, usedTypes) {
+  const preferred = [], fallback = [];
+  for (const idx of idxs) {
+    (usedTypes.has(CATEGORY_POOL[idx].type) ? fallback : preferred).push(idx);
+  }
+  return [...shuffled(preferred), ...shuffled(fallback)];
+}
 
-    for (const cat2Idx of cat2Idxs) {
-      const cat2 = CATEGORY_POOL[cat2Idx];
-      const cat3Idxs = shuffled(categoryIndicesContaining(rightHook, new Set([cat1Idx, cat2Idx])));
+// Attempts to complete a loop starting from a SPECIFIC category (by pool
+// index) as the top row. Returns a loop object, or null if this category
+// doesn't lead anywhere workable (caller decides whether to retry).
+function tryCompleteLoop(cat1Idx) {
+  const cat1 = CATEGORY_POOL[cat1Idx];
+  const members = shuffled(cat1.members);
+  if (members.length < 4) return null;
+  const leftHook = members[0];
+  const rightHook = members[1];
+  const filler1 = members.slice(2, 4);
+  if (filler1.length < 2) return null;
 
-      for (const cat3Idx of cat3Idxs) {
-        const cat3 = CATEGORY_POOL[cat3Idx];
-        const xCandidates = shuffled(cat2.members.filter(m => m !== leftHook)).slice(0, 25);
-        const yCandidates = shuffled(cat3.members.filter(m => m !== rightHook)).slice(0, 25);
+  const cat2Idxs = prioritizeByType(categoryIndicesContaining(leftHook, new Set([cat1Idx])), new Set([cat1.type]));
+  let found = null;
 
-        outer:
-        for (const x of xCandidates) {
-          const xCatIdxs = new Set(categoryIndicesContaining(x, new Set([cat1Idx, cat2Idx, cat3Idx])));
-          if (!xCatIdxs.size) continue;
-          for (const y of yCandidates) {
-            if (y === x) continue;
-            const yCatIdxs = categoryIndicesContaining(y, new Set([cat1Idx, cat2Idx, cat3Idx]));
-            const shared = yCatIdxs.find(i => xCatIdxs.has(i));
-            if (shared !== undefined) { found = { cat2Idx, cat3Idx, cat4Idx: shared, x, y }; break outer; }
-          }
+  for (const cat2Idx of cat2Idxs) {
+    const cat2 = CATEGORY_POOL[cat2Idx];
+    const cat3Idxs = prioritizeByType(categoryIndicesContaining(rightHook, new Set([cat1Idx, cat2Idx])), new Set([cat1.type, cat2.type]));
+
+    for (const cat3Idx of cat3Idxs) {
+      const cat3 = CATEGORY_POOL[cat3Idx];
+      const xCandidates = shuffled(cat2.members.filter(m => m !== leftHook)).slice(0, 25);
+      const yCandidates = shuffled(cat3.members.filter(m => m !== rightHook)).slice(0, 25);
+
+      outer:
+      for (const x of xCandidates) {
+        const xCatIdxs = new Set(categoryIndicesContaining(x, new Set([cat1Idx, cat2Idx, cat3Idx])));
+        if (!xCatIdxs.size) continue;
+        for (const y of yCandidates) {
+          if (y === x) continue;
+          const yCatIdxs = categoryIndicesContaining(y, new Set([cat1Idx, cat2Idx, cat3Idx]));
+          const shared = yCatIdxs.find(i => xCatIdxs.has(i));
+          if (shared !== undefined) { found = { cat2Idx, cat3Idx, cat4Idx: shared, x, y }; break outer; }
         }
-        if (found) break;
       }
       if (found) break;
     }
+    if (found) break;
+  }
 
-    if (!found) continue;
+  if (!found) return null;
 
-    const cat2 = CATEGORY_POOL[found.cat2Idx];
-    const cat3 = CATEGORY_POOL[found.cat3Idx];
-    const cat4 = CATEGORY_POOL[found.cat4Idx];
-    const cat2Filler = shuffled(cat2.members.filter(m => m !== leftHook && m !== found.x)).slice(0, 2);
-    const cat3Filler = shuffled(cat3.members.filter(m => m !== rightHook && m !== found.y)).slice(0, 2);
-    const cat4Filler = shuffled(cat4.members.filter(m => m !== found.x && m !== found.y)).slice(0, 2);
-    if (cat2Filler.length < 2 || cat3Filler.length < 2 || cat4Filler.length < 2) continue;
+  const cat2 = CATEGORY_POOL[found.cat2Idx];
+  const cat3 = CATEGORY_POOL[found.cat3Idx];
+  const cat4 = CATEGORY_POOL[found.cat4Idx];
+  const cat2Filler = shuffled(cat2.members.filter(m => m !== leftHook && m !== found.x)).slice(0, 2);
+  const cat3Filler = shuffled(cat3.members.filter(m => m !== rightHook && m !== found.y)).slice(0, 2);
+  const cat4Filler = shuffled(cat4.members.filter(m => m !== found.x && m !== found.y)).slice(0, 2);
+  if (cat2Filler.length < 2 || cat3Filler.length < 2 || cat4Filler.length < 2) return null;
 
-    return {
-      top:    { name: cat1.name, words: [leftHook, ...filler1, rightHook] },
-      left:   { name: cat2.name, words: [leftHook, ...cat2Filler, found.x] },
-      right:  { name: cat3.name, words: [rightHook, ...cat3Filler, found.y] },
-      bottom: { name: cat4.name, words: [found.x, ...cat4Filler, found.y] },
-    };
+  // UNIQUENESS CHECK: the 2 non-corner "filler" words in each category
+  // are supposed to belong ONLY to that category within this loop — if
+  // one of them also happens to be a genuine member of one of the OTHER
+  // 3 categories, the loop is ambiguous/redundant (e.g. "Types of Trees"
+  // and "Trees (Extended)" both legitimately containing the same filler
+  // word), so it gets rejected and we try again. Corner words are exempt
+  // since they're SUPPOSED to belong to two categories at once.
+  const catMembers = [cat1.members, cat2.members, cat3.members, cat4.members];
+  const fillers = [filler1, cat2Filler, cat3Filler, cat4Filler];
+  let contaminated = false;
+  for (let i = 0; i < 4 && !contaminated; i++) {
+    for (const w of fillers[i]) {
+      for (let j = 0; j < 4; j++) {
+        if (i === j) continue;
+        if (catMembers[j].includes(w)) { contaminated = true; break; }
+      }
+      if (contaminated) break;
+    }
+  }
+  if (contaminated) return null;
+
+  // Two different pool entries (e.g. from different data sources) can end
+  // up with the exact same name, or coincidentally get selected twice —
+  // either way, no two of the 4 categories in a loop should be identical.
+  const names = [cat1.name, cat2.name, cat3.name, cat4.name];
+  if (new Set(names).size !== 4) return null;
+
+  // Hard cap on how many of the 4 categories may share the same source
+  // type — without this, hub-like words that mostly interconnect within
+  // one data source (e.g. compound-word affix roots like "ground",
+  // "land", "ship" show up as members across MANY affix groups) can
+  // produce a loop that's 3-4 affix categories deep, which technically
+  // satisfies every other check but isn't the variety anyone's after.
+  const types = [cat1.type, cat2.type, cat3.type, cat4.type];
+  const typeCounts = {};
+  types.forEach(t => { typeCounts[t] = (typeCounts[t] || 0) + 1; });
+  if (Math.max(...Object.values(typeCounts)) > 2) return null;
+
+  return {
+    top:    { name: cat1.name, words: [leftHook, ...filler1, rightHook] },
+    left:   { name: cat2.name, words: [leftHook, ...cat2Filler, found.x] },
+    right:  { name: cat3.name, words: [rightHook, ...cat3Filler, found.y] },
+    bottom: { name: cat4.name, words: [found.x, ...cat4Filler, found.y] },
+  };
+}
+
+function generateLoop(maxAttempts = 400) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const loop = tryCompleteLoop(pickStratifiedCategoryIdx());
+    if (loop) return loop;
+  }
+  return null;
+}
+
+// Seeds the TOP category from a live Datamuse synonym lookup instead of
+// the local pool: pick a random word we know about, fetch its synonyms,
+// and keep only the ones scored close to the strongest match — i.e.
+// "3 others of comparable weight" to the seed, per the idea of starting
+// from one word and finding peers of similar strength rather than an
+// arbitrary cutoff. The arms and closing category still use the fast
+// local pool/contamination-check machinery unchanged — only the top row
+// is live, to keep this from turning into a slow chain of network calls.
+async function generateLoopFromDatamuseSeed(maxSeedAttempts = 6, attemptsPerSeed = 15) {
+  const vocabWords = [...MEMBERSHIP_INDEX.keys()];
+  if (!vocabWords.length) return null;
+
+  for (let s = 0; s < maxSeedAttempts; s++) {
+    const seed = vocabWords[Math.floor(Math.random() * vocabWords.length)];
+    let syns;
+    try { syns = await DatamuseClient.synonyms(seed); } catch { syns = []; }
+    if (!syns.length) continue;
+
+    const topScore = syns[0].score || 0;
+    // Datamuse already returns results sorted by relevance for this
+    // endpoint — the top handful ARE the "comparable weight" peers,
+    // whether or not a numeric score field happens to be present. Use
+    // score as a tighter filter when it's there, otherwise just take the
+    // top slice as-is instead of failing outright.
+    const candidates = syns.filter(x => x.word !== seed);
+    const peers = topScore
+      ? candidates.filter(x => (x.score || 0) >= topScore * 0.6).map(x => x.word)
+      : candidates.slice(0, 8).map(x => x.word);
+    if (peers.length < 3) continue;
+
+    const chosen = shuffled(peers).slice(0, 3);
+    const cat1Members = [seed, ...chosen];
+
+    // Temporarily register this as a real pool entry so the arm-search and
+    // contamination-check logic can treat it exactly like any other
+    // category, then remove it again once we're done with this seed.
+    const virtualIdx = CATEGORY_POOL.length;
+    CATEGORY_POOL.push({ name: `Synonyms of "${cap(seed)}" (Datamuse)`, members: cat1Members, type: 'datamuse' });
+    for (const m of cat1Members) {
+      if (!MEMBERSHIP_INDEX.has(m)) MEMBERSHIP_INDEX.set(m, []);
+      MEMBERSHIP_INDEX.get(m).push(virtualIdx);
+    }
+
+    let loop = null;
+    for (let a = 0; a < attemptsPerSeed && !loop; a++) loop = tryCompleteLoop(virtualIdx);
+
+    CATEGORY_POOL.pop();
+    for (const m of cat1Members) {
+      const list = MEMBERSHIP_INDEX.get(m);
+      const i = list.indexOf(virtualIdx);
+      if (i !== -1) list.splice(i, 1);
+    }
+
+    if (loop) return loop;
   }
   return null;
 }
 
 function renderLoopGrid(loop) {
-  const colorFor = { top: 'yellow', left: 'blue', right: 'green', bottom: 'purple' };
-  const legend = ['top', 'left', 'right', 'bottom'].map(pos =>
-    `<div class="loop-legend-item"><span class="loop-swatch c-${colorFor[pos]}"></span><span class="loop-legend-label">${loop[pos].name}</span></div>`
-  ).join('');
-
   const cell = (word, isHook) => word
-    ? `<div class="loop-cell${isHook ? ' loop-hook' : ''}">${cap(word)}</div>`
-    : `<div class="loop-cell loop-empty"></div>`;
+    ? `<td class="loop-cell${isHook ? ' loop-hook' : ''}">${cap(word)}</td>`
+    : `<td class="loop-cell loop-empty"></td>`;
 
-  const grid = `<div class="loop-grid">
-    ${cell(loop.top.words[0], true)}${cell(loop.top.words[1])}${cell(loop.top.words[2])}${cell(loop.top.words[3], true)}
-    ${cell(loop.left.words[1])}${cell()}${cell()}${cell(loop.right.words[1])}
-    ${cell(loop.left.words[2])}${cell()}${cell()}${cell(loop.right.words[2])}
-    ${cell(loop.bottom.words[0], true)}${cell(loop.bottom.words[1])}${cell(loop.bottom.words[2])}${cell(loop.bottom.words[3], true)}
-  </div>`;
-
-  return `<div class="loop-legend">${legend}</div>${grid}`;
+  return `<table class="loop-table">
+    <tr>
+      <td class="loop-corner"></td>
+      <td class="loop-col-header">${loop.left.name}</td>
+      <td class="loop-corner"></td>
+      <td class="loop-corner"></td>
+      <td class="loop-col-header">${loop.right.name}</td>
+    </tr>
+    <tr>
+      <td class="loop-row-header">${loop.top.name}</td>
+      ${cell(loop.top.words[0], true)}${cell(loop.top.words[1])}${cell(loop.top.words[2])}${cell(loop.top.words[3], true)}
+    </tr>
+    <tr>
+      <td class="loop-row-header"></td>
+      ${cell(loop.left.words[1])}<td class="loop-cell loop-empty"></td><td class="loop-cell loop-empty"></td>${cell(loop.right.words[1])}
+    </tr>
+    <tr>
+      <td class="loop-row-header"></td>
+      ${cell(loop.left.words[2])}<td class="loop-cell loop-empty"></td><td class="loop-cell loop-empty"></td>${cell(loop.right.words[2])}
+    </tr>
+    <tr>
+      <td class="loop-row-header">${loop.bottom.name}</td>
+      ${cell(loop.bottom.words[0], true)}${cell(loop.bottom.words[1])}${cell(loop.bottom.words[2])}${cell(loop.bottom.words[3], true)}
+    </tr>
+  </table>`;
 }
 
-function renderNewLoop() {
+async function renderNewLoop() {
   const container = document.getElementById('loopContent');
-  container.innerHTML = '<div class="loop-fail">Shuffling…</div>';
-  setTimeout(() => {
-    const loop = generateLoop();
-    container.innerHTML = loop
-      ? renderLoopGrid(loop)
-      : '<div class="loop-fail">Couldn\'t close a loop that time — hit "Generate Another" to try again.</div>';
-  }, 10);
+  const useDatamuse = document.getElementById('loopDatamuseToggle')?.checked;
+  container.innerHTML = `<div class="loop-fail">${useDatamuse ? 'Asking Datamuse for a seed word…' : 'Shuffling…'}</div>`;
+  await new Promise(r => setTimeout(r, 10));
+  const loop = useDatamuse ? await generateLoopFromDatamuseSeed() : generateLoop();
+  container.innerHTML = loop
+    ? renderLoopGrid(loop)
+    : '<div class="loop-fail">Couldn\'t close a loop that time — hit "Generate Another" to try again.</div>';
 }
 
 function showLoopView() {

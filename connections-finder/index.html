@@ -980,7 +980,7 @@ function rebuildCategoryPool() {
   // Affix groups add real wordplay variety ("___FRY", "SUPER___", etc.)
   // instead of the pool being 100% "trivia groupings of things".
   for (const g of AFFIX_GROUPS) {
-    if (g.members.length >= 4) CATEGORY_POOL.push({ name: `${g.disp} — combine with "${g.affix.toUpperCase()}"`, members: [...new Set(g.members)], type: 'affix' });
+    if (g.members.length >= 4) CATEGORY_POOL.push({ name: g.disp, members: [...new Set(g.members)], type: 'affix' });
   }
   // Cultural-icon themes (Christmas, Halloween, etc.) as another non-trivia source.
   for (const icon of CULTURAL_ICONS) {
@@ -1880,7 +1880,7 @@ function renderApiStatusBanner() {
   const down = Object.entries(apiStatus).filter(([, v]) => v === 'fail').map(([k]) => API_LABELS[k]);
   if (!down.length) { el.style.display = 'none'; return; }
   el.style.display = '';
-  el.innerHTML = `⚠ Live ${down.join(' and ')} plugin${down.length > 1 ? 's are' : ' rules are'} unreachable right now (network blocked, offline, or this domain isn't allowed from wherever you opened this file). Local rules are unaffected and still run normally.<br><span style="font-size:.75rem">Try serving this from a local web server or your own site instead of opening it directly — browsers restrict outgoing requests from file:// pages, and some APIs don't allow file:// origins even when hosted requests work fine.</span>`;
+  el.innerHTML = `⚠ Live ${down.join(' and ')} plugin${down.length > 1 ? 's are' : ' rules are'} unreachable right now (network blocked, offline, or this domain isn't allowed from wherever you opened this file). Local rules are unaffected and still run normally.<br><span style="font-size:.75rem"></span>`;
 }
 
 function markServiceFailure(service) {
@@ -2391,6 +2391,23 @@ function tryCompleteLoop(cat1Idx) {
   }
   if (contaminated) return null;
 
+  // Two different pool entries (e.g. from different data sources) can end
+  // up with the exact same name, or coincidentally get selected twice —
+  // either way, no two of the 4 categories in a loop should be identical.
+  const names = [cat1.name, cat2.name, cat3.name, cat4.name];
+  if (new Set(names).size !== 4) return null;
+
+  // Hard cap on how many of the 4 categories may share the same source
+  // type — without this, hub-like words that mostly interconnect within
+  // one data source (e.g. compound-word affix roots like "ground",
+  // "land", "ship" show up as members across MANY affix groups) can
+  // produce a loop that's 3-4 affix categories deep, which technically
+  // satisfies every other check but isn't the variety anyone's after.
+  const types = [cat1.type, cat2.type, cat3.type, cat4.type];
+  const typeCounts = {};
+  types.forEach(t => { typeCounts[t] = (typeCounts[t] || 0) + 1; });
+  if (Math.max(...Object.values(typeCounts)) > 2) return null;
+
   return {
     top:    { name: cat1.name, words: [leftHook, ...filler1, rightHook] },
     left:   { name: cat2.name, words: [leftHook, ...cat2Filler, found.x] },
@@ -2426,8 +2443,15 @@ async function generateLoopFromDatamuseSeed(maxSeedAttempts = 6, attemptsPerSeed
     if (!syns.length) continue;
 
     const topScore = syns[0].score || 0;
-    if (!topScore) continue;
-    const peers = syns.filter(x => x.word !== seed && (x.score || 0) >= topScore * 0.6).map(x => x.word);
+    // Datamuse already returns results sorted by relevance for this
+    // endpoint — the top handful ARE the "comparable weight" peers,
+    // whether or not a numeric score field happens to be present. Use
+    // score as a tighter filter when it's there, otherwise just take the
+    // top slice as-is instead of failing outright.
+    const candidates = syns.filter(x => x.word !== seed);
+    const peers = topScore
+      ? candidates.filter(x => (x.score || 0) >= topScore * 0.6).map(x => x.word)
+      : candidates.slice(0, 8).map(x => x.word);
     if (peers.length < 3) continue;
 
     const chosen = shuffled(peers).slice(0, 3);
