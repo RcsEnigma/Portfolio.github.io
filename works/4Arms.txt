@@ -11,7 +11,7 @@ I made a crude 3d scene to try out various angles and this is what I landed on.
 Canonically takes place at the same moment in the same room as "Colleague_Face". I was inspired to make this based off the turnout of "Scientist_Winged".
 
 [tags]
-2D, Trepidation, Illustration
+2D, Trepidation, Illustration, Violent
 
 [date]
 2025-09

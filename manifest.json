@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-31T09:13:31.779Z",
+  "generated": "2026-08-04T15:16:05.870Z",
   "tags": [
     "2D",
     "3D",
@@ -13,7 +13,8 @@
     "Multimodal",
     "Photorealism",
     "Pixel",
-    "Trepidation"
+    "Trepidation",
+    "Violent"
   ],
   "works": [
     {
@@ -24,7 +25,8 @@
         "Antagonist_02.png",
         "Antagonist_03.webp",
         "Antagonist_04.webp",
-        "Antagonist_05.webp"
+        "Antagonist_05.PNG",
+        "Antagonist_06.webp"
       ],
       "type": "image",
       "title": "Antagonist",
@@ -45,14 +47,16 @@
         "Antagonist_02.webp",
         "Antagonist_03.webp",
         "Antagonist_04.webp",
-        "Antagonist_05.webp"
+        "Antagonist_05.webp",
+        "Antagonist_06.webp"
       ],
       "zoomMedia": [
         "Antagonist_01_zoom.webp",
         "Antagonist_02_zoom.webp",
         "Antagonist_03_zoom.webp",
         "Antagonist_04_zoom.webp",
-        "Antagonist_05_zoom.webp"
+        "Antagonist_05_zoom.webp",
+        "Antagonist_06_zoom.webp"
       ]
     },
     {
@@ -296,7 +300,8 @@
       "tags": [
         "2D",
         "Trepidation",
-        "Illustration"
+        "Illustration",
+        "Violent"
       ],
       "featured": false,
       "date": "2025-09",
@@ -500,7 +505,8 @@
         "3D",
         "Blender",
         "Graphic Design",
-        "Trepidation"
+        "Trepidation",
+        "Violent"
       ],
       "featured": false,
       "date": "2024-11",
@@ -588,7 +594,8 @@
       "description": "A Stylized design possibly fit for an album cover.\n\nI imagined the skull's eyes as portals the gun was half inside. It might be interpreted differently. I think it looks cool either way.",
       "tags": [
         "3D",
-        "Blender"
+        "Blender",
+        "Violent"
       ],
       "featured": false,
       "date": "2024-05",
@@ -842,7 +849,8 @@
       "tags": [
         "2D",
         "Trepidation",
-        "Illustration"
+        "Illustration",
+        "Violent"
       ],
       "featured": false,
       "date": "2023-09",
@@ -1009,7 +1017,8 @@
       "tags": [
         "2D",
         "Trepidation",
-        "Illustration"
+        "Illustration",
+        "Violent"
       ],
       "featured": false,
       "date": "2023-02",
@@ -1171,7 +1180,8 @@
       "description": "A redraw of a doodle from a year earlier (Slide 2).\n\nI wanted to depict something very 'powerful'.",
       "tags": [
         "2D",
-        "Illustration"
+        "Illustration",
+        "Violent"
       ],
       "featured": false,
       "date": "2022-03",
@@ -1186,32 +1196,6 @@
       "zoomMedia": [
         "Energy_01_zoom.webp",
         "Energy_02_zoom.webp"
-      ]
-    },
-    {
-      "id": "AbstractFour",
-      "primaryMedia": "AbstractFour.mp4",
-      "allMedia": [
-        "AbstractFour.mp4"
-      ],
-      "type": "video",
-      "title": "AbstractCrackedSkull",
-      "description": "Insipred by rave visuals. Works in tandem with the previous render, this one would appear when the leitmotif comes back gnarlier.",
-      "tags": [
-        "3D",
-        "Blender"
-      ],
-      "featured": false,
-      "date": "2022-02",
-      "link": "",
-      "aspectRatio": null,
-      "gridSpan": "wide",
-      "thumbMedia": null,
-      "modalThumbs": [
-        null
-      ],
-      "zoomMedia": [
-        null
       ]
     },
     {
@@ -1242,13 +1226,14 @@
     },
     {
       "id": "AbstractThree",
-      "primaryMedia": "AbstractThree.mp4",
+      "primaryMedia": "AbstractThree_01.mp4",
       "allMedia": [
-        "AbstractThree.mp4"
+        "AbstractThree_01.mp4",
+        "AbstractThree_02.mp4"
       ],
       "type": "video",
       "title": "AbstractSkull",
-      "description": "Insipred by rave visuals. A little morbid, but I foresee tessellation with some rave song themes.",
+      "description": "Insipred by rave visuals. A little morbid, but I foresee tessellation with some rave song themes.\n\nThe second one would appear when the leitmotif comes back gnarlier(?)",
       "tags": [
         "3D",
         "Blender"
@@ -1260,9 +1245,11 @@
       "gridSpan": "wide",
       "thumbMedia": null,
       "modalThumbs": [
+        null,
         null
       ],
       "zoomMedia": [
+        null,
         null
       ]
     },
@@ -1305,7 +1292,8 @@
       "tags": [
         "2D",
         "Trepidation",
-        "Illustration"
+        "Illustration",
+        "Violent"
       ],
       "featured": false,
       "date": "2022-01",

@@ -11,7 +11,7 @@ Slide 3: A propaganda-style graphic depitcing the hextille-LiDAR technology as s
 Timeline: Slide 1 - Feb 23, Slide 2 - Feb 26, Slide 3 - Feb 24
 
 [tags]
-2D, Trepidation, Illustration
+2D, Trepidation, Illustration, Violent
 
 [date]
 2023-02

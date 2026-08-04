@@ -7,7 +7,7 @@ A Stylized design possibly fit for an album cover.
 I imagined the skull's eyes as portals the gun was half inside. It might be interpreted differently. I think it looks cool either way.
 
 [tags]
-3D, Blender
+3D, Blender, Violent
 
 [date]
 2024-05
