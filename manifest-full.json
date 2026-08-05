@@ -10,10 +10,12 @@
     "Game Design",
     "Graphic Design",
     "Illustration",
+    "Mature",
     "Multimodal",
     "Photorealism",
     "Pixel",
-    "Trepidation"
+    "Trepidation",
+    "Violent"
   ],
   "works": [
     {
@@ -287,6 +289,65 @@
       ]
     },
     {
+      "id": "MagazineSeven",
+      "primaryMedia": "MagazineSeven.png",
+      "allMedia": [
+        "MagazineSeven.png"
+      ],
+      "type": "image",
+      "title": "Cover 08",
+      "description": "A more risque design. Was interested in a sci-fi tattoo, the back is an attractive canvas. \n\nRendered in blender, text added in post.",
+      "tags": [
+        "2D",
+        "Graphic Design",
+        "Multimodal",
+        "Mature"
+      ],
+      "featured": false,
+      "date": "2025-10",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall",
+      "thumbMedia": "MagazineSeven.webp",
+      "modalThumbs": [
+        "MagazineSeven.webp"
+      ],
+      "zoomMedia": [
+        "MagazineSeven_zoom.webp"
+      ]
+    },
+    {
+      "id": "4Arms",
+      "primaryMedia": "4Arms_01.png",
+      "allMedia": [
+        "4Arms_01.png",
+        "4Arms_02.png"
+      ],
+      "type": "image",
+      "title": "4-Arms vs the Scientist",
+      "description": "\"The Four-Armed Prisoner rushes and PINS the Scientist to the WALL. HIS TOP SET PRESSES HIS FOREARMS ABOVE HIM, While the bottom set JACKHAMMERS PUNCHES into his TORSO. With each meaty THWACK, the Scientist's back EXPLODES BLOOD ONTO THE WALL.\"\n\nAn illustration of a scene from my Trepidation project. I don't look highly on this piece; I think it's overall a little too indiscernible. I really wanted to showcase all four arms while also detailing a sense of claustrophobia from the Scientist's (left) perspective.\n\nI made a crude 3d scene to try out various angles and this is what I landed on.\n\nCanonically takes place at the same moment in the same room as \"Colleague_Face\". I was inspired to make this based off the turnout of \"Scientist_Winged\".",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration",
+        "Violent"
+      ],
+      "featured": false,
+      "date": "2025-09",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "4Arms_01.webp",
+      "modalThumbs": [
+        "4Arms_01.webp",
+        "4Arms_02.webp"
+      ],
+      "zoomMedia": [
+        "4Arms_01_zoom.webp",
+        "4Arms_02_zoom.webp"
+      ]
+    },
+    {
       "id": "MagazineFour",
       "primaryMedia": "MagazineFour_01.png",
       "allMedia": [
@@ -458,6 +519,44 @@
       ]
     },
     {
+      "id": "Colleague_Face",
+      "primaryMedia": "Colleague_Face_01.png",
+      "allMedia": [
+        "Colleague_Face_01.png",
+        "Colleague_Face_02.png",
+        "Colleague_Face_03.png",
+        "Colleague_Face_04.mkv"
+      ],
+      "type": "image",
+      "title": "Colleague Face",
+      "description": "A render of a scene from my Trepidation project. Sculpted manually with 99% procedural materials (the LED panel wall in the back uses an image texture. That's it).\n\nThis piece involved use of almost every tab within the blender suite, which seriously tested my familarities and capability within the software. Although procedural, I still had to work with UVs on the character's skin and undershirt. The seam edges of the undershirt were done with geometry nodes, as well. \n\n2nd image excludes the graphics.\n\n3rd image was the initial render, for the sake of framing.\n\n4th video was a lackluster animation I whipped up a while later. Because the character was sculpted, I couldn't animate them at all; I had no further expectations and moved on to new projects.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Graphic Design",
+        "Trepidation",
+        "Violent"
+      ],
+      "featured": false,
+      "date": "2024-11",
+      "link": "",
+      "aspectRatio": 1,
+      "gridSpan": "normal",
+      "thumbMedia": "Colleague_Face_01.webp",
+      "modalThumbs": [
+        "Colleague_Face_01.webp",
+        "Colleague_Face_02.webp",
+        "Colleague_Face_03.webp",
+        null
+      ],
+      "zoomMedia": [
+        "Colleague_Face_01_zoom.webp",
+        "Colleague_Face_02_zoom.webp",
+        "Colleague_Face_03_zoom.webp",
+        null
+      ]
+    },
+    {
       "id": "Procedural_Land",
       "primaryMedia": "Procedural_Land_01.png",
       "allMedia": [
@@ -511,6 +610,33 @@
       ],
       "zoomMedia": [
         null
+      ]
+    },
+    {
+      "id": "Skull_ArtOne",
+      "primaryMedia": "Skull_ArtOne.png",
+      "allMedia": [
+        "Skull_ArtOne.png"
+      ],
+      "type": "image",
+      "title": "Skull 01",
+      "description": "A Stylized design possibly fit for an album cover.\n\nI imagined the skull's eyes as portals the gun was half inside. It might be interpreted differently. I think it looks cool either way.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Violent"
+      ],
+      "featured": false,
+      "date": "2024-05",
+      "link": "",
+      "aspectRatio": 1,
+      "gridSpan": "normal",
+      "thumbMedia": "Skull_ArtOne.webp",
+      "modalThumbs": [
+        "Skull_ArtOne.webp"
+      ],
+      "zoomMedia": [
+        "Skull_ArtOne_zoom.webp"
       ]
     },
     {
@@ -739,6 +865,40 @@
       ]
     },
     {
+      "id": "Scientist_Thermal",
+      "primaryMedia": "Scientist_Thermal_01.PNG",
+      "allMedia": [
+        "Scientist_Thermal_01.PNG",
+        "Scientist_Thermal_02.webp",
+        "Scientist_Thermal_03.webp"
+      ],
+      "type": "image",
+      "title": "Scientist Thermal",
+      "description": "A heavily stylized depction of the Scientist character from my Trepidation project. Heavily inspired from the use of color from the works of Spazgunk on Newgrounds (images 2 and 3)",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration",
+        "Violent"
+      ],
+      "featured": false,
+      "date": "2023-09",
+      "link": "",
+      "aspectRatio": 1.089,
+      "gridSpan": "normal",
+      "thumbMedia": "Scientist_Thermal_01.webp",
+      "modalThumbs": [
+        "Scientist_Thermal_01.webp",
+        "Scientist_Thermal_02.webp",
+        "Scientist_Thermal_03.webp"
+      ],
+      "zoomMedia": [
+        "Scientist_Thermal_01_zoom.webp",
+        "Scientist_Thermal_02_zoom.webp",
+        "Scientist_Thermal_03_zoom.webp"
+      ]
+    },
+    {
       "id": "Spiderman",
       "primaryMedia": "Spiderman_01.png",
       "allMedia": [
@@ -873,6 +1033,68 @@
       ]
     },
     {
+      "id": "Nephilim",
+      "primaryMedia": "Nephilim_01.png",
+      "allMedia": [
+        "Nephilim_01.png",
+        "Nephilim_02.png",
+        "Nephilim_03.png"
+      ],
+      "type": "image",
+      "title": "Nephilim",
+      "description": "\"The HEXTILLE PATTERN across the Nephilim's skin begins to glow RED HOT, and he starts WRITHING IN PAIN! He's excreting LITERS of blood -- his SMOLDERING flesh is luckily CAUTERIZING the majority of these lacerations. The thrashing slows... The wiring loses its HEAT... Still standing, the RAVAGED Nephilim angrily looks around the room for answers. A Dev timidly approaches, and offers some kind of illustration on a clipboard in one hand and a communication device in the other. The Nephilim looks down at him. He makes a MIDDLE FINGER AND PUNCHES the Dev, CRUMPLING him into a pile of flesh against the floor!\"\n\nConcept art for a 10-foot tall character in my Trepidation project. The hextille of wiring would've given his skin LiDAR-like depth stimuli, allowing him to sense impacts and react before they touch him. This would obviously not be very necessary to a beast of this caliber -- the hextille wiring was actually supposed to go in human-sized units, but the devs couldn't develop the technology to fit properly, it needed to be too dense. So a larger unit was created purely to see the current technology work under ideal bodily proportions. However, the prototype didn't work exactly as planned...\n\nSlide 3: A propaganda-style graphic depitcing the hextille-LiDAR technology as sleek and idealistic.\n\nTimeline: Slide 1 - Feb 23, Slide 2 - Feb 26, Slide 3 - Feb 24",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration",
+        "Violent"
+      ],
+      "featured": false,
+      "date": "2023-02",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "Nephilim_01.webp",
+      "modalThumbs": [
+        "Nephilim_01.webp",
+        "Nephilim_02.webp",
+        "Nephilim_03.webp"
+      ],
+      "zoomMedia": [
+        "Nephilim_01_zoom.webp",
+        "Nephilim_02_zoom.webp",
+        "Nephilim_03_zoom.webp"
+      ]
+    },
+    {
+      "id": "Scientist_Sketches",
+      "primaryMedia": "Scientist_Sketches.png",
+      "allMedia": [
+        "Scientist_Sketches.png"
+      ],
+      "type": "image",
+      "title": "Scientist Sketches",
+      "description": "Self Explanatory. Concept art which is considerably outdated now.",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration",
+        "Violent"
+      ],
+      "featured": false,
+      "date": "2022-11",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "Scientist_Sketches.webp",
+      "modalThumbs": [
+        "Scientist_Sketches.webp"
+      ],
+      "zoomMedia": [
+        "Scientist_Sketches_zoom.webp"
+      ]
+    },
+    {
       "id": "AbstractSeven",
       "primaryMedia": "AbstractSeven.mkv",
       "allMedia": [
@@ -977,6 +1199,36 @@
       ]
     },
     {
+      "id": "Energy",
+      "primaryMedia": "Energy_01.png",
+      "allMedia": [
+        "Energy_01.png",
+        "Energy_02.png"
+      ],
+      "type": "image",
+      "title": "Energy",
+      "description": "A redraw of a doodle from a year earlier (Slide 2).\n\nI wanted to depict something very 'powerful'.",
+      "tags": [
+        "2D",
+        "Illustration",
+        "Violent"
+      ],
+      "featured": false,
+      "date": "2022-03",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "wide",
+      "thumbMedia": "Energy_01.webp",
+      "modalThumbs": [
+        "Energy_01.webp",
+        "Energy_02.webp"
+      ],
+      "zoomMedia": [
+        "Energy_01_zoom.webp",
+        "Energy_02_zoom.webp"
+      ]
+    },
+    {
       "id": "AbstractOne",
       "primaryMedia": "AbstractOne.mkv",
       "allMedia": [
@@ -1055,6 +1307,37 @@
       ],
       "zoomMedia": [
         null
+      ]
+    },
+    {
+      "id": "Scientist_And_Colleague",
+      "primaryMedia": "Scientist_And_Colleague_01.png",
+      "allMedia": [
+        "Scientist_And_Colleague_01.png",
+        "Scientist_And_Colleague_02.PNG"
+      ],
+      "type": "image",
+      "title": "Scientist and Colleague",
+      "description": "Somewhat outdated concept art. On slide 2 I bundled in a closeup sketch of the Colleague created three months later (April of '22).",
+      "tags": [
+        "2D",
+        "Trepidation",
+        "Illustration",
+        "Violent"
+      ],
+      "featured": false,
+      "date": "2022-01",
+      "link": "",
+      "aspectRatio": 1.778,
+      "gridSpan": "normal",
+      "thumbMedia": "Scientist_And_Colleague_01.webp",
+      "modalThumbs": [
+        "Scientist_And_Colleague_01.webp",
+        "Scientist_And_Colleague_02.webp"
+      ],
+      "zoomMedia": [
+        "Scientist_And_Colleague_01_zoom.webp",
+        "Scientist_And_Colleague_02_zoom.webp"
       ]
     }
   ]

@@ -48,8 +48,24 @@ const ZOOM_QUALITY = 90;
 const WORKS_DIR   = path.join(__dirname, "works");
 const PAGES_DIR   = path.join(__dirname, "pages");
 const MANIFEST_OUT = path.join(__dirname, "manifest.json");
+const MANIFEST_FULL_OUT = path.join(__dirname, "manifest-full.json");
 const PAGES_OUT   = path.join(__dirname, "pages.json");
 const STUB_MARKER = "AUTO-GENERATED-PAGE-STUB";
+const FULL_PAGE_DIR = path.join(__dirname, "full");
+
+// Works tagged with any of these (case-insensitive) are left out of
+// manifest.json entirely — not just hidden client-side, they're never sent
+// to a visitor browsing the main site at all. They only appear in
+// manifest-full.json, which /full/index.html loads instead. This is a
+// default-visibility gate, not real access control: /full/ isn't password
+// protected, and the underlying image files in works/ are just as publicly
+// fetchable as everything else on GitHub Pages to anyone who has (or
+// guesses) the direct URL. Add more tag names here if you want more than
+// one gated category.
+const GATED_TAGS = ["violent", "mature"];
+function isGatedWork(work) {
+  return work.tags.some(t => GATED_TAGS.includes(t.toLowerCase()));
+}
 
 const IMAGE_EXT = new Set([".jpg",".jpeg",".png",".gif",".webp",".avif",".svg"]);
 const VIDEO_EXT = new Set([".mp4",".webm",".mov",".ogg",".mkv"]);
@@ -406,6 +422,10 @@ async function buildPages() {
     const pageDir = path.join(PAGES_DIR, folderName);
     const slug    = slugify(folderName);
     if (!slug) continue;
+    if (slug === "full") {
+      console.log("  skipping /pages/" + folderName + "/ — \"full\" is reserved for the gated-content page (see GATED_TAGS); rename the folder.");
+      continue;
+    }
 
     const metaPath = path.join(pageDir, "_page.txt");
     const metaRaw  = fs.existsSync(metaPath) ? fs.readFileSync(metaPath,"utf8") : "";
@@ -505,6 +525,18 @@ function stubTemplate(slug, label, v) {
 `;
 }
 
+// /full/index.html is a byte-for-byte copy of the root index.html — same
+// gallery, same code, just served from a different path so its boot()
+// fetches manifest-full.json instead of manifest.json (see boot() in
+// index.html). Copying it fresh on every run means there's exactly one
+// source of truth to maintain; you never edit /full/index.html directly.
+function writeFullPageStub() {
+  const rootIndexPath = path.join(__dirname, "index.html");
+  if (!fs.existsSync(rootIndexPath)) return;
+  if (!fs.existsSync(FULL_PAGE_DIR)) fs.mkdirSync(FULL_PAGE_DIR, { recursive:true });
+  fs.copyFileSync(rootIndexPath, path.join(FULL_PAGE_DIR, "index.html"));
+}
+
 function writeStubs(pages) {
   const validSlugs = new Set(pages.map(p=>p.slug));
   // Version stamp changes on every run, forcing browsers/CDNs to fetch
@@ -550,18 +582,30 @@ async function build() {
     console.log("DO NOT CLOSE this window until you see \"Done compressing\" below.\n");
   }
 
-  const manifest = await buildWorks();
+  const manifestFull = await buildWorks();
   const pages = await buildPages();
   finishProgress();
   if (progress.total > 0 && sharp) console.log("Done compressing.\n");
 
-  fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifest,null,2));
-  console.log("manifest.json: " + manifest.works.length + " work(s), " + manifest.tags.length + " tag(s)\n");
-  for (const e of manifest.works) {
+  // manifest.json (public) excludes gated-tag works entirely; manifest-full.json
+  // (loaded only by /full/) includes everything. See GATED_TAGS above.
+  const publicWorks = manifestFull.works.filter(e => !isGatedWork(e));
+  const publicTags  = [...new Set(publicWorks.flatMap(e=>e.tags))].sort();
+  const manifestPublic = { generated: manifestFull.generated, tags: publicTags, works: publicWorks };
+  const gatedCount = manifestFull.works.length - publicWorks.length;
+
+  fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifestPublic,null,2));
+  fs.writeFileSync(MANIFEST_FULL_OUT, JSON.stringify(manifestFull,null,2));
+  writeFullPageStub();
+
+  console.log("manifest.json: " + publicWorks.length + " work(s), " + publicTags.length + " tag(s)"
+    + (gatedCount ? "  (+" + gatedCount + " gated — see manifest-full.json / /full/)" : "") + "\n");
+  for (const e of manifestFull.works) {
     const span  = e.gridSpan.padEnd(10);
     const ar    = e.aspectRatio ? e.aspectRatio+" ar" : "no dims";
     const thumb = e.thumbMedia ? " [thumb: "+e.thumbMedia+"]" : (sharp ? " [no thumb]" : "");
-    console.log("  "+span+" "+e.title+"  ("+ar+", "+e.allMedia.length+" file(s))"+thumb);
+    const gated = isGatedWork(e) ? "  [GATED, /full/ only]" : "";
+    console.log("  "+span+" "+e.title+"  ("+ar+", "+e.allMedia.length+" file(s))"+thumb+gated);
   }
 
   fs.writeFileSync(PAGES_OUT, JSON.stringify({generated:new Date().toISOString(),pages},null,2));
