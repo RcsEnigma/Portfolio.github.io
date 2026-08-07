@@ -1,0 +1,8 @@
+[type]
+title-bar
+
+[title]
+Why it works
+
+[background]
+#ffffff

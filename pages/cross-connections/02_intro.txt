@@ -1,0 +1,16 @@
+[type]
+text-left
+
+[title]
+Introduction
+
+[text]
+The Mini is to the Crossword what this is to Connections. 
+
+I've designed this puzzle format because Connections is my favorite NYT game and I'd love to see a long-form version of it. This take on the connections formula involves a layout where categories intersect, allowing single phrases to have multiple interpretations depending on the categories they're apart of.
+
+[media]
+PuzzleExample.png
+
+[background]
+#a0c35a

@@ -1,0 +1,14 @@
+[type]
+text-only
+
+[title]
+How to play
+
+[text]
+Each phrase (right) belongs in a cell on the layout (left). the layout is arranged such that every line of four cells contains four phrases which have something in common with each other, forming a category. these categories intersect, making junction points. A phrase which belongs on a junction point will have two different interpretations simultaneously, pertaining to their respective categories. Some phrases have already been placed in for you; They garner colors which represent their category's difficulty. Yellow categories are easy- they are four words that can be taken at face value, such as synonyms or themed pop culture references. Then goes green, then blue, and finally purple. Purple categories are very tricky, sneaky, and obscure, and are often not very related to the phrases themselves; but they will still always follow a consistent rule.
+
+[media]
+PuzzleExample.png
+
+[background]
+#f9df6d

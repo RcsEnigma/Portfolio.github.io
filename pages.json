@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-07T04:33:20.559Z",
+  "generated": "2026-08-07T18:26:22.301Z",
   "pages": [
     {
       "slug": "cross-connections",
@@ -28,11 +28,77 @@
           "game": "game"
         },
         {
+          "type": "text-left",
+          "title": "Introduction",
+          "text": "The Mini is to the Crossword what this is to Connections. \n\nI've designed this puzzle format because Connections is my favorite NYT game and I'd love to see a long-form version of it. This take on the connections formula involves a layout where categories intersect, allowing single phrases to have multiple interpretations depending on the categories they're apart of.",
+          "media": [
+            {
+              "file": "PuzzleExample.png",
+              "type": "image",
+              "thumb": "PuzzleExample.webp",
+              "zoomThumb": "PuzzleExample_zoom.webp"
+            }
+          ],
+          "background": "#a0c35a",
+          "compress": true,
+          "game": "game"
+        },
+        {
           "type": "game-embed",
           "title": "Cross Connections",
           "text": "Click to play. Best on desktop — use the fullscreen button in-game once it loads.",
           "media": [],
           "background": "#ffffff",
+          "compress": true,
+          "game": "game"
+        },
+        {
+          "type": "text-only",
+          "title": "How to play",
+          "text": "Each phrase (right) belongs in a cell on the layout (left). the layout is arranged such that every line of four cells contains four phrases which have something in common with each other, forming a category. these categories intersect, making junction points. A phrase which belongs on a junction point will have two different interpretations simultaneously, pertaining to their respective categories. Some phrases have already been placed in for you; They garner colors which represent their category's difficulty. Yellow categories are easy- they are four words that can be taken at face value, such as synonyms or themed pop culture references. Then goes green, then blue, and finally purple. Purple categories are very tricky, sneaky, and obscure, and are often not very related to the phrases themselves; but they will still always follow a consistent rule.",
+          "media": [
+            {
+              "file": "PuzzleExample.png",
+              "type": "image",
+              "thumb": "PuzzleExample.webp",
+              "zoomThumb": "PuzzleExample_zoom.webp"
+            }
+          ],
+          "background": "#f9df6d",
+          "compress": true,
+          "game": "game"
+        },
+        {
+          "type": "title-bar",
+          "title": "Why it works",
+          "text": "",
+          "media": [],
+          "background": "#ffffff",
+          "compress": true,
+          "game": "game"
+        },
+        {
+          "type": "text-left",
+          "title": "Nuances",
+          "text": "- One phrase in each category is already revealed, including it's difficulty. Not only does this 'anchor' the puzzle and prevent players from inputting categories wherever they want, but revealing the color allows them to break down the puzzle and work through it in a semi-linear fashion, as opposed to being completely left in the dark (this system is what you already do in standard connections games, you just call it a 'hint', accessible on a different page).\n\n- It's good to start with the yellows, as they can be taken at face value and will be the easiest to figure out; it helps to establish the board and remove fluff from the phrase list. However, it's possible a category of any difficulty could be immediately apparent to the player (in which case there's no downside to establishing it early on).\n\n- The junction points are also very powerful, as you'd need to look though the phrase list to find what applies to both categories. No 'junction word' will ever have the same meaning in both categories, so referencing the given phrases in relation to their junction point could help you find out the hidden multiple interpretations of any phrase.\n\n- The loops are what really brings the puzzle together - when players are struggling with a category, they can tackle it from an alternative method by solving the intersecting categories, in order to loop back around and solve a different junction point in the initial category. If done effectively, it helps greatly in two ways: 3/4 of phrases in the single category are revealed AND a lot of phrases get removed from the word bank, narrowing down the possible solutions. \n\n- I also hypothesized a player-configurable 'Hard Mode' which would add an interesting twist - every puzzle now includes one additional phrase in it's list, which does NOT belong to any cell. Given the puzzlemaker can choose whatever phrase they want, it not only gives opportunity for true red herrings, but also removes the standard 'process of elimination' mentality that a near-complete puzzle usually fosters.",
+          "media": [],
+          "background": "#b0c4ef",
+          "compress": true,
+          "game": "game"
+        },
+        {
+          "type": "image-left",
+          "title": "Why Bother?",
+          "text": "It's no doubt NYT's Games branch has become an incredibly valuable pillar of NYT as a whole. Frequent experimentation with concepts like Vertex, Zorse, Capture, and Digits tell me you're open to new ideas.",
+          "media": [
+            {
+              "file": "PuzzleExample.png",
+              "type": "image",
+              "thumb": "PuzzleExample.webp",
+              "zoomThumb": "PuzzleExample_zoom.webp"
+            }
+          ],
+          "background": "#ba81c5",
           "compress": true,
           "game": "game"
         }

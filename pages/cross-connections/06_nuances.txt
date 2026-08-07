@@ -1,0 +1,20 @@
+[type]
+text-left
+
+[title]
+Nuances
+
+[text]
+- One phrase in each category is already revealed, including it's difficulty. Not only does this 'anchor' the puzzle and prevent players from inputting categories wherever they want, but revealing the color allows them to break down the puzzle and work through it in a semi-linear fashion, as opposed to being completely left in the dark (this system is what you already do in standard connections games, you just call it a 'hint', accessible on a different page).
+
+- It's good to start with the yellows, as they can be taken at face value and will be the easiest to figure out; it helps to establish the board and remove fluff from the phrase list. However, it's possible a category of any difficulty could be immediately apparent to the player (in which case there's no downside to establishing it early on).
+
+- The junction points are also very powerful, as you'd need to look though the phrase list to find what applies to both categories. No 'junction word' will ever have the same meaning in both categories, so referencing the given phrases in relation to their junction point could help you find out the hidden multiple interpretations of any phrase.
+
+- The loops are what really brings the puzzle together - when players are struggling with a category, they can tackle it from an alternative method by solving the intersecting categories, in order to loop back around and solve a different junction point in the initial category. If done effectively, it helps greatly in two ways: 3/4 of phrases in the single category are revealed AND a lot of phrases get removed from the word bank, narrowing down the possible solutions. 
+
+- I also hypothesized a player-configurable 'Hard Mode' which would add an interesting twist - every puzzle now includes one additional phrase in it's list, which does NOT belong to any cell. Given the puzzlemaker can choose whatever phrase they want, it not only gives opportunity for true red herrings, but also removes the standard 'process of elimination' mentality that a near-complete puzzle usually fosters.  
+
+
+[background]
+#b0c4ef

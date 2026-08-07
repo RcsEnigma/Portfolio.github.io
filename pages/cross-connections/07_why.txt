@@ -1,0 +1,14 @@
+[type]
+image-left
+
+[title]
+Why Bother?
+
+[text]
+It's no doubt NYT's Games branch has become an incredibly valuable pillar of NYT as a whole. Frequent experimentation with concepts like Vertex, Zorse, Capture, and Digits tell me you're open to new ideas.
+
+[media]
+PuzzleExample.png
+
+[background]
+#ba81c5
