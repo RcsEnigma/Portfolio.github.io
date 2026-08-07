@@ -70,6 +70,41 @@
       "}" +
       ".w-carousel-btn:hover{background:rgba(255,255,255,.18);color:#fff;}" +
 
+      // Game embed — poster + lazily-mounted iframe
+      ".w-game-embed{" +
+        "position:relative;width:100%;aspect-ratio:8/5;" +
+        "border-radius:var(--radius);overflow:hidden;background:#0a0a0a;" +
+      "}" +
+      ".w-game-embed iframe{" +
+        "position:absolute;inset:0;width:100%;height:100%;border:0;display:block;" +
+      "}" +
+      ".w-game-poster{" +
+        "position:absolute;inset:0;display:flex;align-items:center;justify-content:center;" +
+        "cursor:pointer;background:#0a0a0a;" +
+      "}" +
+      ".w-game-poster img{" +
+        "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" +
+        "opacity:.5;transition:opacity .25s ease;" +
+      "}" +
+      ".w-game-poster:hover img{opacity:.65;}" +
+      ".w-game-poster-inner{" +
+        "position:relative;z-index:1;display:flex;flex-direction:column;" +
+        "align-items:center;gap:.8rem;padding:0 1.5rem;text-align:center;" +
+      "}" +
+      ".w-game-play-btn{" +
+        "width:60px;height:60px;border-radius:50%;flex-shrink:0;" +
+        "background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);" +
+        "display:flex;align-items:center;justify-content:center;" +
+        "transition:background .2s ease,transform .2s ease;" +
+      "}" +
+      ".w-game-poster:hover .w-game-play-btn{background:var(--accent);transform:scale(1.08);}" +
+      ".w-game-play-btn svg{width:20px;height:20px;fill:#fff;margin-left:3px;}" +
+      ".w-game-title{" +
+        "font-family:var(--mono);font-size:.8rem;letter-spacing:.08em;" +
+        "text-transform:uppercase;color:rgba(255,255,255,.9);" +
+      "}" +
+      ".w-game-caption{font-size:.85rem;color:rgba(255,255,255,.55);max-width:32rem;}" +
+
       // Zoom overlay
       "#page-zoom-overlay{" +
         "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.97);" +
@@ -261,6 +296,7 @@
       case "carousel":   section.appendChild(buildCarouselWidget(w, slug)); break;
       case "trio":        section.appendChild(buildTrio(w, slug)); break;
       case "title-bar":  section.appendChild(buildTitleBar(w)); break;
+      case "game-embed": section.appendChild(buildGameEmbed(w, slug)); break;
       case "text-only":
       default:            section.appendChild(buildTextOnly(w)); break;
     }
@@ -359,6 +395,50 @@
       bar.appendChild(p);
     }
     return bar;
+  }
+
+  // ── Game embed — click-to-play Unity WebGL build in an iframe ─────
+  // Deliberately not auto-loaded: Unity builds are large (often 10MB+ of
+  // .wasm/.data), so nothing is fetched until the person actually clicks
+  // play. Fullscreen is handled by the Unity build's own fullscreen button
+  // (see /pages/<slug>/<game>/index.html) calling unityInstance.SetFullscreen —
+  // that call only succeeds from inside the iframe because of the
+  // allow="fullscreen" / allowfullscreen attributes set below.
+  function buildGameEmbed(w, slug) {
+    const wrap = document.createElement("div");
+    wrap.className = "w-game-embed";
+
+    const gameFolder = w.game || "game";
+    const gameUrl = "/pages/" + slug + "/" + gameFolder + "/index.html";
+
+    const poster = document.createElement("div");
+    poster.className = "w-game-poster";
+
+    const posterItem = w.media && w.media[0];
+    if (posterItem) {
+      const img = buildMediaEl(slug, posterItem, { noZoom: true });
+      if (img) poster.appendChild(img);
+    }
+
+    const inner = document.createElement("div");
+    inner.className = "w-game-poster-inner";
+    inner.innerHTML =
+      '<div class="w-game-play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>' +
+      (w.title ? `<div class="w-game-title">${esc(w.title)}</div>` : "") +
+      (w.text  ? `<div class="w-game-caption">${esc(w.text)}</div>` : "");
+    poster.appendChild(inner);
+
+    poster.onclick = () => {
+      const iframe = document.createElement("iframe");
+      iframe.src = gameUrl;
+      iframe.setAttribute("allowfullscreen", "");
+      iframe.setAttribute("allow", "fullscreen; autoplay");
+      wrap.innerHTML = "";
+      wrap.appendChild(iframe);
+    };
+
+    wrap.appendChild(poster);
+    return wrap;
   }
 
   // ── Carousel — film-strip with centre-pivot positioning ───────────

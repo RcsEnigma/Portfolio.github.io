@@ -1,0 +1,14 @@
+[type]
+game-embed
+
+[title]
+CrossConnections
+
+[text]
+Click to play. Best on desktop — use the fullscreen button in-game once it loads.
+
+[game]
+game
+
+[background]
+#0a0a0a

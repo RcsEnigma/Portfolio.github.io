@@ -1,6 +1,27 @@
 {
-  "generated": "2026-08-05T12:41:18.712Z",
+  "generated": "2026-08-07T04:15:52.844Z",
   "pages": [
+    {
+      "slug": "cross-connections",
+      "folder": "cross-connections",
+      "label": "Cross Connections",
+      "order": null,
+      "featured": true,
+      "carouselMedia": "CardDisplay.mp4",
+      "carouselType": "video",
+      "carouselCaption": "Map phrases to categories",
+      "widgets": [
+        {
+          "type": "game-embed",
+          "title": "CrossConnections",
+          "text": "Click to play. Best on desktop — use the fullscreen button in-game once it loads.",
+          "media": [],
+          "background": "#0a0a0a",
+          "compress": true,
+          "game": "game"
+        }
+      ]
+    },
     {
       "slug": "exul-omnium",
       "folder": "exul-omnium",
@@ -24,7 +45,8 @@
             }
           ],
           "background": "#EDEAE4",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "split",
@@ -45,7 +67,8 @@
             }
           ],
           "background": "#18191C",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "trio",
@@ -72,7 +95,8 @@
             }
           ],
           "background": "#060708",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "text-left",
@@ -87,7 +111,8 @@
             }
           ],
           "background": "#292A2E",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "image-left",
@@ -102,7 +127,8 @@
             }
           ],
           "background": "#18191C",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "text-only",
@@ -110,7 +136,8 @@
           "text": "",
           "media": [],
           "background": "#CCC7BC",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "split",
@@ -131,7 +158,8 @@
             }
           ],
           "background": "#18191C",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "text-only",
@@ -146,7 +174,8 @@
             }
           ],
           "background": "#292A2E",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "trio",
@@ -173,7 +202,8 @@
             }
           ],
           "background": "#292A2E",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "text-left",
@@ -188,7 +218,8 @@
             }
           ],
           "background": "#18191C",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "carousel",
@@ -245,7 +276,8 @@
             }
           ],
           "background": "#060708",
-          "compress": true
+          "compress": true,
+          "game": "game"
         },
         {
           "type": "image-left",
@@ -260,7 +292,8 @@
             }
           ],
           "background": "#CCC7BC",
-          "compress": true
+          "compress": true,
+          "game": "game"
         }
       ]
     }

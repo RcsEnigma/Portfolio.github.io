@@ -382,7 +382,7 @@ async function buildWorks() {
 
 const VALID_WIDGET_TYPES = new Set([
   "image-left","text-left","split","media-only","full-bleed",
-  "text-only","carousel","trio","title-bar"
+  "text-only","carousel","trio","title-bar","game-embed"
 ]);
 
 function parsePageMeta(raw, folderName) {
@@ -402,6 +402,12 @@ function parseWidget(raw) {
   const mediaList = (b.media||"").split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
   // [compress] defaults to true — set to false to skip thumbnail generation for this widget
   const compress = !/^(false|no|0)$/i.test(b.compress||"");
+  // [game] only applies to type=game-embed — subfolder (relative to the page
+  // folder) containing the game's own index.html + Build/ output. Defaults
+  // to "game". [media] on a game-embed widget is optional and, if present,
+  // is used as the click-to-play poster image (goes through the normal
+  // thumbnail pipeline like any other widget image).
+  const game = (b.game || "game").trim();
   return {
     type: VALID_WIDGET_TYPES.has(type) ? type : "text-only",
     title: b.title||"",
@@ -409,6 +415,7 @@ function parseWidget(raw) {
     media: mediaList,
     background: b.background||null,
     compress,
+    game,
   };
 }
 
@@ -471,6 +478,15 @@ async function buildPages() {
         mediaItems.push({ file, type:mtype, thumb, zoomThumb });
       }
       w.media = mediaItems;
+
+      if (w.type === "game-embed") {
+        const gameIndexPath = path.join(pageDir, w.game, "index.html");
+        if (!fs.existsSync(gameIndexPath)) {
+          console.log(`  warning: /pages/${folderName}/${f} is type "game-embed" but ` +
+            `/pages/${folderName}/${w.game}/index.html doesn't exist — check [game] or the folder contents.`);
+        }
+      }
+
       widgets.push(w);
     }
 

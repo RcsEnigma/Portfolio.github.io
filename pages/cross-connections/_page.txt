@@ -1,0 +1,11 @@
+[label]
+Cross Connections
+
+[featured]
+true
+
+[carousel_media]
+CardDisplay.mp4
+
+[carousel_caption]
+Map phrases to categories
