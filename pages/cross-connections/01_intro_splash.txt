@@ -1,0 +1,11 @@
+[type]
+full-bleed
+
+[title]
+CROSS CONNECTIONS
+
+[media]
+CardDisplay.mp4
+
+[background]
+#ffffff

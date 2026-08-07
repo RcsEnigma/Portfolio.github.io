@@ -2,7 +2,7 @@
 game-embed
 
 [title]
-CrossConnections
+Cross Connections
 
 [text]
 Click to play. Best on desktop — use the fullscreen button in-game once it loads.
@@ -11,4 +11,4 @@ Click to play. Best on desktop — use the fullscreen button in-game once it loa
 game
 
 [background]
-#0a0a0a
+#ffffff
