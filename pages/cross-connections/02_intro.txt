@@ -13,4 +13,4 @@ I've designed this puzzle format because Connections is my favorite NYT game and
 PuzzleExample.png
 
 [background]
-#a0c35a
+#f9df6d

@@ -11,4 +11,4 @@ Each phrase (right) belongs in a cell on the layout (left). the layout is arrang
 PuzzleExample.png
 
 [background]
-#f9df6d
+#a0c35a
