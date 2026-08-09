@@ -13,7 +13,7 @@ Nuances
 
 - The loops are what really brings the puzzle together - when players are struggling with a category, they can tackle it from an alternative method by solving the intersecting categories, in order to loop back around and solve a different junction point in the initial category. If done effectively, it helps greatly in two ways: 3/4 of phrases in the single category are revealed AND a lot of phrases get removed from the word bank, narrowing down the possible solutions. 
 
-- I also hypothesized a player-configurable 'Hard Mode' which would add an interesting twist - every puzzle now includes one additional phrase in it's list, which does NOT belong to any cell. Given the puzzlemaker can choose whatever phrase they want, it not only gives opportunity for true red herrings, but also removes the standard 'process of elimination' mentality that a near-complete puzzle usually fosters.  
+- I also hypothesized an opt-in 'Hard Mode' which would add an interesting twist - every puzzle now includes one additional phrase in it's list, which does NOT belong to any cell. Given the puzzlemaker can choose whatever phrase they want, it not only gives opportunity for true red herrings, but also removes the standard 'process of elimination' mentality that a near-complete puzzle usually fosters.  
 
 
 [background]
