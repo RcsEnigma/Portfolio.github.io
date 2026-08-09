@@ -5,9 +5,9 @@ text-left
 Introduction
 
 [text]
-The Mini is to the Crossword what this is to Connections. 
+We all love playing Connections - it's a succinct, bite-sized puzzle which accompanies your morning coffee. It's a great formula, but experienced players don't get to sink their teeth into it; Let's give them something with a bit more substance - something that will transfix them for the entire day.
 
-I've designed this puzzle format because Connections is my favorite NYT game and I'd love to see a long-form version of it. This take on the connections formula involves a layout where categories intersect, allowing single phrases to have multiple interpretations depending on the categories they're apart of.
+I've designed this puzzle format because Connections is my favorite NYT game and I'd love to see a long-form version of it. This take on the Connections formula involves a layout where categories intersect, allowing single phrases to have multiple interpretations depending on the categories they're apart of. The closest comparison I can think of is how Wordle would be logically adapted into a Scrabble-like format. But, this dichotomy already exists on your roster - the Crossword and the Mini deliver the same gameplay premise simultaneously in both long and short formats.
 
 [media]
 PuzzleExample.png

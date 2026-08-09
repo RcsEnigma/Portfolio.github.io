@@ -15,6 +15,8 @@ Nuances
 
 - I also hypothesized an opt-in 'Hard Mode' which would add an interesting twist - every puzzle now includes one additional phrase in it's list, which does NOT belong to any cell. Given the puzzlemaker can choose whatever phrase they want, it not only gives opportunity for true red herrings, but also removes the standard 'process of elimination' mentality that a near-complete puzzle usually fosters.  
 
+- The format here is also extremely malleable; these puzzles feature 10 categories with 4 phrases each, but we can easily raise/lower those values as we please. Maybe every puzzle should be centered around one 'theme' category with 5-8 phrases in it? Maybe we scale the size of puzzles to 12-16 categories - these numbers could be anything. However, through limited testing, I've found 10-12 is the sweet spot; going higher results in too many words in the phrase box and the puzzle gets exponentially harder to comb through and digest for the player.
+
 [media]
 PuzzleExample.png
 

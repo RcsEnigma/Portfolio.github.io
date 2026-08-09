@@ -5,7 +5,7 @@ game-embed
 Cross Connections
 
 [text]
-Click to play. Best on desktop, in fullscreen.
+Click to play. Best on desktop, in fullscreen. ESC to close.
 
 [game]
 game

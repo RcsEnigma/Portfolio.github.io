@@ -7,6 +7,8 @@ Why Bother?
 [text]
 It's no doubt NYT's Games branch has become an incredibly valuable pillar of NYT as a whole. Frequent experimentation with concepts like Vertex, Zorse, Capture, and Digits tell me you're open to new ideas.
 
+Players deserve a new challenge once they've mastered Connections - and the metrics tell us plenty of players are ready for something new. 
+
 [media]
 PuzzleExample.png
 
