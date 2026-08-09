@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-09T12:32:28.267Z",
+  "generated": "2026-08-09T13:00:52.654Z",
   "pages": [
     {
       "slug": "cross-connections",
@@ -220,7 +220,7 @@
           "game": "game"
         },
         {
-          "type": "text-only",
+          "type": "title-bar",
           "title": "REBIRTH",
           "text": "",
           "media": [],
