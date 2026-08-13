@@ -72,8 +72,14 @@
 
       // Game embed — poster + lazily-mounted iframe
       ".w-game-embed{" +
-        "position:relative;width:100%;aspect-ratio:8/5;" +
+        "position:relative;" +
+        "width:96vw;max-width:1700px;" +
+        "margin-left:50%;transform:translateX(-50%);" +
+        "aspect-ratio:8/5;max-height:85vh;" +
         "border-radius:var(--radius);overflow:hidden;background:#0a0a0a;" +
+      "}" +
+      "@media (max-width:640px){" +
+        ".w-game-embed{width:100vw;max-height:70vh;border-radius:0;}" +
       "}" +
       ".w-game-embed iframe{" +
         "position:absolute;inset:0;width:100%;height:100%;border:0;display:block;" +

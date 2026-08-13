@@ -10,5 +10,8 @@ Click to play. Best on desktop, in fullscreen. ESC to close.
 [game]
 game
 
+[media]
+PuzzleExample.png
+
 [background]
 #ffffff

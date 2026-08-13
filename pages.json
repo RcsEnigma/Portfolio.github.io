@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-10T06:30:17.043Z",
+  "generated": "2026-08-13T03:53:57.033Z",
   "pages": [
     {
       "slug": "cross-connections",
@@ -47,7 +47,14 @@
           "type": "game-embed",
           "title": "Cross Connections",
           "text": "Click to play. Best on desktop, in fullscreen. ESC to close.",
-          "media": [],
+          "media": [
+            {
+              "file": "PuzzleExample.png",
+              "type": "image",
+              "thumb": "PuzzleExample.webp",
+              "zoomThumb": "PuzzleExample_zoom.webp"
+            }
+          ],
           "background": "#ffffff",
           "compress": true,
           "game": "game"
