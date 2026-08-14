@@ -1823,6 +1823,62 @@ class CustomSetPlugin extends SingleWordRulePlugin {
 }
 
 // ═══════════════════════════════════════════════════
+//  WORDNET SYNONYM CLUSTERS — offline, bundled (no API calls, no tokens)
+//  Data file: wordnet_synonyms.json (sibling of this file), fetched once
+//  at startup below. Regenerate the data any time with parse_wordnet.py.
+//  Source: Princeton WordNet 3.1. Starts disabled and only flips on once
+//  the fetch succeeds — see loadWordNetData() near autoLoadPacksManifest.
+// ═══════════════════════════════════════════════════
+let WN_SYNSETS = null; // id -> { p: 'n'|'v'|'a'|'r', w: [word, word, ...] }
+let WN_WORDS = null;   // word -> [synsetId, synsetId, ...]
+const WN_POS_LABEL = { n: 'noun', v: 'verb', a: 'adjective', r: 'adverb' };
+
+class WordNetSynonymPlugin extends SingleWordRulePlugin {
+  constructor() {
+    super({
+      id: 'wordnetSynonym',
+      name: 'Synonym Cluster (WordNet)',
+      description: 'Shares a precise dictionary synonym set with other words — also surfaces distinct senses of a single ambiguous word (e.g. every meaning of "wave").',
+      color: 'green',
+      confidence: 'high',
+      source: 'local',
+      enabled: false, // flipped true once wordnet_synonyms.json finishes loading
+    });
+  }
+
+  evaluate(word, w) {
+    if (!WN_WORDS) return [];
+    const ids = WN_WORDS[w];
+    if (!ids || !ids.length) return [];
+
+    return ids.map(id => {
+      const syn = WN_SYNSETS[id];
+      const others = syn.w.filter(x => x !== w);
+      if (!others.length) return null;
+
+      const posLabel = WN_POS_LABEL[syn.p] || syn.p;
+      // Canonical name derives from the FULL sorted synset member list, not
+      // from whichever input word triggered it — so if word1 and word2 are
+      // both in this synset, they independently produce the identical
+      // categoryName, and SingleWordRulePlugin's built-in pair-mode
+      // AND-logic finds the match automatically.
+      const sortedAll = [...syn.w].sort();
+      const label = sortedAll.slice(0, 4).map(x => x.toUpperCase()).join(', ')
+        + (sortedAll.length > 4 ? '…' : '');
+
+      return {
+        categoryName: `SYNONYMS (${posLabel.toUpperCase()}): ${label}`,
+        ruleDescription: `Shares a precise WordNet synonym set (${posLabel}) with these words.`,
+        inputWordsFit: `${word.toUpperCase()} means the same as: ${others.map(x => x.toUpperCase()).join(', ')}`,
+        otherExamples: others.map(cap),
+      };
+    }).filter(Boolean);
+  }
+}
+
+const wordNetPlugin = new WordNetSynonymPlugin();
+
+// ═══════════════════════════════════════════════════
 //  REGISTER ALL PLUGINS
 // ═══════════════════════════════════════════════════
 const customSetPlugin = new CustomSetPlugin();
@@ -1848,6 +1904,7 @@ rebuildCategoryPool();
   new LetterAdditionPlugin(),
   new StartsEndsWordPlugin(),
   new HiddenWordPlugin(),
+  wordNetPlugin,
   customSetPlugin,
   new DatamuseSharedSynonymPlugin(),
   new DatamuseSharedTriggerPlugin(),
@@ -1973,6 +2030,27 @@ function deriveNameFromUrl(url) {
     const file = url.split('/').filter(Boolean).pop().replace(/\.json$/i, '');
     return file.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Imported Pack';
   } catch { return 'Imported Pack'; }
+}
+
+// Fetches wordnet_synonyms.json (same directory as this file) and, if
+// successful, enables the WordNetSynonymPlugin and refreshes its checkbox
+// in the settings drawer. Mirrors autoLoadPacksManifest()'s fail-quietly
+// behavior below — if the file isn't there, or this page was opened
+// directly as file:// rather than served over http/https, it just leaves
+// the plugin disabled rather than erroring.
+async function loadWordNetData() {
+  try {
+    const res = await fetch('./wordnet_synonyms.json');
+    if (!res.ok) return;
+    const data = await res.json();
+    WN_SYNSETS = data.synsets;
+    WN_WORDS = data.words;
+    wordNetPlugin.enabled = true;
+    registry.saveState();
+    if (document.getElementById('pluginGrid')) renderPluginGrid(); // no-op if drawer hasn't been opened yet
+  } catch (e) {
+    console.warn('No wordnet_synonyms.json found (optional feature):', e);
+  }
 }
 
 // Silently checks for a "packs.json" manifest next to this file (same
@@ -2145,6 +2223,7 @@ function updatePairEstimate() {
 
 ensureFieldCount(1);
 autoLoadPacksManifest();
+loadWordNetData();
 
 // ═══════════════════════════════════════════════════
 //  RENDER HELPERS
