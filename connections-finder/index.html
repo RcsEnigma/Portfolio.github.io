@@ -381,11 +381,39 @@ const AFFIX_GROUPS = [
   { affix:"ground", pos:"after",  disp:"___GROUND", members:["back","fore","play","under","camp","battle","above","below","firm","high","low","middle","burial","common","fair","hunting","rally","show","testing","training"] },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────
+// GENERATED AFFIX GROUPS — mined from WordNet's own multi-word lemmas and
+// fused-compound spelling, via parse_affixes.py, instead of hand-typed.
+// Loaded from affix_lookup_generated.json (sibling file) at startup below;
+// same fail-quietly pattern as the WordNet synonym data and packs.json.
+// Hand-typed AFFIX_GROUPS above stays authoritative — a generated entry
+// only fills in an (affix, pos) combination that isn't already curated
+// above, rather than overriding it.
+// ─────────────────────────────────────────────────────────────────────────
+let GENERATED_AFFIX_GROUPS = [];
+
 const AFFIX_LOOKUP = {};
-for (const g of AFFIX_GROUPS) {
-  for (const m of g.members) {
-    if (!AFFIX_LOOKUP[m]) AFFIX_LOOKUP[m] = [];
-    AFFIX_LOOKUP[m].push(g);
+function rebuildAffixLookup() {
+  for (const key of Object.keys(AFFIX_LOOKUP)) delete AFFIX_LOOKUP[key];
+  const curatedKeys = new Set(AFFIX_GROUPS.map(g => `${g.affix}|${g.pos}`));
+  const all = [...AFFIX_GROUPS, ...GENERATED_AFFIX_GROUPS.filter(g => !curatedKeys.has(`${g.affix}|${g.pos}`))];
+  for (const g of all) {
+    for (const m of g.members) {
+      if (!AFFIX_LOOKUP[m]) AFFIX_LOOKUP[m] = [];
+      AFFIX_LOOKUP[m].push(g);
+    }
+  }
+}
+rebuildAffixLookup();
+
+async function loadGeneratedAffixes() {
+  try {
+    const res = await fetch('./affix_lookup_generated.json');
+    if (!res.ok) return;
+    GENERATED_AFFIX_GROUPS = await res.json();
+    rebuildAffixLookup();
+  } catch (e) {
+    console.warn('No affix_lookup_generated.json found (optional feature):', e);
   }
 }
 
@@ -2224,6 +2252,7 @@ function updatePairEstimate() {
 ensureFieldCount(1);
 autoLoadPacksManifest();
 loadWordNetData();
+loadGeneratedAffixes();
 
 // ═══════════════════════════════════════════════════
 //  RENDER HELPERS
