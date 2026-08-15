@@ -1611,20 +1611,75 @@ class StartsEndsWordPlugin extends SingleWordRulePlugin {
 }
 
 class HiddenWordPlugin extends SingleWordRulePlugin {
-  constructor() { super({ id:'hiddenWord', name:'Hidden Word Inside', description:'Conceals an animal/color/number/body part/metal inside its spelling.', color:'orange', confidence:'medium' }); }
+  constructor() { super({ id:'hiddenWord', name:'Hidden Word Inside', description:'Conceals a real word — from a curated category, or any dictionary word once WordNet data is loaded — inside its spelling, at any position.', color:'orange', confidence:'medium' }); }
   evaluate(word, w) {
+    const hits = []; // { item, catName|null, tagged }
+
+    // 1) Curated categories first — existing rich behavior, unchanged.
+    //    These get priority billing (richer categoryName + curated examples).
     for (const [catName, list] of Object.entries(HIDDEN_CATEGORIES)) {
       for (const item of list) {
         if (w.includes(item) && item !== w && w.length > item.length) {
-          const idx = w.indexOf(item);
-          const curated = HIDDEN_HOSTS[item] || [];
-          const fromData = findHostsInData(item);
-          const examples = [...new Set([...curated, ...fromData])].filter(e => norm(e).includes(item) && norm(e) !== item).slice(0, 6);
-          return [{ categoryName:`HIDES A ${catName.toUpperCase()} — CONTAINS "${item.toUpperCase()}"`, ruleDescription:`The ${catName} "${item.toUpperCase()}" is concealed inside this word.`, inputWordsFit:`${word.toUpperCase()} contains "${item.toUpperCase()}" (position ${idx+1})`, otherExamples: examples.length >= 2 ? examples : [`Any word containing "${item.toUpperCase()}"`] }];
+          hits.push({ item, catName, tagged: true });
         }
       }
     }
-    return [];
+
+    // 2) Generic dictionary fallback (WordNet-backed, once loaded) — any
+    // real word (length >= 4, to cut down on coincidental short-substring
+    // noise like "pro"/"rod" inside "product") hidden anywhere in the
+    // spelling, not just the 5 curated categories. Only adds items not
+    // already caught above. This is what catches things like "sham"
+    // hiding "ham", "juicer" hiding "juice", "milkweed" hiding "milk" --
+    // none of which are animals/colors/numbers/body-parts/metals, but are
+    // all real dictionary words.
+    if (WN_DICTIONARY) {
+      const covered = new Set(hits.map(h => h.item));
+      for (let i = 0; i < w.length; i++) {
+        for (let j = i + 3; j <= w.length; j++) {
+          const sub = w.slice(i, j);
+          if (sub === w || covered.has(sub)) continue;
+          // 3-letter hits are only trustworthy right at the start/end of
+          // the word (sham->HAM, spork->PORK) -- in the middle of a
+          // longer word, short substrings match too often by pure
+          // coincidence (product->ROD). Require length>=4 for interior
+          // matches; edges can stay at the lower length-3 bar.
+          const atEdge = (i === 0 || j === w.length);
+          if (sub.length < 4 && !atEdge) continue;
+          if (WN_DICTIONARY.has(sub)) {
+            hits.push({ item: sub, catName: null, tagged: false });
+            covered.add(sub);
+          }
+        }
+      }
+    }
+
+    if (!hits.length) return [];
+
+    // Rank curated-category hits above generic ones, then prefer longer
+    // (more specific / less coincidental) hidden words, cap the list so
+    // a long word doesn't flood the UI with every 3-letter substring.
+    hits.sort((a, b) => (b.tagged - a.tagged) || (b.item.length - a.item.length));
+    const top = hits.slice(0, 5);
+
+    return top.map(({ item, catName, tagged }) => {
+      const idx = w.indexOf(item);
+      const curated = HIDDEN_HOSTS[item] || [];
+      const fromData = findHostsInData(item);
+      const examples = [...new Set([...curated, ...fromData])].filter(e => norm(e).includes(item) && norm(e) !== item).slice(0, 6);
+      const label = tagged
+        ? `HIDES A ${catName.toUpperCase()} — CONTAINS "${item.toUpperCase()}"`
+        : `CONTAINS THE WORD "${item.toUpperCase()}"`;
+      const desc = tagged
+        ? `The ${catName} "${item.toUpperCase()}" is concealed inside this word.`
+        : `The word "${item.toUpperCase()}" is concealed inside this word's spelling.`;
+      return {
+        categoryName: label,
+        ruleDescription: desc,
+        inputWordsFit: `${word.toUpperCase()} contains "${item.toUpperCase()}" (position ${idx + 1})`,
+        otherExamples: examples.length >= 2 ? examples : [`Any word containing "${item.toUpperCase()}"`],
+      };
+    });
   }
 }
 
@@ -1858,7 +1913,11 @@ class CustomSetPlugin extends SingleWordRulePlugin {
 //  the fetch succeeds — see loadWordNetData() near autoLoadPacksManifest.
 // ═══════════════════════════════════════════════════
 let WN_SYNSETS = null; // id -> { p: 'n'|'v'|'a'|'r', w: [word, word, ...] }
-let WN_WORDS = null;   // word -> [synsetId, synsetId, ...]
+let WN_WORDS = null;   // word -> [synsetId, synsetId, ...]  (words WITH a synonym cluster)
+let WN_DICTIONARY = null; // Set of every valid word, incl. words with no
+                           // synonyms (e.g. "milk") -- a different, broader
+                           // question than "does this word have synonyms".
+                           // Used by HiddenWordPlugin's dictionary fallback.
 const WN_POS_LABEL = { n: 'noun', v: 'verb', a: 'adjective', r: 'adverb' };
 
 class WordNetSynonymPlugin extends SingleWordRulePlugin {
@@ -2073,6 +2132,7 @@ async function loadWordNetData() {
     const data = await res.json();
     WN_SYNSETS = data.synsets;
     WN_WORDS = data.words;
+    WN_DICTIONARY = new Set(data.dictionary || []);
     wordNetPlugin.enabled = true;
     registry.saveState();
     if (document.getElementById('pluginGrid')) renderPluginGrid(); // no-op if drawer hasn't been opened yet

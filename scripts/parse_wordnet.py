@@ -15,7 +15,7 @@ def clean_word(w):
     w = re.sub(r'\(.*?\)', '', w)  # strip parenthetical markers like (a), (p)
     return w.strip()
 
-def parse_file(path, pos):
+def parse_file(path, pos, all_words_out):
     synsets = []  # list of (offset, [words])
     with open(path, encoding='utf-8', errors='ignore') as f:
         for line in f:
@@ -40,13 +40,22 @@ def parse_file(path, pos):
                 cw = clean_word(word)
                 if cw and re.match(r'^[a-zA-Z][a-zA-Z \-\']*$', cw):
                     words.append(cw.lower())
+            # Every word seen counts toward the "is this a real word?"
+            # dictionary, EVEN from singleton synsets (w_cnt==1, no
+            # synonyms) -- e.g. milk's primary sense has no synonyms but
+            # is obviously still a real word. Only the synonym-CLUSTER
+            # list below needs >=2 members; the dictionary itself doesn't.
+            for w in words:
+                if ' ' not in w:
+                    all_words_out.add(w)
             if len(words) >= 2:
                 synsets.append((f"{pos}{offset}", words, pos))
     return synsets
 
+all_valid_words = set()
 all_synsets = []
 for pos, fname in POS_FILES.items():
-    all_synsets.extend(parse_file(f"{DICT_DIR}/{fname}", pos))
+    all_synsets.extend(parse_file(f"{DICT_DIR}/{fname}", pos, all_valid_words))
 
 print(f"Total synsets parsed: {len(all_synsets)}", file=sys.stderr)
 
@@ -58,6 +67,10 @@ print(f"Total synsets parsed: {len(all_synsets)}", file=sys.stderr)
 # smaller payload than repeating the member list per word.
 synsets = {}   # id -> {pos, words:[...]}
 word_ids = defaultdict(list)  # word -> [id, ...]
+# all_valid_words already populated above (from parse_file, unfiltered by
+# synset size) -- this answers "is X a real word", which is a different
+# question from "does X have synonyms" (milk's primary sense is a
+# singleton synset -- no synonyms -- but it's obviously still a real word).
 
 for sid, words, pos in all_synsets:
     uniq = [w for w in dict.fromkeys(words) if ' ' not in w]  # single-token only
@@ -67,10 +80,11 @@ for sid, words, pos in all_synsets:
     for w in uniq:
         word_ids[w].append(sid)
 
-print(f"Final single-token words: {len(word_ids)}  synsets: {len(synsets)}", file=sys.stderr)
+print(f"Final single-token words (with synonyms): {len(word_ids)}  synsets: {len(synsets)}", file=sys.stderr)
+print(f"Total valid dictionary words (incl. no-synonym singles like 'milk'): {len(all_valid_words)}", file=sys.stderr)
 
 with open("wordnet_synonyms.json", "w") as f:
-    json.dump({"synsets": synsets, "words": word_ids}, f, separators=(',', ':'))
+    json.dump({"synsets": synsets, "words": word_ids, "dictionary": sorted(all_valid_words)}, f, separators=(',', ':'))
 
 import os
 print(f"Output size: {os.path.getsize('wordnet_synonyms.json')/1024/1024:.2f} MB", file=sys.stderr)
