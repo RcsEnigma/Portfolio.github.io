@@ -1,0 +1,167 @@
+{
+  "No Way Through": [
+    "red light",
+    "closed sign",
+    "dead end",
+    "page not found",
+    "busy signal"
+  ],
+  "Approval Given": [
+    "green light",
+    "thumbs up",
+    "rubber stamp",
+    "access granted",
+    "boarding pass"
+  ],
+  "Early Warning Signs": [
+    "red flag",
+    "smoke",
+    "coal mine canary",
+    "tripwire",
+    "check engine light"
+  ],
+  "Preview Or Sample": [
+    "free sample",
+    "movie trailer",
+    "excerpt",
+    "demo",
+    "test drive"
+  ],
+  "No Longer Usable": [
+    "burnt out bulb",
+    "flat tire",
+    "broken key",
+    "expired card",
+    "out of ink"
+  ],
+  "Espresso Machine Parts": [
+    "portafilter",
+    "steam wand",
+    "group head",
+    "drip tray",
+    "pressure gauge",
+    "water reservoir"
+  ],
+  "First Aid Kit Contents": [
+    "adhesive bandages",
+    "gauze pads",
+    "antiseptic wipes",
+    "tweezers",
+    "safety pins",
+    "medical tape"
+  ],
+  "Grandfather Clock Parts": [
+    "pendulum",
+    "weights",
+    "dial",
+    "chimes",
+    "case",
+    "hands"
+  ],
+  "California Roll Ingredients": [
+    "nori",
+    "sushi rice",
+    "crab stick",
+    "avocado",
+    "cucumber",
+    "sesame seeds"
+  ],
+  "Violin Parts": [
+    "body",
+    "neck",
+    "fingerboard",
+    "bridge",
+    "sound post",
+    "tuning pegs"
+  ],
+  "Manual Camera Controls": [
+    "shutter button",
+    "aperture ring",
+    "focus ring",
+    "film advance",
+    "rewind knob",
+    "shutter speed dial"
+  ],
+  "Sewing Kit Items": [
+    "needle",
+    "thread",
+    "scissors",
+    "pins",
+    "thimble",
+    "seam ripper"
+  ],
+  "Firefighter Turnout Gear": [
+    "helmet",
+    "turnout coat",
+    "turnout trousers",
+    "gloves",
+    "boots",
+    "air pack"
+  ],
+  "One Hole Objects": [
+    "donut",
+    "bagel",
+    "washer",
+    "drinking straw",
+    "ring",
+    "hula hoop"
+  ],
+  "Common Electrical Conductors": [
+    "copper wire",
+    "aluminum foil",
+    "pencil lead",
+    "salt water",
+    "steel spoon",
+    "tap water"
+  ],
+  "Attracted To A Magnet": [
+    "iron nail",
+    "steel paperclip",
+    "steel wrench",
+    "iron bolt",
+    "cast iron pan"
+  ],
+  "Floats Because Of Air": [
+    "steel ship",
+    "beach ball",
+    "empty bottle",
+    "life jacket",
+    "pool noodle"
+  ],
+  "Everyday Levers": [
+    "seesaw",
+    "crowbar",
+    "scissors",
+    "wheelbarrow",
+    "bottle opener"
+  ],
+  "Spiral Shapes": [
+    "corkscrew",
+    "screw",
+    "spring",
+    "spiral staircase",
+    "drill bit",
+    "snail shell"
+  ],
+  "Energy Storage Objects": [
+    "battery",
+    "flywheel",
+    "capacitor",
+    "compressed air",
+    "gasoline"
+  ],
+  "Pressure Vessels": [
+    "soda can",
+    "bicycle tire",
+    "aerosol can",
+    "pressure cooker",
+    "scuba tank"
+  ],
+  "Thermal Insulators": [
+    "wool coat",
+    "foam cup",
+    "double glazed window",
+    "thermos",
+    "bubble wrap"
+  ]
+}

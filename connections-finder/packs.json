@@ -13,6 +13,9 @@
     "kimi-linguistics-communication.json",
     "kimi-nature-deep.json",
     "kimi-sports-recreation.json",
-    "kimi-tech-modern.json"
+    "kimi-tech-modern.json",
+    "kimi-HIJ.json",
+    "gemini-HIJ.json",
+    "qwen-HIJ.json"
   ]
 }
