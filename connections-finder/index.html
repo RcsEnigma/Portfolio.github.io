@@ -212,7 +212,7 @@
         <button class="settings-btn" onclick="showFinderView()">← Back to Finder</button>
         <button class="analyze-btn loop-generate-btn" onclick="renderNewLoopFromInputs()">🎲 Generate</button>
       </div>
-      <p class="loop-input-hint">Fill in any of the 8 fields below (one candidate word/phrase per line) to steer generation — leave any blank and the algorithm picks freely for that spot. Each <strong>edge</strong> field represents BOTH non-corner cells on that side at once: on generate, the algorithm looks through the words you listed, picks one to determine the category, then finds a second word (from your list if another one fits, otherwise its own pick) for the other cell. Words you type that don't end up used are never placed anywhere else in the loop.</p>
+      <p class="loop-input-hint">Fill in any of the 8 fields below (one candidate word/phrase per line) to steer generation — leave any blank and the algorithm picks freely for that spot. Each field is an OR-selection, same as the main Finder: the algorithm picks exactly ONE of your candidates and uses it, never more than one, even if several would fit. Each <strong>edge</strong> field represents BOTH non-corner cells on that side at once — the one candidate it picks fills one cell, and the other cell is always filled freely by the algorithm, never from a leftover candidate in the same field. Words you type that don't end up picked are never placed anywhere else in the loop.</p>
       <div class="loop-input-grid">
         <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerTL"></textarea></div>
         <div class="loop-input-wrap"><span class="loop-input-label">Top edge</span><textarea class="loop-input-cell edge" id="loopIn_edgeTop"></textarea></div>
@@ -2894,11 +2894,31 @@ function pickForSlot(inputWords, poolMembers, reserved, used) {
   return free[Math.floor(Math.random() * free.length)];
 }
 
+// Picks n words to fill a multi-cell slot (currently: an edge's 2 filler
+// cells). Per the main Finder page's convention, a multi-line field is an
+// OR-selection -- it holds CANDIDATES, and the algorithm commits to using
+// exactly ONE of them, never more, regardless of how many others in the
+// list would also fit that category. That one pick fills one of the
+// output cells; any remaining cells for this same slot are filled freely
+// from the category's own members -- never from the leftover candidates
+// in this same field, which are simply not used (same as an unpicked
+// candidate on the main page: present as an option, not a guarantee).
 function pickManyForSlot(inputWords, poolMembers, reserved, used, n) {
+  const poolSet = new Set(poolMembers);
   const out = [];
-  for (let i = 0; i < n; i++) {
-    const w = pickForSlot(inputWords, poolMembers, reserved, used);
-    if (!w) return null;
+
+  if (inputWords.length > 0) {
+    const fit = inputWords.filter(w => poolSet.has(w) && !used.has(w));
+    if (!fit.length) return null; // hard fail -- none of the candidates fit this category
+    const picked = fit[Math.floor(Math.random() * fit.length)];
+    used.add(picked);
+    out.push(picked);
+  }
+
+  while (out.length < n) {
+    const free = poolMembers.filter(w => !reserved.has(w) && !used.has(w));
+    if (!free.length) return null;
+    const w = free[Math.floor(Math.random() * free.length)];
     used.add(w);
     out.push(w);
   }
