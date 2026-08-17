@@ -216,6 +216,41 @@
   .loop-excluded-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 3px 10px; margin: 3px 6px 3px 0; }
   .loop-excluded-chip button { background: none; border: none; cursor: pointer; color: #c33; font-weight: bold; padding: 0; font-size: .85rem; }
 
+  /* Edge category-lock: pick-category button on each of the 4 edge
+     fields, plus a small removable chip once one is locked in. */
+  .loop-edge-label-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-bottom: 3px; }
+  .loop-lock-btn { font-size: .68rem; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; cursor: pointer; color: var(--muted); line-height: 1.5; }
+  .loop-lock-btn:hover { border-color: #888; color: var(--text); }
+  .loop-locked-chip-row:empty { display: none; }
+  .loop-locked-chip { display: inline-flex; align-items: center; gap: 5px; background: #eef4ff; border: 1px solid #bcd2f5; border-radius: 12px; padding: 2px 8px; margin-bottom: 3px; font-size: .68rem; max-width: 100%; }
+  .loop-locked-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .loop-locked-chip button { background: none; border: none; cursor: pointer; color: #345; font-weight: bold; padding: 0; font-size: .8rem; flex-shrink: 0; }
+  .loop-locked-chip button:hover { color: #c33; }
+
+  /* Centered modal (category picker + browse-words popup), separate from
+     the side drawer -- both need a search box and a scrollable list. */
+  .cmodal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 50; align-items: center; justify-content: center; }
+  .cmodal-overlay.open { display: flex; }
+  .cmodal { background: var(--bg); border-radius: 14px; width: min(520px, 92vw); max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
+  .cmodal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 10px; }
+  .cmodal-head h3 { font-size: 1.05rem; font-weight: normal; }
+  .cmodal-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); line-height: 1; }
+  .cmodal-search { margin: 0 18px 10px; border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; font: inherit; font-size: .88rem; background: var(--surface); color: var(--text); outline: none; }
+  .cmodal-search:focus { border-color: #555; }
+  .cmodal-toolbar { display: flex; gap: 6px; margin: 0 18px 10px; flex-wrap: wrap; }
+  .cmodal-body { overflow-y: auto; padding: 0 18px 18px; flex: 1; }
+  .cmodal-hint { font-size: .8rem; color: var(--faint); font-style: italic; padding: 6px 2px; }
+
+  .cat-pick-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 6px; border-radius: 8px; cursor: pointer; }
+  .cat-pick-item:hover { background: var(--surface); }
+  .cat-pick-item-name { font-size: .85rem; font-weight: 500; }
+  .cat-pick-item-count { font-size: .72rem; color: var(--muted); flex-shrink: 0; }
+
+  .browse-word-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .browse-word-chip { font-family: var(--mono); font-size: .78rem; padding: 3px 10px; border-radius: 100px; background: var(--surface); border: 1px solid var(--border); letter-spacing: .5px; text-transform: uppercase; }
+  .browse-show-more-btn { margin-top: 14px; height: 34px; padding: 0 16px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface); font-family: var(--font); font-size: .8rem; cursor: pointer; }
+  .browse-show-more-btn:hover { border-color: #888; }
+
   @media (max-width: 900px) {
     .layout { flex-direction: column; }
     .sidebar { width: 100%; position: static; }
@@ -264,13 +299,29 @@
       <p class="loop-input-hint">Fill in any of the 8 fields below (one candidate word/phrase per line) to steer generation — leave any blank and the algorithm picks freely for that spot. Each field is an OR-selection, same as the main Finder: the algorithm picks exactly ONE of your candidates and uses it, never more than one, even if several would fit. Each <strong>edge</strong> field represents BOTH non-corner cells on that side at once — the one candidate it picks fills one cell, and the other cell is always filled freely by the algorithm, never from a leftover candidate in the same field. Words you type that don't end up picked are never placed anywhere else in the loop.</p>
       <div class="loop-input-grid">
         <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerTL"></textarea></div>
-        <div class="loop-input-wrap"><span class="loop-input-label">Top edge</span><textarea class="loop-input-cell edge" id="loopIn_edgeTop"></textarea></div>
+        <div class="loop-input-wrap">
+          <div class="loop-edge-label-row"><span class="loop-input-label">Top edge</span><button class="loop-lock-btn" onclick="openCategoryPicker('top')" title="Lock this side to a specific category">🔎 Category</button></div>
+          <div class="loop-locked-chip-row" id="loopLockChip_top"></div>
+          <textarea class="loop-input-cell edge" id="loopIn_edgeTop"></textarea>
+        </div>
         <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerTR"></textarea></div>
-        <div class="loop-input-wrap"><span class="loop-input-label">Left edge</span><textarea class="loop-input-cell edge" id="loopIn_edgeLeft"></textarea></div>
+        <div class="loop-input-wrap">
+          <div class="loop-edge-label-row"><span class="loop-input-label">Left edge</span><button class="loop-lock-btn" onclick="openCategoryPicker('left')" title="Lock this side to a specific category">🔎 Category</button></div>
+          <div class="loop-locked-chip-row" id="loopLockChip_left"></div>
+          <textarea class="loop-input-cell edge" id="loopIn_edgeLeft"></textarea>
+        </div>
         <div class="loop-input-cell center-empty"></div>
-        <div class="loop-input-wrap"><span class="loop-input-label">Right edge</span><textarea class="loop-input-cell edge" id="loopIn_edgeRight"></textarea></div>
+        <div class="loop-input-wrap">
+          <div class="loop-edge-label-row"><span class="loop-input-label">Right edge</span><button class="loop-lock-btn" onclick="openCategoryPicker('right')" title="Lock this side to a specific category">🔎 Category</button></div>
+          <div class="loop-locked-chip-row" id="loopLockChip_right"></div>
+          <textarea class="loop-input-cell edge" id="loopIn_edgeRight"></textarea>
+        </div>
         <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerBL"></textarea></div>
-        <div class="loop-input-wrap"><span class="loop-input-label">Bottom edge</span><textarea class="loop-input-cell edge" id="loopIn_edgeBottom"></textarea></div>
+        <div class="loop-input-wrap">
+          <div class="loop-edge-label-row"><span class="loop-input-label">Bottom edge</span><button class="loop-lock-btn" onclick="openCategoryPicker('bottom')" title="Lock this side to a specific category">🔎 Category</button></div>
+          <div class="loop-locked-chip-row" id="loopLockChip_bottom"></div>
+          <textarea class="loop-input-cell edge" id="loopIn_edgeBottom"></textarea>
+        </div>
         <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerBR"></textarea></div>
       </div>
       <label class="loop-toggle"><input type="checkbox" id="loopDatamuseToggle"> When every field above is blank, seed the top category from live Datamuse synonyms instead of local lists (slower, needs network)</label>
@@ -289,6 +340,28 @@
     </div>
     <div class="rules-panel-scroll" id="rulesPanelScroll"></div>
   </aside>
+</div>
+
+<!-- CATEGORY PICKER MODAL (loop generator edge-lock) -->
+<div class="cmodal-overlay" id="catPickOverlay" onclick="if(event.target===this) closeCategoryPicker()">
+  <div class="cmodal">
+    <div class="cmodal-head"><h3 id="catPickTitle">Pick a category</h3><button class="cmodal-close" onclick="closeCategoryPicker()">✕</button></div>
+    <input type="text" class="cmodal-search" id="catPickSearchInput" placeholder="Search categories…" oninput="renderCategoryPickerList()">
+    <div class="cmodal-body" id="catPickBody"></div>
+  </div>
+</div>
+
+<!-- BROWSE WORDS MODAL (rules panel + loop result "browse all members") -->
+<div class="cmodal-overlay" id="browseWordsOverlay" onclick="if(event.target===this) closeBrowseWords()">
+  <div class="cmodal">
+    <div class="cmodal-head"><h3 id="browseWordsTitle">Category members</h3><button class="cmodal-close" onclick="closeBrowseWords()">✕</button></div>
+    <div class="cmodal-toolbar">
+      <button class="filter-btn" id="browseSortAlpha" onclick="setBrowseSort('alpha')">Alphabetical</button>
+      <button class="filter-btn" id="browseSortOrig" onclick="setBrowseSort('orig')">Original order</button>
+    </div>
+    <input type="text" class="cmodal-search" id="browseSearchInput" placeholder="Search within this category…" oninput="renderBrowseWords()">
+    <div class="cmodal-body" id="browseWordsBody"></div>
+  </div>
 </div>
 
 <!-- SETTINGS DRAWER -->
@@ -1072,6 +1145,11 @@ const VOCAB_BY_LENGTH = new Map();
 // ═══════════════════════════════════════════════════
 const CATEGORY_POOL = [];
 const MEMBERSHIP_INDEX = new Map();
+// name -> CATEGORY_POOL index, rebuilt alongside the pool. Lets the edge
+// category-lock feature remember a chosen category by NAME (stable across
+// rebuilds/data reloads) instead of an index (which shifts every time the
+// pool is rebuilt), then resolve it back to a live index right before use.
+const CATEGORY_NAME_TO_IDX = new Map();
 // Session-only (a plain JS Set, never written to localStorage — resets on
 // page refresh, per spec) list of category NAMES the user has manually
 // excluded from future loop generation via the "🚫" button on a rendered
@@ -1082,6 +1160,15 @@ let EXCLUDED_CATEGORY_NAMES = new Set();
 // values at once (e.g. every WordNet-synonym-sourced category) -- driven
 // by the Rules Browser panel's broad-type group toggles.
 let EXCLUDED_POOL_TYPES = new Set();
+// Edge category-lock (loop generator): which loop CATEGORY, by name, is
+// forced onto each of the 4 edges (top/left/right/bottom = the loop's 4
+// categories). Session-only, same lifetime as the exclusion sets above.
+// null for an edge means "algorithm picks freely", same as today.
+let LOOP_LOCKED_CATEGORIES = { top: null, left: null, right: null, bottom: null };
+// Which edge the category-picker modal is currently open for.
+let CAT_PICK_TARGET_EDGE = null;
+// State for the "browse all words in a category" modal.
+let BROWSE_WORDS_STATE = { catName: null, sort: 'alpha', shown: 200 };
 // ═══════════════════════════════════════════════════
 //  RULES BROWSER — permanently-visible right panel. Unifies two
 //  previously separate controls: individual Finder-plugin toggles (used
@@ -1206,12 +1293,22 @@ function rebuildCategoryPool() {
     }
   }
 
+  CATEGORY_NAME_TO_IDX.clear();
   CATEGORY_POOL.forEach((cat, idx) => {
     for (const m of cat.members) {
       if (!MEMBERSHIP_INDEX.has(m)) MEMBERSHIP_INDEX.set(m, []);
       MEMBERSHIP_INDEX.get(m).push(idx);
     }
+    // Last one wins on a name collision (rare) -- fine for a picker/browse
+    // lookup, which only ever needs SOME live category matching that name.
+    CATEGORY_NAME_TO_IDX.set(cat.name, idx);
   });
+
+  // A locked edge category can go stale across a pool rebuild (data pack
+  // added/removed, custom set imported, etc.) -- re-render the chips so a
+  // name that no longer resolves visibly reflects that instead of silently
+  // pointing at nothing until the next generate attempt.
+  if (typeof renderLockedCategoryChips === 'function') renderLockedCategoryChips();
 
   // Centralized here rather than in every caller (there are 9+ call sites
   // across the async data loaders and custom-set import functions) so the
@@ -3012,19 +3109,29 @@ function prioritizeByFit(idxs, relevantInputWords) {
   return [...shuffled(preferred), ...shuffled(fallback)];
 }
 
-function tryCompleteLoopFromInputs(inputs, reserved) {
+// lockedIdx: { top, left, right, bottom }, each either a resolved
+// CATEGORY_POOL index (that side is forced to exactly that category) or
+// null (algorithm picks freely, same as before this feature existed).
+// Resolution/validity of the locked names themselves happens once, up
+// front, in generateLoopFromInputs() -- by the time this runs, every
+// non-null entry here is guaranteed to be a live, non-excluded index.
+function tryCompleteLoopFromInputs(inputs, reserved, lockedIdx = { top: null, left: null, right: null, bottom: null }) {
   const used = new Set();
 
-  // ---- cat1 (top row): seeded from any top-row field that has input ----
-  const topSeedWords = shuffled([...inputs.cornerTL, ...inputs.edgeTop, ...inputs.cornerTR]);
+  // ---- cat1 (top row): locked > seeded from typed top-row words > random ----
   let cat1Idx;
-  if (topSeedWords.length) {
-    const idxs = categoryIndicesContaining(topSeedWords[0]);
-    if (!idxs.length) return null;
-    cat1Idx = idxs[Math.floor(Math.random() * idxs.length)];
+  if (lockedIdx.top !== null) {
+    cat1Idx = lockedIdx.top;
   } else {
-    cat1Idx = pickStratifiedCategoryIdxExcluding();
-    if (cat1Idx === null) return null;
+    const topSeedWords = shuffled([...inputs.cornerTL, ...inputs.edgeTop, ...inputs.cornerTR]);
+    if (topSeedWords.length) {
+      const idxs = categoryIndicesContaining(topSeedWords[0]);
+      if (!idxs.length) return null;
+      cat1Idx = idxs[Math.floor(Math.random() * idxs.length)];
+    } else {
+      cat1Idx = pickStratifiedCategoryIdxExcluding();
+      if (cat1Idx === null) return null;
+    }
   }
   const cat1 = CATEGORY_POOL[cat1Idx];
 
@@ -3037,51 +3144,79 @@ function tryCompleteLoopFromInputs(inputs, reserved) {
   const filler1 = pickManyForSlot(inputs.edgeTop, cat1.members, reserved, used, 2);
   if (!filler1) return null;
 
-  // ---- cat2 (left column) must contain leftHook ----
-  const cat2Idxs = prioritizeByFit(
-    categoryIndicesContaining(leftHook, new Set([cat1Idx])),
-    [...inputs.edgeLeft, ...inputs.cornerBL]
-  );
+  // ---- cat2 (left column) must contain leftHook -- locked to exactly one
+  // candidate when the user forced it, same shared filter loop otherwise ----
+  const cat2Idxs = lockedIdx.left !== null
+    ? [lockedIdx.left]
+    : prioritizeByFit(
+        categoryIndicesContaining(leftHook, new Set([cat1Idx])),
+        [...inputs.edgeLeft, ...inputs.cornerBL]
+      );
 
   for (const cat2Idx of cat2Idxs) {
     const cat2 = CATEGORY_POOL[cat2Idx];
+    // Locked cat2 was never filtered by "contains leftHook" above (that
+    // filter is what categoryIndicesContaining does for the free case) --
+    // check it explicitly here instead. A miss just fails this attempt
+    // (retried with a different top pick next time round), consistent
+    // with every other failure path in this function.
+    if (lockedIdx.left !== null && !cat2.members.includes(leftHook)) continue;
     const used2 = new Set(used);
     const cat2Filler = pickManyForSlot(inputs.edgeLeft, cat2.members, reserved, used2, 2);
     if (!cat2Filler) continue;
 
     // ---- cat3 (right column) must contain rightHook ----
-    const cat3Idxs = prioritizeByFit(
-      categoryIndicesContaining(rightHook, new Set([cat1Idx, cat2Idx])),
-      [...inputs.edgeRight, ...inputs.cornerBR]
-    );
+    const cat3Idxs = lockedIdx.right !== null
+      ? [lockedIdx.right]
+      : prioritizeByFit(
+          categoryIndicesContaining(rightHook, new Set([cat1Idx, cat2Idx])),
+          [...inputs.edgeRight, ...inputs.cornerBR]
+        );
 
     for (const cat3Idx of cat3Idxs) {
       const cat3 = CATEGORY_POOL[cat3Idx];
+      if (lockedIdx.right !== null && !cat3.members.includes(rightHook)) continue;
       const used3 = new Set(used2);
       const cat3Filler = pickManyForSlot(inputs.edgeRight, cat3.members, reserved, used3, 2);
       if (!cat3Filler) continue;
 
       // ---- bottom corners: x from cat2 (not leftHook), y from cat3 (not
-      // rightHook), searching for a category (cat4) they share ----
+      // rightHook). Free case searches for ANY category they share; locked
+      // case requires that shared category to be exactly the forced one. ----
       const xPool = cat2.members.filter(m => m !== leftHook);
       const yPool = cat3.members.filter(m => m !== rightHook);
-      const xCandidates = inputs.cornerBL.length
-        ? shuffled(inputs.cornerBL.filter(w => xPool.includes(w) && !used3.has(w)))
-        : shuffled(xPool.filter(w => !reserved.has(w) && !used3.has(w))).slice(0, 25);
-      if (!xCandidates.length) continue;
-
       let found = null;
-      outer:
-      for (const x of xCandidates) {
-        const xCatIdxs = new Set(categoryIndicesContaining(x, new Set([cat1Idx, cat2Idx, cat3Idx])));
-        if (!xCatIdxs.size) continue;
-        const yCandidates = inputs.cornerBR.length
-          ? shuffled(inputs.cornerBR.filter(w => yPool.includes(w) && w !== x && !used3.has(w)))
-          : shuffled(yPool.filter(w => w !== x && !reserved.has(w) && !used3.has(w))).slice(0, 25);
-        for (const y of yCandidates) {
-          const yCatIdxs = categoryIndicesContaining(y, new Set([cat1Idx, cat2Idx, cat3Idx]));
-          const shared = yCatIdxs.find(i => xCatIdxs.has(i));
-          if (shared !== undefined) { found = { x, y, cat4Idx: shared }; break outer; }
+
+      if (lockedIdx.bottom !== null) {
+        const cat4 = CATEGORY_POOL[lockedIdx.bottom];
+        const cat4Set = new Set(cat4.members);
+        const xCandidates = inputs.cornerBL.length
+          ? shuffled(inputs.cornerBL.filter(w => xPool.includes(w) && cat4Set.has(w) && !used3.has(w)))
+          : shuffled(xPool.filter(w => cat4Set.has(w) && !reserved.has(w) && !used3.has(w))).slice(0, 25);
+        outerLocked:
+        for (const x of xCandidates) {
+          const yCandidates = inputs.cornerBR.length
+            ? shuffled(inputs.cornerBR.filter(w => yPool.includes(w) && cat4Set.has(w) && w !== x && !used3.has(w)))
+            : shuffled(yPool.filter(w => cat4Set.has(w) && w !== x && !reserved.has(w) && !used3.has(w))).slice(0, 25);
+          for (const y of yCandidates) { found = { x, y, cat4Idx: lockedIdx.bottom }; break outerLocked; }
+        }
+      } else {
+        const xCandidates = inputs.cornerBL.length
+          ? shuffled(inputs.cornerBL.filter(w => xPool.includes(w) && !used3.has(w)))
+          : shuffled(xPool.filter(w => !reserved.has(w) && !used3.has(w))).slice(0, 25);
+
+        outer:
+        for (const x of xCandidates) {
+          const xCatIdxs = new Set(categoryIndicesContaining(x, new Set([cat1Idx, cat2Idx, cat3Idx])));
+          if (!xCatIdxs.size) continue;
+          const yCandidates = inputs.cornerBR.length
+            ? shuffled(inputs.cornerBR.filter(w => yPool.includes(w) && w !== x && !used3.has(w)))
+            : shuffled(yPool.filter(w => w !== x && !reserved.has(w) && !used3.has(w))).slice(0, 25);
+          for (const y of yCandidates) {
+            const yCatIdxs = categoryIndicesContaining(y, new Set([cat1Idx, cat2Idx, cat3Idx]));
+            const shared = yCatIdxs.find(i => xCatIdxs.has(i));
+            if (shared !== undefined) { found = { x, y, cat4Idx: shared }; break outer; }
+          }
         }
       }
       if (!found) continue;
@@ -3127,11 +3262,77 @@ function tryCompleteLoopFromInputs(inputs, reserved) {
   return null;
 }
 
+// Resolves LOOP_LOCKED_CATEGORIES (names) to live CATEGORY_POOL indices.
+// Returns { top, left, right, bottom } on success, or { error } if any
+// locked name no longer resolves to a usable category (removed by a data
+// reload, or currently excluded via the Rules Browser).
+function resolveLockedCategories() {
+  const lockedNames = Object.values(LOOP_LOCKED_CATEGORIES).filter(Boolean);
+  if (new Set(lockedNames).size !== lockedNames.length) {
+    return { error: 'The same category is locked onto more than one edge — a loop needs 4 distinct categories, so pick a different one for each, or clear a lock.' };
+  }
+  const result = { top: null, left: null, right: null, bottom: null };
+  for (const key of Object.keys(LOOP_LOCKED_CATEGORIES)) {
+    const name = LOOP_LOCKED_CATEGORIES[key];
+    if (!name) continue;
+    const idx = CATEGORY_NAME_TO_IDX.get(name);
+    if (idx === undefined) {
+      return { error: `The category locked to the ${key} edge ("${cap(name)}") no longer exists — clear it (✕ on its chip) and pick another.` };
+    }
+    const cat = CATEGORY_POOL[idx];
+    if (EXCLUDED_CATEGORY_NAMES.has(cat.name) || EXCLUDED_POOL_TYPES.has(cat.type)) {
+      return { error: `The category locked to the ${key} edge ("${cap(name)}") is currently excluded in the Rules Browser — re-enable it there, or clear the lock.` };
+    }
+    result[key] = idx;
+  }
+  return result;
+}
+
+// Fails fast, before burning any generation attempts, when a field's typed
+// candidates couldn't possibly satisfy a category locked onto that side --
+// e.g. locking "Types of Trees" onto the top edge but typing "OCEAN" into
+// the top-edge box. Doesn't attempt to jointly satisfy a corner against
+// TWO locked adjacent categories at once (e.g. both top AND left locked,
+// several corner candidates typed) -- that rarer combination still falls
+// through correctly to the normal per-attempt checks in
+// tryCompleteLoopFromInputs, just without this early, more specific message.
+function validateLockedTypedWords(inputs, lockedResolved) {
+  const errors = [];
+  const check = (lockedIdx, fields) => {
+    if (lockedIdx === null) return;
+    const memberSet = new Set(CATEGORY_POOL[lockedIdx].members);
+    const catName = CATEGORY_POOL[lockedIdx].name;
+    for (const [fieldKey, fieldLabel] of fields) {
+      const words = inputs[fieldKey];
+      if (words.length && !words.some(w => memberSet.has(w))) {
+        errors.push(`None of the words you typed in "${fieldLabel}" belong to the locked category "${catName}".`);
+      }
+    }
+  };
+  check(lockedResolved.top,    [['cornerTL', 'top-left corner'], ['edgeTop', 'top edge'], ['cornerTR', 'top-right corner']]);
+  check(lockedResolved.left,   [['cornerTL', 'top-left corner'], ['edgeLeft', 'left edge'], ['cornerBL', 'bottom-left corner']]);
+  check(lockedResolved.right,  [['cornerTR', 'top-right corner'], ['edgeRight', 'right edge'], ['cornerBR', 'bottom-right corner']]);
+  check(lockedResolved.bottom, [['cornerBL', 'bottom-left corner'], ['edgeBottom', 'bottom edge'], ['cornerBR', 'bottom-right corner']]);
+  return errors;
+}
+
+// Returns either a completed loop object, or { error: string } when the
+// locked-category setup itself is invalid/unsatisfiable by the typed
+// words (checked up front so we don't burn 400 attempts failing
+// identically every time), or null for the ordinary "couldn't find one
+// this time, try again" case.
 function generateLoopFromInputs(maxAttempts = 400) {
   const inputs = readLoopInputs();
   const reserved = allReservedLoopWords(inputs);
+
+  const lockedResolved = resolveLockedCategories();
+  if (lockedResolved.error) return { error: lockedResolved.error };
+
+  const typedErrors = validateLockedTypedWords(inputs, lockedResolved);
+  if (typedErrors.length) return { error: typedErrors[0] };
+
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const loop = tryCompleteLoopFromInputs(inputs, reserved);
+    const loop = tryCompleteLoopFromInputs(inputs, reserved, lockedResolved);
     if (loop) return loop;
   }
   return null;
@@ -3210,6 +3411,144 @@ function reincludeLoopCategory(name) {
 // character inside a double-quoted JS string.
 function esc(s) { return JSON.stringify(s).replace(/'/g, '&#39;'); }
 
+// For dynamic strings dropped into innerHTML as TEXT CONTENT (not an
+// attribute -- that's what esc() above is for). Category names routinely
+// contain characters like & " ' < that would otherwise get parsed as markup.
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ═══════════════════════════════════════════════════
+//  EDGE CATEGORY-LOCK MODAL (loop generator)
+//  Search the full CATEGORY_POOL and force a specific category onto one
+//  of the loop's 4 sides (top/left/right/bottom), same 4 categories the
+//  edge fields already represent one-to-one.
+// ═══════════════════════════════════════════════════
+const EDGE_LABELS = { top: 'top', left: 'left', right: 'right', bottom: 'bottom' };
+
+function openCategoryPicker(edgeKey) {
+  CAT_PICK_TARGET_EDGE = edgeKey;
+  document.getElementById('catPickTitle').textContent = `Lock a category to the ${EDGE_LABELS[edgeKey]} edge`;
+  document.getElementById('catPickSearchInput').value = '';
+  document.getElementById('catPickOverlay').classList.add('open');
+  renderCategoryPickerList();
+  setTimeout(() => document.getElementById('catPickSearchInput')?.focus(), 30);
+}
+
+function closeCategoryPicker() {
+  document.getElementById('catPickOverlay').classList.remove('open');
+  CAT_PICK_TARGET_EDGE = null;
+}
+
+function renderCategoryPickerList() {
+  const body = document.getElementById('catPickBody');
+  const rawQuery = document.getElementById('catPickSearchInput')?.value || '';
+  const query = norm(rawQuery);
+  if (query.length < 2) {
+    body.innerHTML = `<div class="cmodal-hint">Type at least 2 letters to search ${CATEGORY_POOL.length.toLocaleString()} categories…</div>`;
+    return;
+  }
+  const matches = CATEGORY_POOL.filter(c =>
+    !EXCLUDED_CATEGORY_NAMES.has(c.name) && !EXCLUDED_POOL_TYPES.has(c.type) && norm(c.name).includes(query)
+  );
+  const shown = matches.slice(0, 100);
+  if (!shown.length) {
+    body.innerHTML = `<div class="cmodal-hint">No enabled categories match "${escHtml(rawQuery)}".</div>`;
+    return;
+  }
+  let html = '';
+  for (const c of shown) {
+    html += `<div class="cat-pick-item" onclick='lockCategoryForEdge(${esc(CAT_PICK_TARGET_EDGE)}, ${esc(c.name)})'>
+      <span class="cat-pick-item-name">${escHtml(c.name)}</span>
+      <span class="cat-pick-item-count">${c.members.length.toLocaleString()} words</span>
+    </div>`;
+  }
+  if (matches.length > 100) html += `<div class="cmodal-hint">Showing first 100 of ${matches.length} — refine your search for more.</div>`;
+  body.innerHTML = html;
+}
+
+function lockCategoryForEdge(edgeKey, name) {
+  LOOP_LOCKED_CATEGORIES[edgeKey] = name;
+  closeCategoryPicker();
+  renderLockedCategoryChips();
+}
+
+function clearLockedCategory(edgeKey) {
+  LOOP_LOCKED_CATEGORIES[edgeKey] = null;
+  renderLockedCategoryChips();
+}
+
+function renderLockedCategoryChips() {
+  for (const key of Object.keys(LOOP_LOCKED_CATEGORIES)) {
+    const row = document.getElementById(`loopLockChip_${key}`);
+    if (!row) continue;
+    const name = LOOP_LOCKED_CATEGORIES[key];
+    row.innerHTML = name
+      ? `<span class="loop-locked-chip"><span title="${escHtml(name)}">🔒 ${escHtml(name)}</span><button onclick='clearLockedCategory(${esc(key)})' title="Unlock this edge">✕</button></span>`
+      : '';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  BROWSE-WORDS MODAL
+//  Every CATEGORY_POOL entry already carries its full `members` array in
+//  memory (see rebuildCategoryPool()), so this is pure rendering -- no
+//  extra lookups needed, even for a category with thousands of members.
+// ═══════════════════════════════════════════════════
+function openBrowseWords(name) {
+  BROWSE_WORDS_STATE = { catName: name, sort: 'alpha', shown: 200 };
+  document.getElementById('browseSearchInput').value = '';
+  document.getElementById('browseWordsOverlay').classList.add('open');
+  renderBrowseWords();
+}
+
+function closeBrowseWords() {
+  document.getElementById('browseWordsOverlay').classList.remove('open');
+}
+
+function setBrowseSort(mode) {
+  BROWSE_WORDS_STATE.sort = mode;
+  BROWSE_WORDS_STATE.shown = 200;
+  renderBrowseWords();
+}
+
+function browseShowMore() {
+  BROWSE_WORDS_STATE.shown += 400;
+  renderBrowseWords();
+}
+
+function renderBrowseWords() {
+  const idx = CATEGORY_NAME_TO_IDX.get(BROWSE_WORDS_STATE.catName);
+  const body = document.getElementById('browseWordsBody');
+  document.getElementById('browseSortAlpha').classList.toggle('active', BROWSE_WORDS_STATE.sort === 'alpha');
+  document.getElementById('browseSortOrig').classList.toggle('active', BROWSE_WORDS_STATE.sort === 'orig');
+  if (idx === undefined) {
+    document.getElementById('browseWordsTitle').textContent = 'Category members';
+    body.innerHTML = `<div class="cmodal-hint">This category is no longer available (removed or excluded).</div>`;
+    return;
+  }
+  const cat = CATEGORY_POOL[idx];
+  document.getElementById('browseWordsTitle').textContent = `${cat.name} (${cat.members.length.toLocaleString()} words)`;
+
+  const rawQuery = document.getElementById('browseSearchInput')?.value || '';
+  const query = norm(rawQuery);
+  let words = query ? cat.members.filter(w => w.includes(query)) : cat.members;
+  if (BROWSE_WORDS_STATE.sort === 'alpha') words = [...words].sort((a, b) => a.localeCompare(b));
+
+  const shown = words.slice(0, BROWSE_WORDS_STATE.shown);
+  if (!shown.length) {
+    body.innerHTML = `<div class="cmodal-hint">No members match "${escHtml(rawQuery)}".</div>`;
+    return;
+  }
+  let html = `<div class="browse-word-list">`;
+  for (const w of shown) html += `<span class="browse-word-chip">${escHtml(cap(w))}</span>`;
+  html += `</div>`;
+  if (words.length > shown.length) {
+    html += `<button class="browse-show-more-btn" onclick="browseShowMore()">Show more (${shown.length.toLocaleString()} of ${words.length.toLocaleString()})</button>`;
+  }
+  body.innerHTML = html;
+}
+
 function renderRulesPanel() {
   const el = document.getElementById('rulesPanelScroll');
   if (!el) return;
@@ -3278,10 +3617,11 @@ function renderRulesPanel() {
       const excluded = EXCLUDED_CATEGORY_NAMES.has(c.name);
       html += `<label class="rule-item-row">
         <input type="checkbox" ${excluded ? '' : 'checked'} onchange='this.checked ? reincludeLoopCategory(${esc(c.name)}) : excludeLoopCategory(${esc(c.name)})'>
-        <div>
+        <div style="flex:1">
           <div class="rule-item-name">${c.name}</div>
           <div class="rule-item-count">${c.members.length} members</div>
         </div>
+        <button type="button" class="loop-lock-btn" onclick='event.preventDefault(); openBrowseWords(${esc(c.name)})' title="Browse all words in this category">👁 Browse</button>
       </label>`;
     }
     if (allMatches.length > 100) html += `<div class="rules-empty-note">Showing first 100 of ${allMatches.length} — refine your search for more specific results.</div>`;
@@ -3298,7 +3638,7 @@ function renderLoopGridWithExclude(loop) {
     ? `<td class="loop-cell${isHook ? ' loop-hook' : ''}">${cap(word)}</td>`
     : `<td class="loop-cell loop-empty"></td>`;
   const header = name =>
-    `${name} <button class="loop-exclude-btn" onclick='excludeLoopCategory(${esc(name)})' title="Exclude this category from future loops">🚫</button>`;
+    `${name} <button class="loop-exclude-btn" onclick='openBrowseWords(${esc(name)})' title="Browse all words in this category">👁</button><button class="loop-exclude-btn" onclick='excludeLoopCategory(${esc(name)})' title="Exclude this category from future loops">🚫</button>`;
 
   return `<table class="loop-table">
     <tr>
@@ -3335,9 +3675,13 @@ async function renderNewLoopFromInputs() {
   container.innerHTML = `<div class="loop-fail">${useDatamuse ? 'Asking Datamuse for a seed word…' : 'Shuffling…'}</div>`;
   await new Promise(r => setTimeout(r, 10));
   const loop = useDatamuse ? await generateLoopFromDatamuseSeed() : generateLoopFromInputs();
-  container.innerHTML = loop
-    ? renderLoopGridWithExclude(loop)
-    : '<div class="loop-fail">Couldn\'t close a loop with those constraints that time — try loosening an input field, excluding fewer categories, or leaving more fields blank, then hit Generate again.</div>';
+  if (loop && loop.error) {
+    container.innerHTML = `<div class="loop-fail">${escHtml(loop.error)}</div>`;
+  } else if (loop) {
+    container.innerHTML = renderLoopGridWithExclude(loop);
+  } else {
+    container.innerHTML = '<div class="loop-fail">Couldn\'t close a loop with those constraints that time — try loosening an input field, excluding fewer categories, or leaving more fields blank, then hit Generate again.</div>';
+  }
   renderExcludedList();
 }
 
