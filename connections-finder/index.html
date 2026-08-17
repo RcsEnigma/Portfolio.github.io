@@ -27,6 +27,10 @@
   .rules-panel { width: 340px; flex-shrink: 0; position: sticky; top: 2rem; max-height: calc(100vh - 4rem); display: flex; flex-direction: column; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--surface); }
   .rules-panel-head { padding: 16px 16px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .rules-panel-head h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .rules-panel-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .rules-panel-title-row h2 { margin-bottom: 0; }
+  .rules-enable-all-btn { flex-shrink: 0; font-size: .72rem; padding: 4px 9px; border: 1.5px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--text); cursor: pointer; font-family: inherit; }
+  .rules-enable-all-btn:hover { border-color: #888; }
   .rules-panel-sub { font-size: .78rem; color: var(--muted); line-height: 1.4; }
   .rules-search-input { width: 100%; box-sizing: border-box; margin-top: 10px; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 8px; font: inherit; font-size: .85rem; }
   .rules-panel-scroll { overflow-y: auto; padding: 12px 16px 18px; }
@@ -61,10 +65,12 @@
   .settings-btn { height: 40px; padding: 0 18px; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-family: var(--font); font-size: .88rem; cursor: pointer; transition: border-color .15s; width: 100%; }
   .settings-btn:hover { border-color: #888; }
 
-  .analyze-btn { height: 48px; padding: 0 28px; background: #1a1a1a; color: #fff; border: none; border-radius: var(--radius); font-size: 1rem; font-family: var(--font); cursor: pointer; transition: opacity .15s, transform .1s; width: 100%; }
+  .analyze-btn { height: 48px; padding: 0 28px; background: #1a1a1a; color: #fff; border: none; border-radius: var(--radius); font-size: 1rem; font-family: var(--font); cursor: pointer; transition: opacity .15s, transform .1s, background-color .15s; width: 100%; }
   .analyze-btn:hover:not(:disabled) { opacity: .85; }
   .analyze-btn:active:not(:disabled) { transform: scale(.98); }
   .analyze-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .analyze-btn.cancel-btn { background: #b3261e; } /* reads as a stop/danger action while analysis is running, not just a relabeled disabled state */
+  .analyze-btn.cancel-btn:hover:not(:disabled) { opacity: .9; }
 
   /* Progress bar (sidebar) */
   .progress-section { display: none; flex-direction: column; gap: 6px; }
@@ -274,8 +280,11 @@
 
   <aside class="rules-panel">
     <div class="rules-panel-head">
-      <h2>Rules Browser</h2>
-      <p class="rules-panel-sub">Search and enable/disable individual rules or whole categories of rules — applies to both the Finder and the Random Loop generator at once.</p>
+      <div class="rules-panel-title-row">
+        <h2>Rules Browser</h2>
+        <button class="rules-enable-all-btn" onclick="enableAllRules()" title="Turn every rule back on and clear all exclusions">Enable All</button>
+      </div>
+      <p class="rules-panel-sub">Search and enable/disable individual rules or whole categories of rules — applies to both the Finder and the Random Loop generator at once. Plugin on/off state persists across page refreshes; exclusions here reset your whole setup back to everything enabled.</p>
       <input type="text" class="rules-search-input" id="rulesSearchInput" placeholder="Search rules or categories…" oninput="renderRulesPanel()">
     </div>
     <div class="rules-panel-scroll" id="rulesPanelScroll"></div>
@@ -321,6 +330,16 @@
 //  HELPERS
 // ═══════════════════════════════════════════════════
 const norm = w => w.toLowerCase().replace(/[^a-z]/g, '');
+
+// Cancellation flag for the main Finder analysis (single-list or bulk
+// pairs). Declared this early, before PluginRegistry.analyzeBulk() (which
+// checks it) is even defined, on the same principle as other shared
+// mutable state in this file: a `let` reference inside a method body is
+// only resolved when that method actually RUNS, not when the class is
+// defined, so declaration order only matters relative to call time -- but
+// keeping it up here removes any risk of that being gotten wrong later.
+let ANALYSIS_CANCELLED = false;
+
 const sortLetters = w => norm(w).split('').sort().join('');
 const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 const COLOR_ORDER = ['yellow','green','blue','purple','orange','red'];
@@ -1476,9 +1495,12 @@ class PluginRegistry {
     const total = list1.length * list2.length;
     const skipAPI = typeof opts.skipAPI === 'boolean' ? opts.skipAPI : total > 300;
     let done = 0;
+    let cancelled = false;
 
+    outer:
     for (const w1 of list1) {
       for (const w2 of list2) {
+        if (ANALYSIS_CANCELLED) { cancelled = true; break outer; }
         if (!norm(w1) || !norm(w2)) continue;
         if (norm(w1) === norm(w2)) continue;
 
@@ -1506,6 +1528,7 @@ class PluginRegistry {
         return COLOR_ORDER.indexOf(a.color) - COLOR_ORDER.indexOf(b.color);
       }),
       skippedAPI: skipAPI,
+      cancelled,
     };
   }
 }
@@ -3145,6 +3168,19 @@ function toggleRulePlugin(id, state) {
   renderRulesPanel();
 }
 
+// Turns every Finder plugin back on AND clears both exclusion sets (broad
+// pool-type exclusions from group toggles, individual loop-category
+// exclusions). Plugin on/off state persists across refreshes via
+// localStorage (registry.saveState()); the two exclusion Sets are
+// session-only by design and would reset on refresh anyway, but this
+// gives a one-click way back to a clean slate without waiting for that.
+function enableAllRules() {
+  for (const id of registry.plugins.keys()) registry.toggle(id, true);
+  EXCLUDED_POOL_TYPES.clear();
+  EXCLUDED_CATEGORY_NAMES.clear();
+  renderRulesPanel();
+}
+
 function excludeLoopCategory(name) {
   EXCLUDED_CATEGORY_NAMES.add(name);
   renderRulesPanel();
@@ -3377,7 +3413,9 @@ function showFinderView() {
 async function analyzeSingleList(list, onProgress, skipAPI) {
   const categoryMap = new Map();
   let done = 0;
+  let cancelled = false;
   for (const w of list) {
+    if (ANALYSIS_CANCELLED) { cancelled = true; break; }
     if (!norm(w)) { done++; continue; }
     const results = await registry.analyze([w], { skipAPI });
     for (const r of results) {
@@ -3388,6 +3426,13 @@ async function analyzeSingleList(list, onProgress, skipAPI) {
     }
     done++;
     if (onProgress) onProgress(done, list.length);
+    // Explicit macrotask-yielding checkpoint, same as analyzeBulk() --
+    // without this, a long skipAPI run (each registry.analyze() call
+    // resolving near-instantly with no real async work) can chain through
+    // its whole microtask queue without ever giving the browser a chance
+    // to process the Cancel button's click event, so the button would
+    // look unresponsive even though it isn't actually broken.
+    if (done % 8 === 0) await new Promise(r => setTimeout(r, 0));
   }
   // Live-plugin categories only found via ONE word aren't a real "shared"
   // category — that's just one word's own synonym/association list. Local
@@ -3399,7 +3444,7 @@ async function analyzeSingleList(list, onProgress, skipAPI) {
     if (b.items.length !== a.items.length) return b.items.length - a.items.length;
     return COLOR_ORDER.indexOf(a.color) - COLOR_ORDER.indexOf(b.color);
   });
-  return { results };
+  return { results, cancelled };
 }
 
 async function analyzeAll() {
@@ -3411,20 +3456,30 @@ async function analyzeAll() {
   const forceCheckbox = document.getElementById('forceApiCheckbox');
   const forceLive = !!(forceCheckbox && forceCheckbox.checked);
 
-  document.getElementById('bulkBtn').disabled = true;
-  document.getElementById('bulkBtn').textContent = 'Analyzing…';
+  ANALYSIS_CANCELLED = false;
+  const btn = document.getElementById('bulkBtn');
+  btn.disabled = false; // stays clickable throughout -- it's now doing double duty as the Cancel button
+  btn.classList.add('cancel-btn');
+  btn.textContent = '✕ Cancel Analysis';
+  btn.onclick = cancelAnalysis;
+
+  let wasCancelled = false;
 
   try {
     if (nonEmptyIdx.length === 1) {
       const list = lists[nonEmptyIdx[0]];
       const skipAPI = forceLive ? false : list.length > SINGLE_MODE_WORD_THRESHOLD;
       setProgress(0, list.length, `Checking ${list.length} word${list.length !== 1 ? 's' : ''} individually…`);
-      const { results } = await analyzeSingleList(list, (done, total) => setProgress(done, total, `Checked ${done} of ${total} words…`), skipAPI);
+      const { results, cancelled } = await analyzeSingleList(list, (done, total) => setProgress(done, total, `Checked ${done} of ${total} words…`), skipAPI);
+      wasCancelled = cancelled;
       hideProgress();
       if (!results.length) {
-        document.getElementById('output').innerHTML = `<div class="empty-state">No categories found for any of these words.<br>Could be a candidate for a new rule plugin.</div>`;
+        document.getElementById('output').innerHTML = cancelled
+          ? `<div class="empty-state">Analysis cancelled — no categories found yet in the words checked so far.</div>`
+          : `<div class="empty-state">No categories found for any of these words.<br>Could be a candidate for a new rule plugin.</div>`;
       } else {
         renderResults(list, results, 'single', list.length, false);
+        if (cancelled) prependCancelledNotice(list.length);
       }
     } else {
       const combos = [];
@@ -3441,7 +3496,7 @@ async function analyzeAll() {
       for (const [i, j] of combos) {
         const comboTotal = lists[i].length * lists[j].length;
         setProgress(doneBefore, totalPairs, `Field ${i + 1} × Field ${j + 1}…`);
-        const { results } = await registry.analyzeBulk(lists[i], lists[j], {
+        const { results, cancelled } = await registry.analyzeBulk(lists[i], lists[j], {
           skipAPI,
           onProgress: (done) => setProgress(doneBefore + done, totalPairs, `Field ${i + 1} × Field ${j + 1}: pair ${done} of ${comboTotal}…`),
         });
@@ -3450,6 +3505,7 @@ async function analyzeAll() {
           else merged.get(r.categoryName).pairs.push(...r.pairs);
         }
         doneBefore += comboTotal;
+        if (cancelled) { wasCancelled = true; break; } // stop starting further field-combos too
       }
       hideProgress();
 
@@ -3459,17 +3515,43 @@ async function analyzeAll() {
       });
 
       if (!finalResults.length) {
-        document.getElementById('output').innerHTML = `<div class="empty-state">No shared connections found across any of the ${totalPairs} pairs checked (${combos.length} field-combination${combos.length !== 1 ? 's' : ''}).<br>Try a more focused list.</div>`;
+        document.getElementById('output').innerHTML = wasCancelled
+          ? `<div class="empty-state">Analysis cancelled — no shared connections found yet in the pairs checked so far.</div>`
+          : `<div class="empty-state">No shared connections found across any of the ${totalPairs} pairs checked (${combos.length} field-combination${combos.length !== 1 ? 's' : ''}).<br>Try a more focused list.</div>`;
       } else {
         renderResults(nonEmptyIdx.flatMap(i => lists[i]), finalResults, 'pairs', totalPairs, skipAPI);
+        if (wasCancelled) prependCancelledNotice(doneBefore, totalPairs);
       }
     }
   } catch (e) {
     hideProgress();
     document.getElementById('output').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
   }
-  document.getElementById('bulkBtn').disabled = false;
-  document.getElementById('bulkBtn').textContent = 'Find Connections';
+  btn.disabled = false;
+  btn.classList.remove('cancel-btn');
+  btn.textContent = 'Find Connections';
+  btn.onclick = analyzeAll;
+}
+
+function cancelAnalysis() {
+  ANALYSIS_CANCELLED = true;
+  const btn = document.getElementById('bulkBtn');
+  btn.disabled = true; // one click is enough -- the loop only checks the flag at its next checkpoint, so disable to avoid confusing repeat clicks while it winds down
+  btn.textContent = 'Cancelling…';
+}
+
+// Small inline banner above the results so it's clear the list shown is
+// partial, not the full analysis -- rather than a plain empty-state
+// message, since there IS real content underneath worth seeing.
+function prependCancelledNotice(done, total) {
+  const output = document.getElementById('output');
+  const notice = document.createElement('div');
+  notice.className = 'pair-warning';
+  notice.style.marginBottom = '1rem';
+  notice.textContent = total
+    ? `Analysis cancelled after checking ${done} of ${total} pairs — showing partial results.`
+    : `Analysis cancelled after checking ${done} words — showing partial results.`;
+  output.prepend(notice);
 }
 </script>
 </body>
