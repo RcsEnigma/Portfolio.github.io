@@ -12,7 +12,7 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
-  .layout { max-width: 1400px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; display: flex; gap: 2.5rem; align-items: flex-start; }
+  .layout { max-width: 1680px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; display: flex; gap: 2.5rem; align-items: flex-start; }
   h1 { font-size: 1.9rem; font-weight: normal; letter-spacing: -1px; margin-bottom: .25rem; }
   .subtitle { color: var(--muted); font-size: .92rem; margin-bottom: 1.5rem; font-style: italic; line-height: 1.5; }
 
@@ -179,10 +179,16 @@
   .loop-toolbar .settings-btn, .loop-toolbar .analyze-btn { width: auto; }
   .loop-generate-btn { padding: 0 22px; }
   .loop-table { border-collapse: separate; border-spacing: 6px; max-width: 720px; }
-  .loop-col-header, .loop-row-header { font-size: .78rem; font-weight: bold; color: var(--text); padding: 4px 8px; text-align: left; vertical-align: bottom; white-space: nowrap; }
+  .loop-col-header, .loop-row-header { font-size: .78rem; font-weight: bold; color: var(--text); padding: 4px 8px; text-align: left; vertical-align: bottom; white-space: normal; max-width: 190px; word-break: break-word; }
   .loop-row-header { text-align: right; vertical-align: middle; max-width: 160px; white-space: normal; }
   .loop-corner { }
   .loop-cell { border: 1.5px solid var(--border); border-radius: 10px; padding: 16px 14px; text-align: center; font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; background: var(--surface); font-size: .9rem; min-width: 100px; }
+  /* Defensive backstop regardless of viewport width: a table cell's
+     intrinsic content (a long category name, even with wrapping) can
+     still occasionally force the whole table wider than its column --
+     scope the overflow to its own box instead of letting it visually
+     bleed into the permanently-visible rules panel next to it. */
+  #loopContent { overflow-x: auto; }
   .loop-hook { font-weight: bold; background: #fff3c4; border-color: #e0c76a; }
   .loop-empty { border: none; background: transparent; }
   .loop-fail { font-style: italic; color: var(--muted); padding: 2rem 0; text-align: center; }
