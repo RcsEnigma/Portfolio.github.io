@@ -19,6 +19,43 @@
   .sidebar { width: 300px; flex-shrink: 0; position: sticky; top: 2rem; display: flex; flex-direction: column; gap: 12px; }
   .main-content { flex: 1; min-width: 0; }
 
+  /* Rules Browser -- permanently visible right-hand panel (desktop-only
+     by design, per spec; no mobile collapse behavior). Replaces the old
+     toggleable drawer's plugin grid AND the loop generator's own
+     per-generation exclude list -- both enable/disable surfaces are
+     unified here. */
+  .rules-panel { width: 340px; flex-shrink: 0; position: sticky; top: 2rem; max-height: calc(100vh - 4rem); display: flex; flex-direction: column; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .rules-panel-head { padding: 16px 16px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .rules-panel-head h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 3px; }
+  .rules-panel-sub { font-size: .78rem; color: var(--muted); line-height: 1.4; }
+  .rules-search-input { width: 100%; box-sizing: border-box; margin-top: 10px; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 8px; font: inherit; font-size: .85rem; }
+  .rules-panel-scroll { overflow-y: auto; padding: 12px 16px 18px; }
+  .rules-panel-scroll::-webkit-scrollbar { width: 8px; }
+  .rules-panel-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .rules-section { margin-bottom: 1.3rem; }
+  .rules-section h3 { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: .5rem; }
+
+  .rule-group-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 4px; border-radius: 6px; cursor: pointer; }
+  .rule-group-row:hover { background: var(--bg); }
+  .rule-group-row input { margin-top: 3px; flex-shrink: 0; }
+  .rule-group-main { display: flex; flex-direction: column; }
+  .rule-group-name { font-size: .84rem; font-weight: 500; }
+  .rule-group-count { font-size: .72rem; color: var(--muted); }
+
+  .rule-item-row { display: flex; align-items: flex-start; gap: 8px; padding: 5px 4px; border-radius: 6px; font-size: .8rem; }
+  .rule-item-row:hover { background: var(--bg); }
+  .rule-item-row input { margin-top: 2px; flex-shrink: 0; }
+  .rule-item-name { font-weight: 500; }
+  .rule-item-desc { font-size: .72rem; color: var(--muted); line-height: 1.35; }
+  .rule-item-count { font-size: .7rem; color: var(--muted); }
+
+  .rules-empty-note { font-size: .78rem; color: var(--muted); font-style: italic; padding: 4px; }
+
+  @media (max-width: 1150px) {
+    .rules-panel { display: none; } /* desktop-only feature, per spec -- no mobile layout attempted */
+  }
+
   .field-guide { font-size: .82rem; color: var(--muted); font-style: italic; line-height: 1.5; margin-bottom: 4px; }
 
   .settings-btn { height: 40px; padding: 0 18px; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-family: var(--font); font-size: .88rem; cursor: pointer; transition: border-color .15s; width: 100%; }
@@ -186,7 +223,7 @@
 
     <p class="field-guide">One field: see every category each word could belong to. Add a second: cross-reference the two. Add more: every pair of fields gets checked, never all at once.</p>
 
-    <button class="settings-btn" onclick="openDrawer()">⚙ Rules &amp; Plugins</button>
+    <button class="settings-btn" onclick="openDrawer()">📥 Custom Sets &amp; Import</button>
     <button class="settings-btn" onclick="resetFields()">⟲ Reset All Fields</button>
     <button class="settings-btn" onclick="showLoopView()">🎲 Random Loop</button>
 
@@ -226,9 +263,17 @@
       </div>
       <label class="loop-toggle"><input type="checkbox" id="loopDatamuseToggle"> When every field above is blank, seed the top category from live Datamuse synonyms instead of local lists (slower, needs network)</label>
       <div id="loopContent"></div>
-      <div id="loopExcludedList" class="loop-excluded-list"></div>
     </div>
   </main>
+
+  <aside class="rules-panel">
+    <div class="rules-panel-head">
+      <h2>Rules Browser</h2>
+      <p class="rules-panel-sub">Search and enable/disable individual rules or whole categories of rules — applies to both the Finder and the Random Loop generator at once.</p>
+      <input type="text" class="rules-search-input" id="rulesSearchInput" placeholder="Search rules or categories…" oninput="renderRulesPanel()">
+    </div>
+    <div class="rules-panel-scroll" id="rulesPanelScroll"></div>
+  </aside>
 </div>
 
 <!-- SETTINGS DRAWER -->
@@ -236,19 +281,14 @@
 <div class="drawer" id="drawer">
   <div class="drawer-inner">
     <div class="drawer-head">
-      <h2>Rules &amp; Plugins</h2>
+      <h2>Custom Sets &amp; Import</h2>
       <button class="drawer-close" onclick="closeDrawer()">✕</button>
     </div>
-    <p class="drawer-sub">Every rule is a plugin. Toggle any of them off, or add your own custom word-sets below.</p>
+    <p class="drawer-sub">Add your own permanent word-sets below. For toggling built-in rules on/off, see the Rules Browser panel on the right.</p>
 
     <div class="drawer-section">
       <h3>Live word-association APIs</h3>
       <div class="api-note">These call free, keyless APIs — <strong>Datamuse</strong> for synonyms, statistical associations, and collocations, and <strong>ConceptNet</strong> for structured relations like "used for" and "part of" — that aren't hardcoded anywhere. Results are cached locally for 24h. Requires an internet connection.</div>
-    </div>
-
-    <div class="drawer-section">
-      <h3>Plugins <span id="pluginStatus" class="plugin-status"></span></h3>
-      <div class="plugin-grid" id="pluginGrid"></div>
     </div>
 
     <div class="drawer-section">
@@ -1013,6 +1053,37 @@ const MEMBERSHIP_INDEX = new Map();
 // loop. Centralized enforcement lives in categoryIndicesContaining() below
 // so every generation path respects it automatically.
 let EXCLUDED_CATEGORY_NAMES = new Set();
+// Same idea as EXCLUDED_CATEGORY_NAMES but for whole CATEGORY_POOL `type`
+// values at once (e.g. every WordNet-synonym-sourced category) -- driven
+// by the Rules Browser panel's broad-type group toggles.
+let EXCLUDED_POOL_TYPES = new Set();
+// ═══════════════════════════════════════════════════
+//  RULES BROWSER — permanently-visible right panel. Unifies two
+//  previously separate controls: individual Finder-plugin toggles (used
+//  to live in the settings drawer) and the loop generator's per-category
+//  exclude list (used to only be reachable after generating a loop).
+//  Broad "type" groups bulk-toggle both a plugin AND its CATEGORY_POOL
+//  equivalent together, since the Finder and Random Loop draw from
+//  related-but-separate systems (registry.plugins vs CATEGORY_POOL).
+//  Declared up here, not near the render functions further down, because
+//  rebuildCategoryPool() calls renderRulesPanel() at its own end and runs
+//  synchronously at startup, well before the rest of the file's `const`
+//  declarations would otherwise be reached -- same reasoning as
+//  HYPONYM_GENERATED_CATEGORIES and HIDDEN_WORD_GENERATED_CATEGORIES above.
+// ═══════════════════════════════════════════════════
+const RULE_GROUPS = [
+  { id:'wordnet',     label:'WordNet Synonyms',                        pluginIds:['wordnetSynonym'], poolTypes:['wordnet'] },
+  { id:'hyponym',     label:'Hyponym Categories (Meat, Beverage...)',  pluginIds:[], poolTypes:['hyponym'] },
+  { id:'affix',       label:'Prefix / Suffix Compounds',                pluginIds:['affixGroup'], poolTypes:['affix'] },
+  { id:'hiddenWord',  label:'Hidden Word / Contains X',                 pluginIds:['hiddenWord'], poolTypes:['hiddenWord'] },
+  { id:'letterShape', label:'Letter-Shape Properties',                  pluginIds:['restrictedAlphabet'], poolTypes:['letterShape'] },
+  { id:'letterEdit',  label:'Letter Change / Add / Remove',             pluginIds:['letterChange','letterAddition','letterRemoval'], poolTypes:[] },
+  { id:'wordplay',    label:'Word Structure & Spelling',                pluginIds:['alphabetical','reverseAlphabetical','palindrome','reversal','anagram','silentLetter','allVowels','noVowels','acronym','startsEndsWord','heteronym','homophone'], poolTypes:[] },
+  { id:'named',       label:'Named Trivia Sets',                        pluginIds:['setMembership'], poolTypes:['named','wordcat'] },
+  { id:'icon',        label:'Cultural Icons & Themes',                  pluginIds:['culturalIcon'], poolTypes:['icon'] },
+  { id:'custom',      label:'Custom Imported Packs',                    pluginIds:['customSet'], poolTypes:['custom'] },
+  { id:'api',         label:'Live API Lookups (Datamuse)',              pluginIds:['dmSharedSynonyms','dmSharedTriggers','dmMeansLike','dmRhymes','dmHomophones'], poolTypes:['datamuse'] },
+];
 // Populated later by loadHyponymCategories() (fetches hyponym_categories.json)
 // -- declared up here alongside the other pool-adjacent state, not inline
 // near that loader, because rebuildCategoryPool() runs synchronously once
@@ -1116,6 +1187,12 @@ function rebuildCategoryPool() {
       MEMBERSHIP_INDEX.get(m).push(idx);
     }
   });
+
+  // Centralized here rather than in every caller (there are 9+ call sites
+  // across the async data loaders and custom-set import functions) so the
+  // Rules Browser panel's per-group item counts always reflect the
+  // current pool, however it just changed.
+  if (document.getElementById('rulesPanelScroll')) renderRulesPanel();
 }
 
 function categoriesContaining(word, excludeIdx = new Set()) {
@@ -2224,7 +2301,6 @@ function markDatamuseOK() { markServiceOK('datamuse'); }
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
-  renderPluginGrid();
   renderCustomSetList();
 }
 function closeDrawer() {
@@ -2233,25 +2309,6 @@ function closeDrawer() {
 }
 
 const SOURCE_LABEL = { local:'local', api:'live api', custom:'custom' };
-
-function renderPluginGrid() {
-  const grid = document.getElementById('pluginGrid');
-  grid.innerHTML = '';
-  for (const [id, plugin] of registry.plugins) {
-    const div = document.createElement('div');
-    div.className = `plugin-item ${plugin.enabled ? '' : 'disabled'}`;
-    div.innerHTML = `
-      <input type="checkbox" ${plugin.enabled ? 'checked' : ''} onchange="registry.toggle('${id}', this.checked); renderPluginGrid();">
-      <div class="plugin-meta">
-        <div class="plugin-name">${plugin.name}</div>
-        <div class="plugin-desc">${plugin.description}</div>
-      </div>
-      <span class="plugin-tag tag-${plugin.source}">${SOURCE_LABEL[plugin.source] || plugin.source}</span>
-    `;
-    grid.appendChild(div);
-  }
-  document.getElementById('pluginStatus').textContent = `${registry.getEnabled().length}/${registry.plugins.size} enabled`;
-}
 
 function renderCustomSetList() {
   const list = document.getElementById('customSetList');
@@ -2360,7 +2417,7 @@ async function loadWordNetData() {
     WN_DICTIONARY = new Set(data.dictionary || []);
     wordNetPlugin.enabled = true;
     registry.saveState();
-    if (document.getElementById('pluginGrid')) renderPluginGrid(); // no-op if drawer hasn't been opened yet
+    if (document.getElementById('rulesPanelScroll')) renderRulesPanel(); // no-op if panel hasn't rendered yet
     rebuildCategoryPool();
   } catch (e) {
     console.warn('No wordnet_synonyms.json found (optional feature):', e);
@@ -2691,20 +2748,16 @@ function resetFields() {
 // ═══════════════════════════════════════════════════
 function categoryIndicesContaining(word, excludeIdx = new Set()) {
   const idxs = MEMBERSHIP_INDEX.get(norm(word)) || [];
-  // EXCLUDED_CATEGORY_NAMES (session-only, set via the "exclude" button on
-  // a generated loop) is centralized here so every loop-generation call
-  // site -- old pure-random path, Datamuse-seeded path, new input-driven
-  // path -- automatically respects it without each needing its own filter.
-  return idxs.filter(i => !excludeIdx.has(i) && !EXCLUDED_CATEGORY_NAMES.has(CATEGORY_POOL[i].name));
-}
-
-function pickStratifiedCategoryIdx() {
-  const byType = {};
-  CATEGORY_POOL.forEach((c, i) => { (byType[c.type] ||= []).push(i); });
-  const types = Object.keys(byType);
-  const type = types[Math.floor(Math.random() * types.length)];
-  const options = byType[type];
-  return options[Math.floor(Math.random() * options.length)];
+  // EXCLUDED_CATEGORY_NAMES (individual) and EXCLUDED_POOL_TYPES (broad
+  // group, from the Rules Browser panel) are centralized here so every
+  // loop-generation call site -- old pure-random path, Datamuse-seeded
+  // path, input-driven path -- automatically respects both without each
+  // needing its own filter.
+  return idxs.filter(i =>
+    !excludeIdx.has(i) &&
+    !EXCLUDED_CATEGORY_NAMES.has(CATEGORY_POOL[i].name) &&
+    !EXCLUDED_POOL_TYPES.has(CATEGORY_POOL[i].type)
+  );
 }
 
 // Puts candidates whose TYPE isn't already used elsewhere in this loop
@@ -2816,14 +2869,6 @@ function tryCompleteLoop(cat1Idx) {
   };
 }
 
-function generateLoop(maxAttempts = 400) {
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const loop = tryCompleteLoop(pickStratifiedCategoryIdx());
-    if (loop) return loop;
-  }
-  return null;
-}
-
 // ═══════════════════════════════════════════════════
 //  INPUT-DRIVEN LOOP GENERATION
 //  3x3 input grid (4 corners + 4 edges, center unused) -> 4x4 output grid.
@@ -2834,7 +2879,7 @@ function generateLoop(maxAttempts = 400) {
 function pickStratifiedCategoryIdxExcluding() {
   const byType = {};
   CATEGORY_POOL.forEach((c, i) => {
-    if (EXCLUDED_CATEGORY_NAMES.has(c.name)) return;
+    if (EXCLUDED_CATEGORY_NAMES.has(c.name) || EXCLUDED_POOL_TYPES.has(c.type)) return;
     (byType[c.type] ||= []).push(i);
   });
   const types = Object.keys(byType);
@@ -3063,24 +3108,147 @@ function generateLoopFromInputs(maxAttempts = 400) {
   return null;
 }
 
+// Rules Browser panel helpers -- RULE_GROUPS itself is declared earlier
+// (see comment there) so rebuildCategoryPool()'s synchronous startup call
+// can reach it without a temporal-dead-zone error.
+function poolCountForType(type) {
+  let n = 0;
+  for (const c of CATEGORY_POOL) if (c.type === type) n++;
+  return n;
+}
+
+function ruleGroupIsFullyEnabled(group) {
+  const pluginsOk = group.pluginIds.every(id => registry.plugins.get(id)?.enabled);
+  const poolOk = group.poolTypes.every(t => !EXCLUDED_POOL_TYPES.has(t));
+  return pluginsOk && poolOk;
+}
+
+function toggleRuleGroup(groupId) {
+  const group = RULE_GROUPS.find(g => g.id === groupId);
+  if (!group) return;
+  const turnOn = !ruleGroupIsFullyEnabled(group);
+  for (const id of group.pluginIds) registry.toggle(id, turnOn);
+  for (const t of group.poolTypes) {
+    if (turnOn) EXCLUDED_POOL_TYPES.delete(t); else EXCLUDED_POOL_TYPES.add(t);
+  }
+  renderRulesPanel();
+}
+
+function toggleRulePlugin(id, state) {
+  registry.toggle(id, state);
+  renderRulesPanel();
+}
+
 function excludeLoopCategory(name) {
   EXCLUDED_CATEGORY_NAMES.add(name);
-  renderExcludedList();
+  renderRulesPanel();
 }
 
 function reincludeLoopCategory(name) {
   EXCLUDED_CATEGORY_NAMES.delete(name);
-  renderExcludedList();
+  renderRulesPanel();
 }
 
-function renderExcludedList() {
-  const el = document.getElementById('loopExcludedList');
+// esc(): every dynamic value that flows into an onclick="..." attribute
+// goes through JSON.stringify() wrapped in the OUTER single-quoted
+// attribute (onclick='fn(${esc(x)})') -- never double-quoted. This isn't
+// just style: thousands of the generated categories are literally named
+// things like `Contains "GRAPH"`, which would immediately break a
+// double-quoted attribute if interpolated directly.
+// esc(): every dynamic value that flows into an onchange='...'/onclick='...'
+// attribute goes through this, and every such attribute uses SINGLE
+// quotes consistently. JSON.stringify() alone only protects against
+// double-quotes breaking a double-quoted attribute (categories are
+// literally named things like `Contains "GRAPH"`) -- it does nothing for
+// apostrophes breaking a single-quoted one, and real category names have
+// both (`Associated with St. Patrick's Day`, `Santa's Reindeer`). HTML-
+// entity-encoding any leftover single-quote after JSON.stringify handles
+// that case too: the browser decodes &#39; back to a literal ' before
+// handing the attribute to the JS parser, where it's a perfectly valid
+// character inside a double-quoted JS string.
+function esc(s) { return JSON.stringify(s).replace(/'/g, '&#39;'); }
+
+function renderRulesPanel() {
+  const el = document.getElementById('rulesPanelScroll');
   if (!el) return;
-  if (!EXCLUDED_CATEGORY_NAMES.size) { el.innerHTML = ''; return; }
-  el.innerHTML = `<div style="margin-bottom:6px;">Excluded from regenerating (resets on page refresh):</div>` +
-    [...EXCLUDED_CATEGORY_NAMES].map(n =>
-      `<span class="loop-excluded-chip">${cap(n)}<button onclick='reincludeLoopCategory(${JSON.stringify(n)})' title="Allow this category again">✕</button></span>`
-    ).join('');
+  const rawQuery = document.getElementById('rulesSearchInput')?.value || '';
+  const query = norm(rawQuery);
+
+  let html = '';
+
+  // --- Broad rule-type groups (bulk toggle, affects Finder + Loop at once) ---
+  html += `<div class="rules-section"><h3>Rule Types</h3>`;
+  for (const g of RULE_GROUPS) {
+    const enabled = ruleGroupIsFullyEnabled(g);
+    const pluginCount = g.pluginIds.length;
+    const poolCount = g.poolTypes.reduce((sum, t) => sum + poolCountForType(t), 0);
+    const parts = [];
+    if (pluginCount) parts.push(`${pluginCount} rule${pluginCount > 1 ? 's' : ''}`);
+    if (poolCount) parts.push(`${poolCount.toLocaleString()} loop categories`);
+    html += `<label class="rule-group-row">
+      <input type="checkbox" ${enabled ? 'checked' : ''} onchange='toggleRuleGroup(${esc(g.id)})'>
+      <div class="rule-group-main">
+        <span class="rule-group-name">${g.label}</span>
+        <span class="rule-group-count">${parts.join(' · ') || 'no data loaded yet'}</span>
+      </div>
+    </label>`;
+  }
+  html += `</div>`;
+
+  // --- Individually-excluded loop categories (always visible, regardless of search) ---
+  if (EXCLUDED_CATEGORY_NAMES.size) {
+    html += `<div class="rules-section"><h3>Individually Excluded (Loop)</h3>`;
+    for (const n of EXCLUDED_CATEGORY_NAMES) {
+      html += `<span class="loop-excluded-chip">${cap(n)}<button onclick='reincludeLoopCategory(${esc(n)})' title="Allow this category again">✕</button></span>`;
+    }
+    html += `</div>`;
+  }
+
+  // --- Finder rules: always browsable (small, fixed list of ~27) ---
+  const pluginMatches = [...registry.plugins.values()].filter(p =>
+    !query || norm(p.name).includes(query) || norm(p.description).includes(query)
+  );
+  html += `<div class="rules-section"><h3>Finder Rules ${query ? `(${pluginMatches.length} matching)` : `(${registry.getEnabled().length}/${registry.plugins.size} enabled)`}</h3>`;
+  if (query && !pluginMatches.length) {
+    html += `<div class="rules-empty-note">No Finder rules match "${rawQuery}".</div>`;
+  }
+  for (const p of pluginMatches) {
+    html += `<label class="rule-item-row">
+      <input type="checkbox" ${p.enabled ? 'checked' : ''} onchange='toggleRulePlugin(${esc(p.id)}, this.checked)'>
+      <div>
+        <div class="rule-item-name">${p.name}</div>
+        <div class="rule-item-desc">${p.description}</div>
+      </div>
+    </label>`;
+  }
+  html += `</div>`;
+
+  // --- Loop categories: only rendered when searching (16k+ entries
+  // otherwise -- listing them all by default would flood the panel) ---
+  if (query) {
+    const allMatches = CATEGORY_POOL.filter(c => norm(c.name).includes(query));
+    const poolMatches = allMatches.slice(0, 100);
+    html += `<div class="rules-section"><h3>Loop Categories matching "${rawQuery}" (${allMatches.length})</h3>`;
+    if (!poolMatches.length) {
+      html += `<div class="rules-empty-note">No loop categories match.</div>`;
+    }
+    for (const c of poolMatches) {
+      const excluded = EXCLUDED_CATEGORY_NAMES.has(c.name);
+      html += `<label class="rule-item-row">
+        <input type="checkbox" ${excluded ? '' : 'checked'} onchange='this.checked ? reincludeLoopCategory(${esc(c.name)}) : excludeLoopCategory(${esc(c.name)})'>
+        <div>
+          <div class="rule-item-name">${c.name}</div>
+          <div class="rule-item-count">${c.members.length} members</div>
+        </div>
+      </label>`;
+    }
+    if (allMatches.length > 100) html += `<div class="rules-empty-note">Showing first 100 of ${allMatches.length} — refine your search for more specific results.</div>`;
+    html += `</div>`;
+  } else {
+    html += `<div class="rules-section"><h3>Loop Categories</h3><div class="rules-empty-note">Search above to browse and individually exclude specific loop categories (${CATEGORY_POOL.length.toLocaleString()} total).</div></div>`;
+  }
+
+  el.innerHTML = html;
 }
 
 function renderLoopGridWithExclude(loop) {
@@ -3088,7 +3256,7 @@ function renderLoopGridWithExclude(loop) {
     ? `<td class="loop-cell${isHook ? ' loop-hook' : ''}">${cap(word)}</td>`
     : `<td class="loop-cell loop-empty"></td>`;
   const header = name =>
-    `${name} <button class="loop-exclude-btn" onclick='excludeLoopCategory(${JSON.stringify(name)})' title="Exclude this category from future loops">🚫</button>`;
+    `${name} <button class="loop-exclude-btn" onclick='excludeLoopCategory(${esc(name)})' title="Exclude this category from future loops">🚫</button>`;
 
   return `<table class="loop-table">
     <tr>
@@ -3187,49 +3355,6 @@ async function generateLoopFromDatamuseSeed(maxSeedAttempts = 6, attemptsPerSeed
     if (loop) return loop;
   }
   return null;
-}
-
-function renderLoopGrid(loop) {
-  const cell = (word, isHook) => word
-    ? `<td class="loop-cell${isHook ? ' loop-hook' : ''}">${cap(word)}</td>`
-    : `<td class="loop-cell loop-empty"></td>`;
-
-  return `<table class="loop-table">
-    <tr>
-      <td class="loop-corner"></td>
-      <td class="loop-col-header">${loop.left.name}</td>
-      <td class="loop-corner"></td>
-      <td class="loop-corner"></td>
-      <td class="loop-col-header">${loop.right.name}</td>
-    </tr>
-    <tr>
-      <td class="loop-row-header">${loop.top.name}</td>
-      ${cell(loop.top.words[0], true)}${cell(loop.top.words[1])}${cell(loop.top.words[2])}${cell(loop.top.words[3], true)}
-    </tr>
-    <tr>
-      <td class="loop-row-header"></td>
-      ${cell(loop.left.words[1])}<td class="loop-cell loop-empty"></td><td class="loop-cell loop-empty"></td>${cell(loop.right.words[1])}
-    </tr>
-    <tr>
-      <td class="loop-row-header"></td>
-      ${cell(loop.left.words[2])}<td class="loop-cell loop-empty"></td><td class="loop-cell loop-empty"></td>${cell(loop.right.words[2])}
-    </tr>
-    <tr>
-      <td class="loop-row-header">${loop.bottom.name}</td>
-      ${cell(loop.bottom.words[0], true)}${cell(loop.bottom.words[1])}${cell(loop.bottom.words[2])}${cell(loop.bottom.words[3], true)}
-    </tr>
-  </table>`;
-}
-
-async function renderNewLoop() {
-  const container = document.getElementById('loopContent');
-  const useDatamuse = document.getElementById('loopDatamuseToggle')?.checked;
-  container.innerHTML = `<div class="loop-fail">${useDatamuse ? 'Asking Datamuse for a seed word…' : 'Shuffling…'}</div>`;
-  await new Promise(r => setTimeout(r, 10));
-  const loop = useDatamuse ? await generateLoopFromDatamuseSeed() : generateLoop();
-  container.innerHTML = loop
-    ? renderLoopGrid(loop)
-    : '<div class="loop-fail">Couldn\'t close a loop that time — hit "Generate Another" to try again.</div>';
 }
 
 function showLoopView() {
