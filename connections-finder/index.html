@@ -272,7 +272,7 @@
 
     <button class="settings-btn" onclick="openDrawer()">📥 Custom Sets &amp; Import</button>
     <button class="settings-btn" onclick="resetFields()">⟲ Reset All Fields</button>
-    <button class="settings-btn" onclick="showLoopView()">🎲 Random Loop</button>
+    <button class="settings-btn" id="viewToggleBtn" onclick="toggleView()">🎲 Random Loop</button>
 
     <div class="progress-section" id="progressSection">
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -282,8 +282,8 @@
     <div class="pair-warning" id="pairWarning" style="display:none"></div>
     <div class="pair-warning" id="datamuseStatus" style="display:none"></div>
 
-    <button class="analyze-btn" id="bulkBtn" onclick="analyzeAll()">Find Connections</button>
-    <p class="bulk-hint">One word or phrase per line in each field.</p>
+    <button class="analyze-btn" id="bulkBtn" onclick="runPrimaryAction()">Find Connections</button>
+    <p class="bulk-hint" id="bulkHint">One word or phrase per line in each field.</p>
   </aside>
 
   <main class="main-content">
@@ -292,10 +292,6 @@
       <div id="output"><div class="empty-state">Enter words above to get started.</div></div>
     </div>
     <div id="loopView" style="display:none">
-      <div class="loop-toolbar">
-        <button class="settings-btn" onclick="showFinderView()">← Back to Finder</button>
-        <button class="analyze-btn loop-generate-btn" onclick="renderNewLoopFromInputs()">🎲 Generate</button>
-      </div>
       <p class="loop-input-hint">Fill in any of the 8 fields below (one candidate word/phrase per line) to steer generation — leave any blank and the algorithm picks freely for that spot. Each field is an OR-selection, same as the main Finder: the algorithm picks exactly ONE of your candidates and uses it, never more than one, even if several would fit. Each <strong>edge</strong> field represents BOTH non-corner cells on that side at once — the one candidate it picks fills one cell, and the other cell is always filled freely by the algorithm, never from a leftover candidate in the same field. Words you type that don't end up picked are never placed anywhere else in the loop.</p>
       <div class="loop-input-grid">
         <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerTL"></textarea></div>
@@ -387,6 +383,10 @@
         <button class="drawer-btn" onclick="importCustomSetsFromURL()">Load Pack from URL</button>
         <textarea id="customSetInput" placeholder='{&#10;  "Parts of a Bicycle": ["frame","fork","chain","spoke","saddle"]&#10;}'></textarea>
         <button class="drawer-btn primary" onclick="importCustomSets()">Import Pasted JSON</button>
+        <label class="drawer-btn" style="display:inline-block; text-align:center;">
+          Upload JSON file(s)…
+          <input type="file" id="customSetFileInput" accept=".json,application/json" multiple style="display:none" onchange="importCustomSetsFromFiles(this.files)">
+        </label>
         <div class="import-msg" id="importMsg"></div>
         <div class="custom-set-list" id="customSetList"></div>
       </div>
@@ -1160,6 +1160,10 @@ let EXCLUDED_CATEGORY_NAMES = new Set();
 // values at once (e.g. every WordNet-synonym-sourced category) -- driven
 // by the Rules Browser panel's broad-type group toggles.
 let EXCLUDED_POOL_TYPES = new Set();
+// Which of the two mutually-exclusive main-content views is active --
+// drives the single shared sidebar action button (see runPrimaryAction())
+// and which fields "Reset All Fields" clears.
+let CURRENT_VIEW = 'finder';
 // Edge category-lock (loop generator): which loop CATEGORY, by name, is
 // forced onto each of the 4 edges (top/left/right/bottom = the loop's 4
 // categories). Session-only, same lifetime as the exclusion sets above.
@@ -2632,6 +2636,54 @@ function importCustomSets() {
   }
 }
 
+// Reads one or more locally-picked .json files (same shape as the paste
+// box: {"Category Name": ["word1","word2",...]}, or anything
+// flattenPackJSON already knows how to unwrap) and imports each as a set
+// of custom categories -- lets someone add several files at once (e.g.
+// separate packs from different sources) without copy-pasting each one
+// into the textarea by hand.
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
+}
+
+async function importCustomSetsFromFiles(fileList) {
+  const msg = document.getElementById('importMsg');
+  const files = [...fileList];
+  if (!files.length) return;
+  msg.textContent = `Reading ${files.length} file${files.length === 1 ? '' : 's'}…`;
+  msg.className = 'import-msg';
+
+  let totalAdded = 0;
+  const failed = [];
+  for (const file of files) {
+    try {
+      const text = await readFileAsText(file);
+      const raw = JSON.parse(text);
+      const flattened = flattenPackJSON(raw, deriveNameFromUrl(file.name));
+      totalAdded += customSetPlugin.importSets(flattened);
+    } catch (e) {
+      failed.push(file.name);
+    }
+  }
+
+  if (totalAdded) rebuildCategoryPool();
+  document.getElementById('customSetFileInput').value = '';
+  renderCustomSetList();
+
+  if (failed.length) {
+    msg.textContent = `Imported ${totalAdded} categor${totalAdded === 1 ? 'y' : 'ies'}. Couldn't read: ${failed.join(', ')}.`;
+    msg.className = totalAdded ? 'import-msg ok' : 'import-msg err';
+  } else {
+    msg.textContent = `Imported ${totalAdded} categor${totalAdded === 1 ? 'y' : 'ies'} from ${files.length} file${files.length === 1 ? '' : 's'}.`;
+    msg.className = 'import-msg ok';
+  }
+}
+
 function clearApiCache() {
   CacheManager.clear();
   const msg = document.getElementById('importMsg');
@@ -2852,6 +2904,10 @@ function hideProgress() {
 }
 
 function resetFields() {
+  if (CURRENT_VIEW === 'loop') {
+    resetLoopInputFields();
+    return;
+  }
   ensureFieldCount(1);
   const first = document.getElementById('field0');
   if (first) first.value = '';
@@ -2860,6 +2916,20 @@ function resetFields() {
   document.getElementById('output').innerHTML = '<div class="empty-state">Enter words above to get started.</div>';
   allResults = [];
   currentFilter = 'all';
+}
+
+// Clears every one of the loop generator's 8 textareas (corners + edges).
+// Deliberately leaves any locked-in categories (🔒 chips) alone -- those
+// aren't "text" typed into a field, and clearing them on every reset would
+// undo a deliberate constraint the person set up on purpose. Use the ✕ on
+// a chip, or the picker itself, to clear a lock.
+function resetLoopInputFields() {
+  for (const id of ['loopIn_cornerTL', 'loopIn_cornerTR', 'loopIn_cornerBL', 'loopIn_cornerBR',
+                     'loopIn_edgeTop', 'loopIn_edgeLeft', 'loopIn_edgeRight', 'loopIn_edgeBottom']) {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  }
+  document.getElementById('loopContent').innerHTML = '';
 }
 
 // ═══════════════════════════════════════════════════
@@ -3744,14 +3814,56 @@ async function generateLoopFromDatamuseSeed(maxSeedAttempts = 6, attemptsPerSeed
 }
 
 function showLoopView() {
+  CURRENT_VIEW = 'loop';
   document.getElementById('finderView').style.display = 'none';
   document.getElementById('loopView').style.display = '';
+  updatePrimaryActionButton();
   renderNewLoopFromInputs();
 }
 
 function showFinderView() {
+  CURRENT_VIEW = 'finder';
   document.getElementById('loopView').style.display = 'none';
   document.getElementById('finderView').style.display = '';
+  updatePrimaryActionButton();
+}
+
+// The single sidebar button that switches between the two views -- reads
+// "🎲 Random Loop" in Finder mode (go TO the loop generator) and
+// "← Back to Finder" in Loop mode (go back), same spot either way, so
+// there's one toggle instead of two separate one-directional buttons.
+function toggleView() {
+  if (CURRENT_VIEW === 'loop') showFinderView();
+  else showLoopView();
+}
+
+// The sidebar's one primary-action button ("Find Connections" / "🎲
+// Generate Loop") lives in a fixed spot regardless of which view is
+// showing -- this just relabels it (and the view-toggle button right
+// above it, plus the hint text below) to match the active view, instead
+// of separate buttons in separate places for each view.
+function updatePrimaryActionButton() {
+  const btn = document.getElementById('bulkBtn');
+  const hint = document.getElementById('bulkHint');
+  const toggleBtn = document.getElementById('viewToggleBtn');
+  if (!btn) return;
+  if (CURRENT_VIEW === 'loop') {
+    btn.textContent = '🎲 Generate Loop';
+    if (hint) hint.textContent = 'Fill in any of the 8 fields below to steer generation, or leave them all blank and hit Generate.';
+    if (toggleBtn) toggleBtn.textContent = '← Back to Finder';
+  } else {
+    btn.textContent = 'Find Connections';
+    if (hint) hint.textContent = 'One word or phrase per line in each field.';
+    if (toggleBtn) toggleBtn.textContent = '🎲 Random Loop';
+  }
+}
+
+// Dispatches the shared sidebar button to whichever action the current
+// view needs -- Finder's analyzeAll() or the loop generator's
+// renderNewLoopFromInputs() -- so both views can share one button/position.
+function runPrimaryAction() {
+  if (CURRENT_VIEW === 'loop') renderNewLoopFromInputs();
+  else analyzeAll();
 }
 
 async function analyzeSingleList(list, onProgress, skipAPI) {
