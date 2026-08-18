@@ -71,6 +71,13 @@
       ".w-carousel-btn:hover{background:rgba(255,255,255,.18);color:#fff;}" +
 
       // Game embed — poster + lazily-mounted iframe
+      // scroll-snap-type:proximity (not mandatory) on the page + a single
+      // scroll-snap-align target on the widget: settles/centers the game
+      // if a scroll gesture drifts near it, but a real scroll past it
+      // breaks free immediately — mandatory would fight the scroll wheel
+      // instead.
+      "html{scroll-snap-type:y proximity;}" +
+      ".w-game-embed-bleed{scroll-snap-align:center;}" +
       // Two-layer structure on purpose: .w-game-embed-bleed does ONLY the
       // viewport breakout (must stay in pure vw units — left:50% +
       // margin:-50vw is the scrollbar-safe version of this trick; mixing
@@ -84,12 +91,12 @@
       "}" +
       ".w-game-embed{" +
         "position:relative;box-sizing:border-box;" +
-        "width:98%;max-width:1700px;margin:0 auto;" +
-        "aspect-ratio:8/5;max-height:85vh;" +
-        "border-radius:var(--radius);overflow:hidden;background:#0a0a0a;" +
+        "width:100%;" +
+        "aspect-ratio:3/2;max-height:92vh;" +
+        "overflow:hidden;background:#0a0a0a;" +
       "}" +
       "@media (max-width:640px){" +
-        ".w-game-embed{width:100%;max-height:70vh;border-radius:0;}" +
+        ".w-game-embed{max-height:80vh;}" +
       "}" +
       ".w-game-embed iframe{" +
         "position:absolute;inset:0;width:100%;height:100%;border:0;display:block;" +
