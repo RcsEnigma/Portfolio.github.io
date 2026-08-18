@@ -452,6 +452,8 @@
       iframe.src = gameUrl;
       iframe.setAttribute("allowfullscreen", "");
       iframe.setAttribute("allow", "fullscreen; autoplay");
+      iframe.setAttribute("scrolling", "no");
+      iframe.style.overflow = "hidden";
       wrap.innerHTML = "";
       wrap.appendChild(iframe);
     };
