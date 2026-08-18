@@ -71,15 +71,25 @@
       ".w-carousel-btn:hover{background:rgba(255,255,255,.18);color:#fff;}" +
 
       // Game embed — poster + lazily-mounted iframe
+      // Two-layer structure on purpose: .w-game-embed-bleed does ONLY the
+      // viewport breakout (must stay in pure vw units — left:50% +
+      // margin:-50vw is the scrollbar-safe version of this trick; mixing
+      // in a max-width on the same element fights that math and is what
+      // caused the phantom scrollbar). .w-game-embed does the actual
+      // sizing/centering as a normal box once its parent is full-width.
+      ".w-game-embed-bleed{" +
+        "position:relative;left:50%;right:50%;" +
+        "margin-left:-50vw;margin-right:-50vw;" +
+        "width:100vw;" +
+      "}" +
       ".w-game-embed{" +
-        "position:relative;" +
-        "width:96vw;max-width:1700px;" +
-        "margin-left:50%;transform:translateX(-50%);" +
+        "position:relative;box-sizing:border-box;" +
+        "width:98%;max-width:1700px;margin:0 auto;" +
         "aspect-ratio:8/5;max-height:85vh;" +
         "border-radius:var(--radius);overflow:hidden;background:#0a0a0a;" +
       "}" +
       "@media (max-width:640px){" +
-        ".w-game-embed{width:100vw;max-height:70vh;border-radius:0;}" +
+        ".w-game-embed{width:100%;max-height:70vh;border-radius:0;}" +
       "}" +
       ".w-game-embed iframe{" +
         "position:absolute;inset:0;width:100%;height:100%;border:0;display:block;" +
@@ -411,6 +421,9 @@
   // that call only succeeds from inside the iframe because of the
   // allow="fullscreen" / allowfullscreen attributes set below.
   function buildGameEmbed(w, slug) {
+    const bleed = document.createElement("div");
+    bleed.className = "w-game-embed-bleed";
+
     const wrap = document.createElement("div");
     wrap.className = "w-game-embed";
 
@@ -444,7 +457,8 @@
     };
 
     wrap.appendChild(poster);
-    return wrap;
+    bleed.appendChild(wrap);
+    return bleed;
   }
 
   // ── Carousel — film-strip with centre-pivot positioning ───────────
