@@ -2,20 +2,8 @@
   "packs": [
     "claude-films.json",
     "gemini-lists.json",
-    "gemini-pop-culture.json",
-    "gemini-pop-culture-2.json",
-    "gemini-specialization.json",
-    "gemini-specialization-2.json",
-    "kimi-arts-crafts.json",
-    "kimi-fantasy-mythology.json",
-    "kimi-food-cullinary.json",
-    "kimi-history-military.json",
-    "kimi-linguistics-communication.json",
-    "kimi-nature-deep.json",
-    "kimi-sports-recreation.json",
-    "kimi-tech-modern.json",
+    "kimi-stuff.json",
     "kimi-HIJ.json",
-    "gemini-HIJ.json",
     "gemini-HIJ2.json",
     "qwen-HIJ.json"
   ]
