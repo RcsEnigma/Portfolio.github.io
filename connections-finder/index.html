@@ -116,6 +116,10 @@
   .fit-line { font-size: .8rem; margin-bottom: 8px; opacity: .7; line-height: 1.6; white-space: pre-line; }
   .pills { display: flex; flex-wrap: wrap; gap: 5px; }
   .pill { font-family: var(--mono); font-size: .72rem; padding: 3px 10px; border-radius: 100px; background: rgba(255,255,255,0.45); border: 1px solid rgba(0,0,0,0.12); letter-spacing: .5px; text-transform: uppercase; }
+  .pills-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .copy-pills-btn { flex-shrink: 0; font-size: .68rem; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; color: var(--muted); font-family: var(--font); white-space: nowrap; }
+  .copy-pills-btn:hover:not(:disabled) { border-color: #888; color: var(--text); }
+  .copy-pills-btn:disabled { color: #2a8a4a; border-color: #2a8a4a; cursor: default; }
   /* Bulk pair chips */
   .pair-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
   .pair-chip { font-family: var(--mono); font-size: .72rem; padding: 3px 10px; border-radius: 100px; background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.15); letter-spacing: .5px; text-transform: uppercase; }
@@ -205,7 +209,8 @@
   .loop-input-grid { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 10px; max-width: 560px; margin-bottom: .75rem; }
   .loop-input-wrap { display: flex; flex-direction: column; }
   .loop-input-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
-  .loop-input-cell { border: 1.5px solid var(--border); border-radius: 10px; padding: 8px; font: inherit; font-size: .82rem; resize: vertical; min-height: 68px; background: var(--surface); width: 100%; box-sizing: border-box; }
+  .loop-input-cell { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 8px 10px; font-family: var(--mono); letter-spacing: .5px; text-transform: uppercase; font-size: .8rem; line-height: 1.5; resize: vertical; min-height: 68px; background: var(--surface); color: var(--text); outline: none; width: 100%; box-sizing: border-box; transition: border-color .15s; }
+  .loop-input-cell:focus { border-color: #555; }
   .loop-input-cell.corner { background: #fff3c4; border-color: #e0c76a; }
   .loop-input-cell.center-empty { visibility: hidden; }
   .loop-input-hint { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; max-width: 640px; }
@@ -294,31 +299,31 @@
     <div id="loopView" style="display:none">
       <p class="loop-input-hint">Fill in any of the 8 fields below (one candidate word/phrase per line) to steer generation — leave any blank and the algorithm picks freely for that spot. Each field is an OR-selection, same as the main Finder: the algorithm picks exactly ONE of your candidates and uses it, never more than one, even if several would fit. Each <strong>edge</strong> field represents BOTH non-corner cells on that side at once — the one candidate it picks fills one cell, and the other cell is always filled freely by the algorithm, never from a leftover candidate in the same field. Words you type that don't end up picked are never placed anywhere else in the loop.</p>
       <div class="loop-input-grid">
-        <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerTL"></textarea></div>
+        <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerTL" onpaste="handleSheetsPaste(event)"></textarea></div>
         <div class="loop-input-wrap">
           <div class="loop-edge-label-row"><span class="loop-input-label">Top edge</span><button class="loop-lock-btn" onclick="openCategoryPicker('top')" title="Lock this side to a specific category">🔎 Category</button></div>
           <div class="loop-locked-chip-row" id="loopLockChip_top"></div>
-          <textarea class="loop-input-cell edge" id="loopIn_edgeTop"></textarea>
+          <textarea class="loop-input-cell edge" id="loopIn_edgeTop" onpaste="handleSheetsPaste(event)"></textarea>
         </div>
-        <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerTR"></textarea></div>
+        <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerTR" onpaste="handleSheetsPaste(event)"></textarea></div>
         <div class="loop-input-wrap">
           <div class="loop-edge-label-row"><span class="loop-input-label">Left edge</span><button class="loop-lock-btn" onclick="openCategoryPicker('left')" title="Lock this side to a specific category">🔎 Category</button></div>
           <div class="loop-locked-chip-row" id="loopLockChip_left"></div>
-          <textarea class="loop-input-cell edge" id="loopIn_edgeLeft"></textarea>
+          <textarea class="loop-input-cell edge" id="loopIn_edgeLeft" onpaste="handleSheetsPaste(event)"></textarea>
         </div>
         <div class="loop-input-cell center-empty"></div>
         <div class="loop-input-wrap">
           <div class="loop-edge-label-row"><span class="loop-input-label">Right edge</span><button class="loop-lock-btn" onclick="openCategoryPicker('right')" title="Lock this side to a specific category">🔎 Category</button></div>
           <div class="loop-locked-chip-row" id="loopLockChip_right"></div>
-          <textarea class="loop-input-cell edge" id="loopIn_edgeRight"></textarea>
+          <textarea class="loop-input-cell edge" id="loopIn_edgeRight" onpaste="handleSheetsPaste(event)"></textarea>
         </div>
-        <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerBL"></textarea></div>
+        <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerBL" onpaste="handleSheetsPaste(event)"></textarea></div>
         <div class="loop-input-wrap">
           <div class="loop-edge-label-row"><span class="loop-input-label">Bottom edge</span><button class="loop-lock-btn" onclick="openCategoryPicker('bottom')" title="Lock this side to a specific category">🔎 Category</button></div>
           <div class="loop-locked-chip-row" id="loopLockChip_bottom"></div>
-          <textarea class="loop-input-cell edge" id="loopIn_edgeBottom"></textarea>
+          <textarea class="loop-input-cell edge" id="loopIn_edgeBottom" onpaste="handleSheetsPaste(event)"></textarea>
         </div>
-        <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerBR"></textarea></div>
+        <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerBR" onpaste="handleSheetsPaste(event)"></textarea></div>
       </div>
       <label class="loop-toggle"><input type="checkbox" id="loopDatamuseToggle"> When every field above is blank, seed the top category from live Datamuse synonyms instead of local lists (slower, needs network)</label>
       <div id="loopContent"></div>
@@ -2375,6 +2380,25 @@ const wordNetPlugin = new WordNetSynonymPlugin();
 const customSetPlugin = new CustomSetPlugin();
 rebuildCategoryPool();
 
+// Manually highlighting text inside the app's results (cards, the loop
+// grid, the rules panel, the two browse/pick modals) and hitting Ctrl/Cmd+C
+// would otherwise carry the rendered HTML onto the clipboard too --
+// pill/chip backgrounds, uppercase styling, fonts -- which Sheets/Docs
+// then honors on paste. Forcing the clipboard to plain-text-only for
+// copies that originate in these read-only areas fixes that; input
+// fields (textareas, search boxes) are untouched since a plain textarea
+// selection was already plain text with nothing to strip.
+document.addEventListener('copy', (e) => {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+  const anchorEl = sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement;
+  if (!anchorEl || !anchorEl.closest) return;
+  const scope = anchorEl.closest('#cardGrid, #loopContent, #rulesPanelScroll, #catPickBody, #browseWordsBody');
+  if (!scope) return;
+  e.preventDefault();
+  e.clipboardData.setData('text/plain', sel.toString());
+});
+
 [
   new AlphabeticalPlugin(),
   new ReverseAlphabeticalPlugin(),
@@ -2726,7 +2750,9 @@ function addFieldElement(idx) {
   const placeholder = FIELD_PLACEHOLDERS[idx] || 'more words…';
   div.innerHTML = `<label>Field ${idx + 1} <span>— one word or phrase per line</span></label><textarea class="bulk-textarea" id="field${idx}" placeholder="${placeholder}"></textarea>`;
   container.appendChild(div);
-  div.querySelector('textarea').addEventListener('input', onFieldInput);
+  const ta = div.querySelector('textarea');
+  ta.addEventListener('input', onFieldInput);
+  ta.addEventListener('paste', handleSheetsPaste);
 }
 
 function ensureFieldCount(n) {
@@ -2740,6 +2766,25 @@ function maintainFields() {
   let lastNonEmpty = -1;
   textareas.forEach((t, i) => { if (t.value.trim()) lastNonEmpty = i; });
   ensureFieldCount(lastNonEmpty === -1 ? 1 : lastNonEmpty + 2);
+}
+
+// Google Sheets (and Excel) put a TAB between cells when you copy a row,
+// and these fields expect one entry per LINE -- so a row pasted straight
+// in would land as one run-on line instead of separate candidates. This
+// turns any run of tabs in a paste into a newline before it hits the
+// field, so a copied row (or a whole copied range, tabs AND newlines)
+// unpacks into one word/phrase per line automatically. A plain paste with
+// no tabs at all (the common case: pasting a single word) is left alone
+// and falls through to the browser's normal paste behavior.
+function handleSheetsPaste(e) {
+  const text = (e.clipboardData || window.clipboardData)?.getData('text');
+  if (!text || !text.includes('\t')) return;
+  e.preventDefault();
+  const converted = text.replace(/\t+/g, '\n');
+  const el = e.target;
+  const start = el.selectionStart, end = el.selectionEnd;
+  el.setRangeText(converted, start, end, 'end');
+  el.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function onFieldInput() {
@@ -2828,6 +2873,41 @@ function srcBadge(cat) {
   return `<span class="src-badge">${cat.source === 'api' ? 'live' : 'custom'}</span>`;
 }
 
+// Shared by both card renderers below. The "other examples" pills are the
+// suggested-but-unused words for this category -- the copy button grabs
+// them TAB-separated so a paste into Google Sheets lands as one row
+// (matching how Sheets itself delimits cells on copy), rather than one
+// word per line.
+function pillsSection(otherExamples) {
+  if (!otherExamples || !otherExamples.length) return '';
+  return `<div class="pills-row">
+    <div class="pills">${otherExamples.map(e => `<span class="pill">${e}</span>`).join('')}</div>
+    <button class="copy-pills-btn" onclick='copyOtherExamples(this, ${esc(otherExamples)})' title="Copy as a tab-separated row -- pastes horizontally into one row of Google Sheets">📋 Copy row</button>
+  </div>`;
+}
+
+async function copyOtherExamples(btn, examples) {
+  const text = examples.join('\t');
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    // Clipboard API can be unavailable (older browser, non-HTTPS context)
+    // -- fall back to the classic hidden-textarea + execCommand trick.
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e2) { /* give up quietly */ }
+    document.body.removeChild(ta);
+  }
+  const original = btn.textContent;
+  btn.textContent = '✓ Copied';
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1400);
+}
+
 function renderBulkCard(cat) {
   const pairChips = cat.pairs.map(p => `<span class="pair-chip">${p.w1.toUpperCase()} + ${p.w2.toUpperCase()}</span>`).join('');
   const pairCount = cat.pairs.length;
@@ -2845,7 +2925,7 @@ function renderBulkCard(cat) {
     </div>
     <div class="card-body">
       <div class="pair-chips">${pairChips}</div>
-      <div class="pills">${cat.otherExamples.map(e => `<span class="pill">${e}</span>`).join('')}</div>
+      ${pillsSection(cat.otherExamples)}
     </div>
   </div>`;
 }
@@ -2867,7 +2947,7 @@ function renderItemCard(cat) {
     </div>
     <div class="card-body">
       <div class="pair-chips">${chips}</div>
-      <div class="pills">${cat.otherExamples.map(e => `<span class="pill">${e}</span>`).join('')}</div>
+      ${pillsSection(cat.otherExamples)}
     </div>
   </div>`;
 }
@@ -3867,6 +3947,11 @@ function updatePrimaryActionButton() {
   const hint = document.getElementById('bulkHint');
   const toggleBtn = document.getElementById('viewToggleBtn');
   if (!btn) return;
+  // Defensive: analyzeAll() temporarily points this button at
+  // cancelAnalysis mid-run (see below) -- make sure switching views always
+  // hands control back to the shared dispatcher rather than whatever raw
+  // function was left wired up.
+  btn.onclick = runPrimaryAction;
   if (CURRENT_VIEW === 'loop') {
     btn.textContent = '🎲 Generate Loop';
     if (hint) hint.textContent = 'Fill in any of the 8 fields below to steer generation, or leave them all blank and hit Generate.';
@@ -4006,7 +4091,7 @@ async function analyzeAll() {
   btn.disabled = false;
   btn.classList.remove('cancel-btn');
   btn.textContent = 'Find Connections';
-  btn.onclick = analyzeAll;
+  btn.onclick = runPrimaryAction;
 }
 
 function cancelAnalysis() {
