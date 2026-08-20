@@ -420,6 +420,43 @@ let ANALYSIS_CANCELLED = false;
 
 const sortLetters = w => norm(w).split('').sort().join('');
 const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+// Title-cases every word in a phrase (used for pretty display labels only —
+// never for matching, which always goes through norm()). "coal mine canary"
+// -> "Coal Mine Canary".
+const titleCase = s => s.split(/\s+/).filter(Boolean).map(cap).join(' ');
+
+// Expands a single raw data-file entry into one or more {key, label} pairs.
+// Two shapes are supported:
+//   "coal mine canary"   -> one pair: key="coalminecanary", label="Coal Mine Canary"
+//   "bay (window)"       -> TWO pairs, so the entry is reachable either as
+//                           just "bay" or as the full "bay window":
+//                             { key:"bay",       label:"Bay" }
+//                             { key:"baywindow", label:"Bay Window" }
+// The parenthetical form exists specifically so a word like "bay" or
+// "hydrogen" isn't permanently walled off from every OTHER category it
+// could belong to just because one data pack always writes it with a
+// trailing qualifier ("bay window", "hydrogen bond") — see the
+// CATEGORY_POOL_PAREN_NOTE comment above rebuildCategoryPool() for the
+// fuller rationale. Only ONE parenthetical group per entry is supported
+// (deliberately -- multiple groups would make the raw string ambiguous
+// to re-expand later, e.g. for the browse-words search box).
+function expandRawMember(raw) {
+  const s = String(raw).trim();
+  const m = s.match(/^(.+?)\s*\(([^()]+)\)\s*$/);
+  if (!m) {
+    const key = norm(s);
+    return key ? [{ key, label: titleCase(s) }] : [];
+  }
+  const primary = m[1].trim();
+  const suffix = m[2].trim();
+  const full = `${primary} ${suffix}`;
+  const out = [];
+  const k1 = norm(primary);
+  if (k1) out.push({ key: k1, label: titleCase(primary) });
+  const k2 = norm(full);
+  if (k2 && k2 !== k1) out.push({ key: k2, label: titleCase(full) });
+  return out;
+}
 const COLOR_ORDER = ['yellow','green','blue','purple','orange','red'];
 const CONF_COLORS = { high:'#22c55e', medium:'#f59e0b', low:'#94a3b8' };
 
@@ -1278,9 +1315,13 @@ function rebuildCategoryPool() {
   for (const icon of CULTURAL_ICONS) {
     if (icon.words.length >= 4) CATEGORY_POOL.push({ name: `Associated with ${icon.theme}`, members: [...new Set(icon.words)], type: 'icon' });
   }
-  // Custom imported sets (paste / URL / packs.json manifest).
+  // Custom imported sets (paste / URL / packs.json manifest). `labels` is
+  // the key -> pretty-display-string map from importSets() (see there for
+  // why matching keys and display strings are kept separate); carried
+  // through onto the pool entry so anything rendering cat.members for this
+  // type can show "Bay Window" instead of the raw matching key "baywindow".
   for (const s of customSetPlugin.sets) {
-    if (s.members.length >= 4) CATEGORY_POOL.push({ name: `Custom: ${s.name}`, members: [...new Set(s.members)], type: 'custom' });
+    if (s.members.length >= 4) CATEGORY_POOL.push({ name: `Custom: ${s.name}`, members: [...new Set(s.members)], type: 'custom', labels: s.labels || {} });
   }
   // Hyponym-generated categories (e.g. "Meat", "Beverage") -- genuine IS-A
   // categories mined from WordNet's own taxonomy tree (see
@@ -2294,7 +2335,27 @@ class CustomSetPlugin extends SingleWordRulePlugin {
     let added = 0;
     for (const [name, members] of Object.entries(jsonObj)) {
       if (!Array.isArray(members) || !members.length) continue;
-      this.sets.push({ name: String(name), members: members.map(norm).filter(Boolean) });
+      // Each raw entry can expand to 1 or 2 {key,label} pairs -- see
+      // expandRawMember() (paren-suffix notation, e.g. "bay (window)").
+      // `members` stays the flat list of matching keys (what everything
+      // downstream -- MEMBERSHIP_INDEX, the loop generator's hook lookups,
+      // norm(word) comparisons -- already expects); `labels` is a parallel
+      // key -> pretty-display-string map so the browse-words modal and
+      // evaluate()'s otherExamples don't fall back to butchering a
+      // multi-word phrase with a blind cap() (e.g. "coalminecanary" ->
+      // "Coalminecanary"). Old localStorage-persisted sets saved before
+      // this existed simply have no labels map; every consumer falls back
+      // to cap(key) in that case, same as before.
+      const keys = [];
+      const labels = {};
+      for (const raw of members) {
+        for (const { key, label } of expandRawMember(raw)) {
+          if (!keys.includes(key)) keys.push(key);
+          labels[key] = label;
+        }
+      }
+      if (!keys.length) continue;
+      this.sets.push({ name: String(name), members: keys, labels });
       added++;
     }
     this.save();
@@ -2310,7 +2371,7 @@ class CustomSetPlugin extends SingleWordRulePlugin {
     const lookup = this.buildLookup();
     const sets = lookup[w];
     if (!sets || !sets.length) return [];
-    return sets.map(s => ({ categoryName:`CUSTOM: ${s.name.toUpperCase()}`, ruleDescription:`User-defined category: "${s.name}".`, inputWordsFit:`${word.toUpperCase()} is in your "${s.name}" set`, otherExamples:s.members.filter(m => m !== w).slice(0,6).map(cap) }));
+    return sets.map(s => ({ categoryName:`CUSTOM: ${s.name.toUpperCase()}`, ruleDescription:`User-defined category: "${s.name}".`, inputWordsFit:`${word.toUpperCase()} is in your "${s.name}" set`, otherExamples:s.members.filter(m => m !== w).slice(0,6).map(m => (s.labels && s.labels[m]) || cap(m)) }));
   }
 }
 
@@ -3711,7 +3772,7 @@ function renderBrowseWords() {
     return;
   }
   let html = `<div class="browse-word-list">`;
-  for (const w of shown) html += `<span class="browse-word-chip">${escHtml(cap(w))}</span>`;
+  for (const w of shown) html += `<span class="browse-word-chip">${escHtml((cat.labels && cat.labels[w]) || cap(w))}</span>`;
   html += `</div>`;
   if (words.length > shown.length) {
     html += `<button class="browse-show-more-btn" onclick="browseShowMore()">Show more (${shown.length.toLocaleString()} of ${words.length.toLocaleString()})</button>`;
@@ -3803,9 +3864,21 @@ function renderRulesPanel() {
   el.innerHTML = html;
 }
 
+// Resolves a matching key (e.g. "baywindow") back to its pretty display
+// label (e.g. "Bay Window") by looking up the live CATEGORY_POOL entry for
+// catName. Falls back to a blind cap() for pool types that don't carry a
+// labels map (named/wordnet/hyponym/etc. members are already clean single
+// words, so cap() alone is correct for those -- labels only exists on
+// 'custom' entries, see importSets()).
+function wordLabel(catName, word) {
+  const idx = CATEGORY_NAME_TO_IDX.get(catName);
+  const cat = idx != null ? CATEGORY_POOL[idx] : null;
+  return (cat && cat.labels && cat.labels[word]) || cap(word);
+}
+
 function renderLoopGridWithExclude(loop) {
-  const cell = (word, isHook) => word
-    ? `<td class="loop-cell${isHook ? ' loop-hook' : ''}">${cap(word)}</td>`
+  const cell = (word, catName, isHook) => word
+    ? `<td class="loop-cell${isHook ? ' loop-hook' : ''}">${escHtml(wordLabel(catName, word))}</td>`
     : `<td class="loop-cell loop-empty"></td>`;
   const header = name =>
     `${name} <button class="loop-exclude-btn" onclick='openBrowseWords(${esc(name)})' title="Browse all words in this category">👁</button><button class="loop-exclude-btn" onclick='excludeLoopCategory(${esc(name)})' title="Exclude this category from future loops">🚫</button>`;
@@ -3820,19 +3893,19 @@ function renderLoopGridWithExclude(loop) {
     </tr>
     <tr>
       <td class="loop-row-header">${header(loop.top.name)}</td>
-      ${cell(loop.top.words[0], true)}${cell(loop.top.words[1])}${cell(loop.top.words[2])}${cell(loop.top.words[3], true)}
+      ${cell(loop.top.words[0], loop.top.name, true)}${cell(loop.top.words[1], loop.top.name)}${cell(loop.top.words[2], loop.top.name)}${cell(loop.top.words[3], loop.top.name, true)}
     </tr>
     <tr>
       <td class="loop-row-header"></td>
-      ${cell(loop.left.words[1])}<td class="loop-cell loop-empty"></td><td class="loop-cell loop-empty"></td>${cell(loop.right.words[1])}
+      ${cell(loop.left.words[1], loop.left.name)}<td class="loop-cell loop-empty"></td><td class="loop-cell loop-empty"></td>${cell(loop.right.words[1], loop.right.name)}
     </tr>
     <tr>
       <td class="loop-row-header"></td>
-      ${cell(loop.left.words[2])}<td class="loop-cell loop-empty"></td><td class="loop-cell loop-empty"></td>${cell(loop.right.words[2])}
+      ${cell(loop.left.words[2], loop.left.name)}<td class="loop-cell loop-empty"></td><td class="loop-cell loop-empty"></td>${cell(loop.right.words[2], loop.right.name)}
     </tr>
     <tr>
       <td class="loop-row-header">${header(loop.bottom.name)}</td>
-      ${cell(loop.bottom.words[0], true)}${cell(loop.bottom.words[1])}${cell(loop.bottom.words[2])}${cell(loop.bottom.words[3], true)}
+      ${cell(loop.bottom.words[0], loop.bottom.name, true)}${cell(loop.bottom.words[1], loop.bottom.name)}${cell(loop.bottom.words[2], loop.bottom.name)}${cell(loop.bottom.words[3], loop.bottom.name, true)}
     </tr>
   </table>`;
 }

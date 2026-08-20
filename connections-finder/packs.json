@@ -5,6 +5,7 @@
     "kimi-stuff.json",
     "kimi-HIJ.json",
     "gemini-HIJ2.json",
-    "qwen-HIJ.json"
+    "qwen-HIJ.json",
+    "claude-hypernyms.json"
   ]
 }

@@ -1,0 +1,1201 @@
+{
+  "Insects": [
+    "ant",
+    "bee",
+    "wasp",
+    "beetle",
+    "cricket",
+    "grasshopper",
+    "cicada",
+    "mosquito",
+    "dragonfly",
+    "moth",
+    "termite",
+    "ladybug",
+    "stick insect",
+    "aphid",
+    "weevil",
+    "earwig"
+  ],
+  "Arachnids": [
+    "spider",
+    "scorpion",
+    "tick",
+    "mite",
+    "tarantula",
+    "harvestman"
+  ],
+  "Amphibians": [
+    "frog",
+    "toad",
+    "salamander",
+    "newt",
+    "caecilian",
+    "axolotl"
+  ],
+  "Big Cats": [
+    "lion",
+    "tiger",
+    "leopard",
+    "jaguar",
+    "cheetah",
+    "cougar",
+    "snow leopard",
+    "lynx",
+    "clouded leopard",
+    "caracal"
+  ],
+  "Whales And Dolphins": [
+    "blue (whale)",
+    "humpback (whale)",
+    "orca",
+    "sperm (whale)",
+    "beluga",
+    "narwhal",
+    "bottlenose (dolphin)",
+    "porpoise",
+    "minke (whale)",
+    "gray (whale)"
+  ],
+  "Sharks": [
+    "great white (shark)",
+    "hammerhead (shark)",
+    "tiger (shark)",
+    "mako (shark)",
+    "whale (shark)",
+    "nurse (shark)",
+    "bull (shark)",
+    "reef (shark)",
+    "blacktip (shark)",
+    "lemon (shark)"
+  ],
+  "Owls": [
+    "barn (owl)",
+    "snowy (owl)",
+    "great horned (owl)",
+    "screech (owl)",
+    "barred (owl)",
+    "elf (owl)",
+    "tawny (owl)"
+  ],
+  "Marsupials": [
+    "kangaroo",
+    "koala",
+    "wombat",
+    "wallaby",
+    "tasmanian devil",
+    "opossum",
+    "sugar glider",
+    "bandicoot",
+    "quokka",
+    "numbat"
+  ],
+  "Primates": [
+    "gorilla",
+    "chimpanzee",
+    "orangutan",
+    "baboon",
+    "lemur",
+    "macaque",
+    "gibbon",
+    "marmoset",
+    "tarsier",
+    "mandrill"
+  ],
+  "Farm Animals": [
+    "cow",
+    "pig",
+    "chicken",
+    "sheep",
+    "goat",
+    "horse",
+    "duck",
+    "turkey",
+    "rooster",
+    "donkey",
+    "llama",
+    "goose"
+  ],
+  "Butterflies And Moths": [
+    "monarch",
+    "swallowtail",
+    "painted lady",
+    "luna (moth)",
+    "sphinx (moth)",
+    "cabbage white",
+    "admiral",
+    "fritillary",
+    "atlas moth",
+    "morpho"
+  ],
+  "Venomous Creatures": [
+    "black widow",
+    "scorpion",
+    "box (jellyfish)",
+    "cobra",
+    "puffer (fish)",
+    "poison dart frog",
+    "stonefish",
+    "brown recluse",
+    "gila monster",
+    "platypus"
+  ],
+  "Rodents": [
+    "mouse",
+    "rat",
+    "squirrel",
+    "chipmunk",
+    "gerbil",
+    "hamster",
+    "guinea pig",
+    "porcupine",
+    "beaver",
+    "vole"
+  ],
+  "Freshwater Fish": [
+    "trout",
+    "bass",
+    "catfish",
+    "carp",
+    "pike",
+    "perch",
+    "salmon",
+    "tilapia",
+    "walleye",
+    "sturgeon",
+    "bluegill",
+    "muskellunge"
+  ],
+  "Deserts": [
+    "sahara",
+    "gobi",
+    "mojave",
+    "kalahari",
+    "atacama",
+    "sonoran",
+    "arabian (desert)",
+    "namib",
+    "chihuahuan",
+    "patagonian"
+  ],
+  "Mountain Ranges": [
+    "himalayas",
+    "andes",
+    "rockies",
+    "alps",
+    "urals",
+    "appalachians",
+    "atlas (mountains)",
+    "caucasus",
+    "pyrenees",
+    "carpathians"
+  ],
+  "Types Of Volcanoes": [
+    "shield (volcano)",
+    "cinder cone",
+    "stratovolcano",
+    "lava dome",
+    "supervolcano",
+    "caldera"
+  ],
+  "Layers Of The Earth": [
+    "crust",
+    "mantle",
+    "outer (core)",
+    "inner (core)",
+    "lithosphere",
+    "asthenosphere"
+  ],
+  "Phases Of The Moon": [
+    "new (moon)",
+    "waxing crescent",
+    "first (quarter)",
+    "waxing gibbous",
+    "full (moon)",
+    "waning gibbous",
+    "last (quarter)",
+    "waning crescent"
+  ],
+  "Types Of Stars": [
+    "red (giant)",
+    "white (dwarf)",
+    "neutron (star)",
+    "supergiant",
+    "main sequence (star)",
+    "brown (dwarf)",
+    "blue (giant)",
+    "pulsar"
+  ],
+  "Types Of Galaxies": [
+    "spiral (galaxy)",
+    "elliptical (galaxy)",
+    "irregular (galaxy)",
+    "lenticular (galaxy)",
+    "barred spiral (galaxy)"
+  ],
+  "States Of Matter": [
+    "solid",
+    "liquid",
+    "gas",
+    "plasma",
+    "bose einstein condensate"
+  ],
+  "Common Rock Types": [
+    "granite",
+    "basalt",
+    "limestone",
+    "sandstone",
+    "marble",
+    "slate",
+    "shale",
+    "pumice",
+    "obsidian",
+    "gneiss",
+    "chalk",
+    "conglomerate"
+  ],
+  "Common Minerals": [
+    "quartz",
+    "feldspar",
+    "mica",
+    "calcite",
+    "gypsum",
+    "halite",
+    "pyrite",
+    "talc",
+    "olivine",
+    "hematite"
+  ],
+  "Ocean Zones": [
+    "sunlit (zone)",
+    "twilight (zone)",
+    "midnight (zone)",
+    "abyssal (zone)",
+    "hadal (zone)"
+  ],
+  "Types Of Chemical Bonds": [
+    "ionic (bond)",
+    "covalent (bond)",
+    "metallic (bond)",
+    "hydrogen (bond)",
+    "van der waals (bond)"
+  ],
+  "Types Of Chemical Reactions": [
+    "synthesis (reaction)",
+    "decomposition (reaction)",
+    "combustion (reaction)",
+    "single replacement (reaction)",
+    "double replacement (reaction)",
+    "redox (reaction)"
+  ],
+  "Types Of Storms": [
+    "hurricane",
+    "tornado",
+    "blizzard",
+    "thunderstorm",
+    "monsoon",
+    "dust storm",
+    "hailstorm"
+  ],
+  "Common Spices": [
+    "cinnamon",
+    "nutmeg",
+    "cumin",
+    "turmeric",
+    "paprika",
+    "cardamom",
+    "cloves",
+    "saffron",
+    "coriander",
+    "ginger",
+    "allspice",
+    "fennel seed",
+    "star anise",
+    "mustard seed"
+  ],
+  "Culinary Herbs": [
+    "basil",
+    "oregano",
+    "thyme",
+    "rosemary",
+    "sage",
+    "mint",
+    "cilantro",
+    "dill",
+    "parsley",
+    "tarragon",
+    "chives",
+    "marjoram",
+    "bay leaf",
+    "lemongrass"
+  ],
+  "Grains": [
+    "wheat",
+    "rice",
+    "oats",
+    "barley",
+    "rye",
+    "quinoa",
+    "millet",
+    "corn",
+    "sorghum",
+    "buckwheat",
+    "spelt",
+    "teff",
+    "farro",
+    "amaranth"
+  ],
+  "Legumes": [
+    "lentils",
+    "chickpeas",
+    "kidney beans",
+    "black beans",
+    "pinto beans",
+    "soybeans",
+    "peas",
+    "lima beans",
+    "fava beans",
+    "edamame"
+  ],
+  "Classic Desserts": [
+    "cake",
+    "pie",
+    "cookie",
+    "brownie",
+    "cheesecake",
+    "tart",
+    "pudding",
+    "sorbet",
+    "mousse",
+    "tiramisu",
+    "souffle",
+    "baklava",
+    "eclair",
+    "panna cotta"
+  ],
+  "Types Of Candy": [
+    "chocolate bar",
+    "gummy bear",
+    "lollipop",
+    "licorice",
+    "taffy",
+    "fudge",
+    "caramel",
+    "marshmallow",
+    "nougat",
+    "toffee",
+    "brittle",
+    "jawbreaker"
+  ],
+  "Breakfast Foods": [
+    "pancake",
+    "waffle",
+    "omelette",
+    "cereal",
+    "oatmeal",
+    "bacon",
+    "toast",
+    "bagel",
+    "granola",
+    "hash browns",
+    "french toast",
+    "crepe"
+  ],
+  "Classic Sandwiches": [
+    "club (sandwich)",
+    "blt",
+    "reuben",
+    "panini",
+    "gyro",
+    "submarine (sandwich)",
+    "wrap",
+    "grilled cheese",
+    "french dip",
+    "banh mi"
+  ],
+  "Beer Styles": [
+    "lager",
+    "ale",
+    "stout",
+    "porter",
+    "pilsner",
+    "ipa",
+    "wheat beer",
+    "saison",
+    "bock",
+    "kolsch"
+  ],
+  "Whiskey Types": [
+    "bourbon",
+    "scotch",
+    "rye (whiskey)",
+    "irish (whiskey)",
+    "tennessee (whiskey)",
+    "single malt",
+    "blended (whiskey)"
+  ],
+  "Classic Cocktails": [
+    "margarita",
+    "martini",
+    "mojito",
+    "negroni",
+    "manhattan",
+    "daiquiri",
+    "cosmopolitan",
+    "old fashioned",
+    "whiskey sour",
+    "pina colada"
+  ],
+  "Types Of Fasteners": [
+    "screw",
+    "nail",
+    "bolt",
+    "rivet",
+    "staple",
+    "pin",
+    "clip",
+    "bracket",
+    "toggle bolt",
+    "cotter pin"
+  ],
+  "Types Of Locks": [
+    "padlock",
+    "deadbolt",
+    "combination (lock)",
+    "cylinder (lock)",
+    "keypad (lock)",
+    "smart (lock)"
+  ],
+  "Types Of Windows": [
+    "casement (window)",
+    "sliding (window)",
+    "bay (window)",
+    "skylight",
+    "sash (window)",
+    "awning (window)"
+  ],
+  "Types Of Doors": [
+    "sliding (door)",
+    "revolving (door)",
+    "french (door)",
+    "screen (door)",
+    "garage (door)",
+    "dutch (door)"
+  ],
+  "Types Of Roofs": [
+    "gable (roof)",
+    "hip (roof)",
+    "flat (roof)",
+    "mansard (roof)",
+    "gambrel (roof)",
+    "shed (roof)"
+  ],
+  "Types Of Bags": [
+    "backpack",
+    "briefcase",
+    "tote (bag)",
+    "duffel (bag)",
+    "messenger (bag)",
+    "fanny pack",
+    "satchel",
+    "clutch",
+    "suitcase",
+    "drawstring bag"
+  ],
+  "Types Of Pants": [
+    "jeans",
+    "chinos",
+    "cargo pants",
+    "sweatpants",
+    "leggings",
+    "shorts",
+    "culottes",
+    "capris"
+  ],
+  "Kitchen Appliances": [
+    "blender",
+    "toaster",
+    "microwave",
+    "refrigerator",
+    "dishwasher",
+    "mixer",
+    "food processor",
+    "kettle",
+    "rice cooker",
+    "air fryer"
+  ],
+  "Types Of Kitchen Knives": [
+    "chef's (knife)",
+    "paring (knife)",
+    "bread (knife)",
+    "cleaver",
+    "boning (knife)",
+    "utility (knife)",
+    "santoku (knife)"
+  ],
+  "Types Of Boats": [
+    "yacht",
+    "canoe",
+    "kayak",
+    "catamaran",
+    "ferry",
+    "tugboat",
+    "sailboat",
+    "rowboat",
+    "houseboat",
+    "speedboat"
+  ],
+  "Types Of Trains": [
+    "steam locomotive",
+    "subway (train)",
+    "bullet (train)",
+    "freight (train)",
+    "monorail",
+    "tram",
+    "maglev"
+  ],
+  "Types Of Bicycles": [
+    "road (bike)",
+    "mountain (bike)",
+    "bmx (bike)",
+    "tandem (bike)",
+    "cruiser (bike)",
+    "folding (bike)",
+    "electric (bike)"
+  ],
+  "Types Of Umbrellas": [
+    "golf (umbrella)",
+    "compact (umbrella)",
+    "beach (umbrella)",
+    "bubble (umbrella)",
+    "cane (umbrella)"
+  ],
+  "Architectural Styles": [
+    "gothic",
+    "baroque",
+    "art deco",
+    "brutalist",
+    "modernist",
+    "victorian",
+    "romanesque",
+    "neoclassical",
+    "tudor",
+    "bauhaus"
+  ],
+  "Font Categories": [
+    "serif",
+    "sans (serif)",
+    "monospace",
+    "script",
+    "display",
+    "slab (serif)"
+  ],
+  "Yoga Poses": [
+    "downward dog",
+    "warrior (pose)",
+    "tree (pose)",
+    "child's (pose)",
+    "cobra (pose)",
+    "lotus (pose)",
+    "bridge (pose)"
+  ],
+  "Economic Systems": [
+    "capitalism",
+    "socialism",
+    "communism",
+    "mixed economy",
+    "feudalism"
+  ],
+  "Nursery Rhyme Characters": [
+    "jack and jill",
+    "humpty dumpty",
+    "little bo peep",
+    "old king cole",
+    "jack sprat",
+    "wee willie winkie"
+  ],
+  "Roman Emperors": [
+    "augustus",
+    "nero",
+    "trajan",
+    "hadrian",
+    "constantine",
+    "caligula",
+    "claudius",
+    "vespasian",
+    "marcus aurelius",
+    "diocletian"
+  ],
+  "US Presidents": [
+    "washington",
+    "lincoln",
+    "jefferson",
+    "roosevelt",
+    "kennedy",
+    "reagan",
+    "jackson",
+    "madison",
+    "monroe",
+    "truman"
+  ],
+  "Types Of Libraries": [
+    "public (library)",
+    "academic (library)",
+    "school (library)",
+    "national (library)",
+    "digital (library)",
+    "law (library)"
+  ],
+  "Olympic Sports": [
+    "swimming",
+    "gymnastics",
+    "archery",
+    "fencing",
+    "rowing",
+    "diving",
+    "wrestling",
+    "triathlon",
+    "badminton",
+    "judo"
+  ],
+  "Hand Tools": [
+    "hammer",
+    "screwdriver",
+    "wrench",
+    "pliers",
+    "chisel",
+    "hacksaw",
+    "level",
+    "file",
+    "mallet",
+    "awl"
+  ],
+  "Power Tools": [
+    "drill",
+    "circular saw",
+    "angle grinder",
+    "jigsaw",
+    "router",
+    "sander",
+    "nail gun",
+    "impact driver",
+    "reciprocating saw",
+    "heat gun"
+  ],
+  "Garden Tools": [
+    "rake",
+    "hoe",
+    "trowel",
+    "pruning shears",
+    "spade",
+    "wheelbarrow",
+    "hedge trimmer",
+    "watering can",
+    "leaf blower",
+    "garden fork"
+  ],
+  "Office Supplies": [
+    "stapler",
+    "paperclip",
+    "highlighter",
+    "sticky note",
+    "binder",
+    "hole punch",
+    "rubber band",
+    "tape dispenser",
+    "envelope",
+    "index card"
+  ],
+  "Types Of Ladders": [
+    "step (ladder)",
+    "extension (ladder)",
+    "platform (ladder)",
+    "telescoping (ladder)",
+    "attic (ladder)"
+  ],
+  "Types Of Paint Finishes": [
+    "matte",
+    "satin",
+    "eggshell",
+    "semi (gloss)",
+    "high (gloss)",
+    "flat"
+  ],
+  "Types Of Joints": [
+    "hinge (joint)",
+    "ball and socket (joint)",
+    "pivot (joint)",
+    "gliding (joint)",
+    "saddle (joint)",
+    "condyloid (joint)"
+  ],
+  "Human Senses": [
+    "sight",
+    "hearing",
+    "smell",
+    "taste",
+    "touch",
+    "proprioception",
+    "balance"
+  ],
+  "Vitamins": [
+    "vitamin a",
+    "vitamin b12",
+    "vitamin c",
+    "vitamin d",
+    "vitamin e",
+    "vitamin k",
+    "folate",
+    "niacin"
+  ],
+  "Types Of Twins": [
+    "identical (twins)",
+    "fraternal (twins)",
+    "conjoined (twins)",
+    "mirror (twins)",
+    "half identical (twins)"
+  ],
+  "Types Of Aircraft": [
+    "glider",
+    "biplane",
+    "jet",
+    "helicopter",
+    "seaplane",
+    "blimp",
+    "drone",
+    "fighter (jet)",
+    "cargo plane",
+    "hot air balloon"
+  ],
+  "Types Of Trucks": [
+    "pickup (truck)",
+    "dump (truck)",
+    "tow (truck)",
+    "tanker (truck)",
+    "garbage (truck)",
+    "fire (truck)",
+    "semi (truck)"
+  ],
+  "Public Transit Modes": [
+    "bus",
+    "subway",
+    "tram",
+    "light (rail)",
+    "ferry",
+    "cable car",
+    "commuter (rail)"
+  ],
+  "Space Missions Terminology": [
+    "launch window",
+    "escape velocity",
+    "orbital insertion",
+    "reentry",
+    "docking",
+    "spacewalk",
+    "payload"
+  ],
+  "Solar System Bodies": [
+    "asteroid",
+    "comet",
+    "meteor",
+    "meteorite",
+    "dwarf planet",
+    "moon",
+    "planetoid"
+  ],
+  "Wind Types": [
+    "breeze",
+    "gale",
+    "gust",
+    "squall",
+    "zephyr",
+    "monsoon (wind)",
+    "trade (wind)"
+  ],
+  "Precipitation Types": [
+    "rain",
+    "snow",
+    "sleet",
+    "hail",
+    "drizzle",
+    "freezing rain",
+    "graupel"
+  ],
+  "Sign Language Alphabets": [
+    "american (sign language)",
+    "british (sign language)",
+    "french (sign language)",
+    "international sign",
+    "auslan"
+  ],
+  "Types Of Dictionaries": [
+    "bilingual (dictionary)",
+    "etymological (dictionary)",
+    "thesaurus",
+    "rhyming (dictionary)",
+    "visual (dictionary)"
+  ],
+  "Types Of Maps": [
+    "political (map)",
+    "topographic (map)",
+    "road (map)",
+    "weather (map)",
+    "nautical chart",
+    "subway (map)"
+  ],
+  "Types Of Clocks": [
+    "grandfather (clock)",
+    "cuckoo (clock)",
+    "digital (clock)",
+    "alarm (clock)",
+    "sundial",
+    "hourglass"
+  ],
+  "Types Of Lamps": [
+    "desk (lamp)",
+    "floor (lamp)",
+    "chandelier",
+    "lantern",
+    "lava (lamp)",
+    "string lights"
+  ],
+  "Types Of Chairs": [
+    "armchair",
+    "rocking (chair)",
+    "recliner",
+    "office (chair)",
+    "folding (chair)",
+    "bean bag (chair)",
+    "stool"
+  ],
+  "Types Of Tables": [
+    "coffee (table)",
+    "dining (table)",
+    "picnic (table)",
+    "folding (table)",
+    "end (table)",
+    "drafting (table)"
+  ],
+  "Types Of Mirrors": [
+    "hand (mirror)",
+    "vanity (mirror)",
+    "full length (mirror)",
+    "rearview (mirror)",
+    "two way (mirror)"
+  ],
+  "Chess Titles": [
+    "grandmaster",
+    "international (master)",
+    "fide (master)",
+    "candidate (master)",
+    "national (master)"
+  ],
+  "Reptiles": [
+    "lizard",
+    "snake",
+    "turtle",
+    "crocodile",
+    "alligator",
+    "gecko",
+    "chameleon",
+    "tortoise",
+    "iguana",
+    "komodo dragon"
+  ],
+  "Coral Reef Life": [
+    "coral polyp",
+    "clownfish",
+    "sea anemone",
+    "parrotfish",
+    "sea urchin",
+    "starfish",
+    "moray eel",
+    "reef shark"
+  ],
+  "Fungi": [
+    "mushroom",
+    "yeast",
+    "mold",
+    "truffle",
+    "lichen",
+    "mildew",
+    "puffball",
+    "toadstool"
+  ],
+  "Succulents": [
+    "aloe vera",
+    "jade plant",
+    "echeveria",
+    "cactus",
+    "hens and chicks",
+    "haworthia",
+    "agave",
+    "sedum"
+  ],
+  "Islands": [
+    "madagascar",
+    "greenland",
+    "borneo",
+    "sicily",
+    "iceland",
+    "tasmania",
+    "sardinia",
+    "cyprus"
+  ],
+  "Waterfalls": [
+    "niagara falls",
+    "victoria falls",
+    "angel falls",
+    "iguazu falls",
+    "yosemite falls"
+  ],
+  "Glaciers": [
+    "ice sheet",
+    "valley glacier",
+    "alpine glacier",
+    "tidewater glacier",
+    "ice cap",
+    "ice shelf"
+  ],
+  "Canyons": [
+    "grand canyon",
+    "antelope canyon",
+    "bryce canyon",
+    "fish river canyon",
+    "copper canyon"
+  ],
+  "Ancient Wonders Of The World": [
+    "great pyramid of giza",
+    "hanging gardens of babylon",
+    "statue of zeus",
+    "temple of artemis",
+    "mausoleum at halicarnassus",
+    "colossus of rhodes",
+    "lighthouse of alexandria"
+  ],
+  "Types Of Telescopes": [
+    "refracting telescope",
+    "reflecting telescope",
+    "radio telescope",
+    "space telescope",
+    "catadioptric telescope"
+  ],
+  "Types Of Batteries": [
+    "alkaline battery",
+    "lithium ion battery",
+    "nickel cadmium battery",
+    "lead acid battery",
+    "button cell",
+    "car battery"
+  ],
+  "Types Of Engines": [
+    "combustion engine",
+    "electric motor",
+    "jet engine",
+    "diesel engine",
+    "steam engine",
+    "rotary engine"
+  ],
+  "Pizza Toppings": [
+    "pepperoni",
+    "mushroom",
+    "sausage",
+    "olives",
+    "bell pepper",
+    "onion",
+    "pineapple",
+    "anchovies"
+  ],
+  "Tea Types": [
+    "green tea",
+    "black tea",
+    "oolong tea",
+    "white tea",
+    "herbal tea",
+    "chai",
+    "matcha",
+    "earl grey"
+  ],
+  "Condiments": [
+    "ketchup",
+    "mustard",
+    "mayonnaise",
+    "relish",
+    "hot sauce",
+    "soy sauce",
+    "barbecue sauce",
+    "salsa"
+  ],
+  "Types Of Pens": [
+    "ballpoint pen",
+    "fountain pen",
+    "gel pen",
+    "rollerball pen",
+    "felt tip pen",
+    "calligraphy pen"
+  ],
+  "Types Of Scissors": [
+    "kitchen shears",
+    "pinking shears",
+    "hair scissors",
+    "garden shears",
+    "embroidery scissors",
+    "safety scissors"
+  ],
+  "Types Of Jackets": [
+    "denim jacket",
+    "leather jacket",
+    "bomber jacket",
+    "windbreaker",
+    "parka",
+    "blazer",
+    "trench coat"
+  ],
+  "Types Of Scarves": [
+    "infinity scarf",
+    "pashmina",
+    "bandana",
+    "shawl",
+    "muffler",
+    "neckerchief"
+  ],
+  "Types Of Gloves": [
+    "mittens",
+    "work gloves",
+    "boxing gloves",
+    "oven mitts",
+    "rubber gloves",
+    "winter gloves"
+  ],
+  "Types Of Ties": [
+    "bow tie",
+    "necktie",
+    "bolo tie",
+    "ascot",
+    "cravat"
+  ],
+  "Curtains And Window Coverings": [
+    "blinds",
+    "drapes",
+    "shutters",
+    "valance",
+    "sheers",
+    "roman shade"
+  ],
+  "Types Of Pianos": [
+    "grand piano",
+    "upright piano",
+    "digital piano",
+    "player piano",
+    "electric piano"
+  ],
+  "Orchestra Sections": [
+    "strings",
+    "woodwinds",
+    "brass",
+    "percussion"
+  ],
+  "Types Of Anchors": [
+    "fluke anchor",
+    "plow anchor",
+    "mushroom anchor",
+    "grapnel anchor",
+    "claw anchor"
+  ],
+  "Types Of Sails": [
+    "mainsail",
+    "jib",
+    "spinnaker",
+    "genoa",
+    "gaff sail",
+    "lateen sail"
+  ],
+  "Types Of Bridges Materials": [
+    "steel bridge",
+    "concrete bridge",
+    "wooden bridge",
+    "stone bridge",
+    "rope bridge"
+  ],
+  "Extinct Animals": [
+    "dodo",
+    "woolly mammoth",
+    "saber toothed cat",
+    "passenger pigeon",
+    "tasmanian tiger",
+    "great auk"
+  ],
+  "Types Of Deer": [
+    "whitetail deer",
+    "mule deer",
+    "reindeer",
+    "elk",
+    "moose",
+    "roe deer"
+  ],
+  "Birds Of Prey": [
+    "eagle",
+    "hawk",
+    "falcon",
+    "kestrel",
+    "osprey",
+    "vulture",
+    "kite",
+    "harrier"
+  ],
+  "Types Of Parrots": [
+    "macaw",
+    "cockatoo",
+    "budgerigar",
+    "african grey",
+    "lovebird",
+    "conure"
+  ],
+  "Types Of Turtles": [
+    "sea turtle",
+    "box turtle",
+    "snapping turtle",
+    "painted turtle",
+    "tortoise",
+    "softshell turtle"
+  ],
+  "Types Of Bees": [
+    "honeybee",
+    "bumblebee",
+    "carpenter bee",
+    "mason bee",
+    "sweat bee",
+    "killer bee"
+  ],
+  "Types Of Frogs": [
+    "bullfrog",
+    "tree frog",
+    "poison dart frog",
+    "leopard frog",
+    "glass frog",
+    "tomato frog"
+  ],
+  "Ballet Positions": [
+    "first position",
+    "second position",
+    "third position",
+    "fourth position",
+    "fifth position"
+  ],
+  "Poker Variants": [
+    "texas holdem",
+    "omaha",
+    "seven card stud",
+    "five card draw",
+    "razz"
+  ],
+  "SI Base Units": [
+    "meter",
+    "kilogram",
+    "second",
+    "ampere",
+    "kelvin",
+    "mole",
+    "candela"
+  ]
+}

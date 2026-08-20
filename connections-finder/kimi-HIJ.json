@@ -1,21 +1,168 @@
 {
-"phrases meaning reveal a secret": ["spill the beans", "let the cat out of the bag", "blow the whistle", "leak", "crack", "sing", "show your hand", "come clean", "unmask"], 
-"phrases meaning the best of the best": ["cream of the crop", "top of the line", "gold standard", "a-list", "first string", "blue ribbon"], 
-"phrases meaning start over": ["back to square one", "factory reset", "clean slate", "fresh start", "reboot", "tabula rasa"], 
-"phrases meaning deep in difficult work": ["in the weeds", "in the trenches", "on the front lines", "in the thick of it", "at the coalface", "elbow deep"], 
-"parts of scuba gear": ["regulator", "bcd", "tank", "mask", "fins", "wetsuit", "weight system", "dive computer"], 
-"items in a standard first aid kit": ["bandages", "antiseptic wipes", "gauze", "adhesive tape", "trauma shears", "tweezers", "nitrile gloves", "thermometer"], 
-"tools in a bicycle repair kit": ["tire levers", "patch kit", "frame pump", "multi-tool", "chain breaker", "spare tube", "co2 inflator"], 
-"ingredients in a classic negroni": ["gin", "campari", "sweet vermouth", "citrus peel", "ice cube"], 
-"parts of firefighter turnout gear": ["helmet", "turnout coat", "turnout pants", "boots", "protective hood", "scba unit", "pass device"], 
-"parts of a climbing harness": ["waist belt", "leg loops", "belay loop", "gear loops", "buckle", "padding"], 
-"ingredients in a traditional caesar salad": ["romaine", "croutons", "parmesan", "egg", "lemon juice", "olive oil", "worcestershire", "anchovy"], 
-"topologically a sphere": ["baseball", "apple", "marble", "onion", "globe", "balloon", "peach"], 
-"class one levers": ["seesaw", "tin snips", "pliers", "crowbar", "balance scale", "well crank", "oar"], 
-"ferromagnetic objects": ["iron nail", "steel wool", "cast iron pan", "fridge magnet", "steel beam", "steel staple"], 
-"things that float on surface tension": ["water strider", "thumbtack", "needle", "razor blade", "leaf", "mosquito"], 
-"chiral objects": ["glove", "shoe", "corkscrew", "dna helix", "snail shell", "propeller"], 
-"things that work by capillary action": ["paper towel", "candle wick", "plant xylem", "blotting paper", "chromatography paper", "sponge"], 
-"wheel and axle machines": ["doorknob", "steering wheel", "screwdriver", "windlass", "faucet handle", "lazy susan", "potter's wheel"], 
-"topologically a torus": ["mug", "bagel", "life preserver", "hula hoop", "donut", "inner tube", "key ring"]
+  "phrases meaning reveal a secret": [
+    "spill the beans",
+    "let the cat out of the bag",
+    "blow the whistle",
+    "leak",
+    "crack",
+    "sing",
+    "show your hand",
+    "come clean",
+    "unmask"
+  ],
+  "phrases meaning the best of the best": [
+    "cream of the crop",
+    "top of the line",
+    "gold standard",
+    "a-list",
+    "first string",
+    "blue ribbon"
+  ],
+  "phrases meaning start over": [
+    "back to square one",
+    "factory reset",
+    "clean slate",
+    "fresh start",
+    "reboot",
+    "tabula rasa"
+  ],
+  "phrases meaning deep in difficult work": [
+    "in the weeds",
+    "in the trenches",
+    "on the front lines",
+    "in the thick of it",
+    "at the coalface",
+    "elbow deep"
+  ],
+  "parts of scuba gear": [
+    "regulator",
+    "bcd",
+    "tank",
+    "mask",
+    "fins",
+    "wetsuit",
+    "weight system",
+    "dive computer"
+  ],
+  "items in a standard first aid kit": [
+    "bandages",
+    "antiseptic wipes",
+    "gauze",
+    "adhesive tape",
+    "trauma shears",
+    "tweezers",
+    "nitrile gloves",
+    "thermometer"
+  ],
+  "tools in a bicycle repair kit": [
+    "tire levers",
+    "patch kit",
+    "frame pump",
+    "multi-tool",
+    "chain breaker",
+    "spare tube",
+    "co2 inflator"
+  ],
+  "ingredients in a classic negroni": [
+    "gin",
+    "campari",
+    "sweet vermouth",
+    "citrus peel",
+    "ice cube"
+  ],
+  "parts of firefighter turnout gear": [
+    "helmet",
+    "turnout coat",
+    "turnout pants",
+    "boots",
+    "protective hood",
+    "scba unit",
+    "pass device"
+  ],
+  "parts of a climbing harness": [
+    "waist belt",
+    "leg (loops)",
+    "belay loop",
+    "gear (loops)",
+    "buckle",
+    "padding"
+  ],
+  "ingredients in a traditional caesar salad": [
+    "romaine",
+    "croutons",
+    "parmesan",
+    "egg",
+    "lemon juice",
+    "olive oil",
+    "worcestershire",
+    "anchovy"
+  ],
+  "topologically a sphere": [
+    "baseball",
+    "apple",
+    "marble",
+    "onion",
+    "globe",
+    "balloon",
+    "peach"
+  ],
+  "class one levers": [
+    "seesaw",
+    "tin snips",
+    "pliers",
+    "crowbar",
+    "balance scale",
+    "well crank",
+    "oar"
+  ],
+  "ferromagnetic objects": [
+    "iron nail",
+    "steel wool",
+    "cast iron pan",
+    "fridge magnet",
+    "steel beam",
+    "steel staple"
+  ],
+  "things that float on surface tension": [
+    "water strider",
+    "thumbtack",
+    "needle",
+    "razor blade",
+    "leaf",
+    "mosquito"
+  ],
+  "chiral objects": [
+    "glove",
+    "shoe",
+    "corkscrew",
+    "dna helix",
+    "snail shell",
+    "propeller"
+  ],
+  "things that work by capillary action": [
+    "paper towel",
+    "candle wick",
+    "plant xylem",
+    "blotting (paper)",
+    "chromatography (paper)",
+    "sponge"
+  ],
+  "wheel and axle machines": [
+    "doorknob",
+    "steering (wheel)",
+    "screwdriver",
+    "windlass",
+    "faucet handle",
+    "lazy susan",
+    "potter's (wheel)"
+  ],
+  "topologically a torus": [
+    "mug",
+    "bagel",
+    "life preserver",
+    "hula hoop",
+    "donut",
+    "inner tube",
+    "key ring"
+  ]
 }

@@ -76,8 +76,8 @@
   ],
   "Manual Camera Controls": [
     "shutter button",
-    "aperture ring",
-    "focus ring",
+    "aperture (ring)",
+    "focus (ring)",
     "film advance",
     "rewind knob",
     "shutter speed dial"
@@ -110,9 +110,9 @@
     "copper wire",
     "aluminum foil",
     "pencil lead",
-    "salt water",
+    "salt (water)",
     "steel spoon",
-    "tap water"
+    "tap (water)"
   ],
   "Attracted To A Magnet": [
     "iron nail",
@@ -151,9 +151,9 @@
     "gasoline"
   ],
   "Pressure Vessels": [
-    "soda can",
+    "soda (can)",
     "bicycle tire",
-    "aerosol can",
+    "aerosol (can)",
     "pressure cooker",
     "scuba tank"
   ],

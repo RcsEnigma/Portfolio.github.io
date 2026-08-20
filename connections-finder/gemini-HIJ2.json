@@ -93,8 +93,8 @@
     "objective lens",
     "stage",
     "illuminator",
-    "coarse focus",
-    "fine focus"
+    "coarse (focus)",
+    "fine (focus)"
   ],
   "Ingredients in Pad Thai": [
     "rice noodles",
@@ -106,11 +106,11 @@
     "bean sprouts"
   ],
   "Acoustic drum kit components": [
-    "snare drum",
-    "bass drum",
+    "snare (drum)",
+    "bass (drum)",
     "hi-hat",
-    "crash cymbal",
-    "ride cymbal",
+    "crash (cymbal)",
+    "ride (cymbal)",
     "tom-toms"
   ],
   "Parts of an acoustic guitar": [
@@ -241,115 +241,115 @@
     "racecar"
   ],
   "Meaning: To quit or admit defeat": [
-  "tap out",
-  "fold",
-  "log off",
-  "clock out",
-  "pull the plug",
-  "bow out"
+    "tap out",
+    "fold",
+    "log off",
+    "clock out",
+    "pull the plug",
+    "bow out"
   ],
   "Meaning: Starting over completely": [
-  "square one",
-  "blank slate",
-  "hard reset",
-  "clean sweep",
-  "ground zero",
-  "day one"
+    "square one",
+    "blank slate",
+    "hard reset",
+    "clean sweep",
+    "ground zero",
+    "day one"
   ],
   "Meaning: To stall or delay": [
-  "buy time",
-  "filibuster",
-  "run the clock",
-  "kick the can",
-  "stonewall",
-  "hold off"
+    "buy time",
+    "filibuster",
+    "run the clock",
+    "kick the can",
+    "stonewall",
+    "hold off"
   ],
   "Parts of a traditional shaving kit": [
-  "safety razor",
-  "badger brush",
-  "shaving soap",
-  "leather strop",
-  "alum block",
-  "shaving mug"
+    "safety razor",
+    "badger brush",
+    "shaving soap",
+    "leather strop",
+    "alum block",
+    "shaving mug"
   ],
   "Parts of a bicycle wheel": [
-  "hub",
-  "spoke",
-  "rim",
-  "tire",
-  "inner tube",
-  "valve stem"
+    "hub",
+    "spoke",
+    "rim",
+    "tire",
+    "inner tube",
+    "valve stem"
   ],
   "Clue board game weapons": [
-  "candlestick",
-  "lead pipe",
-  "revolver",
-  "rope",
-  "wrench",
-  "dagger"
+    "candlestick",
+    "lead pipe",
+    "revolver",
+    "rope",
+    "wrench",
+    "dagger"
   ],
   "Items in a basic sewing kit": [
-  "needle",
-  "thread",
-  "thimble",
-  "measuring tape",
-  "pincushion",
-  "seam ripper"
+    "needle",
+    "thread",
+    "thimble",
+    "measuring tape",
+    "pincushion",
+    "seam ripper"
   ],
   "Parts of a standard acoustic violin": [
-  "scroll",
-  "pegbox",
-  "fingerboard",
-  "bridge",
-  "f-hole",
-  "chin rest"
+    "scroll",
+    "pegbox",
+    "fingerboard",
+    "bridge",
+    "f-hole",
+    "chin rest"
   ],
   "Objects that get smaller with use": [
-  "pencil",
-  "eraser",
-  "bar of soap",
-  "candle",
-  "chalk",
-  "cigar"
+    "pencil",
+    "eraser",
+    "bar of soap",
+    "candle",
+    "chalk",
+    "cigar"
   ],
   "Things designed to be broken before use": [
-  "glow stick",
-  "egg",
-  "fortune cookie",
-  "fire alarm glass",
-  "wax seal",
-  "piñata"
+    "glow stick",
+    "egg",
+    "fortune cookie",
+    "fire alarm glass",
+    "wax seal",
+    "piñata"
   ],
   "Things with a single topological hole (torus)": [
-  "doughnut",
-  "wedding ring",
-  "vinyl record",
-  "life preserver",
-  "metal washer",
-  "hex nut"
+    "doughnut",
+    "wedding ring",
+    "vinyl record",
+    "life preserver",
+    "metal washer",
+    "hex nut"
   ],
   "Things with teeth but no mouth": [
-  "comb",
-  "gear",
-  "saw",
-  "zipper",
-  "sprocket",
-  "key"
+    "comb",
+    "gear",
+    "saw",
+    "zipper",
+    "sprocket",
+    "key"
   ],
   "Things that are handed (chiral)": [
-  "scissors",
-  "golf club",
-  "baseball glove",
-  "corkscrew",
-  "can opener",
-  "computer mouse"
+    "scissors",
+    "golf club",
+    "baseball glove",
+    "corkscrew",
+    "can opener",
+    "computer mouse"
   ],
   "Objects stabilized by gyroscopic spin": [
-  "top",
-  "yo-yo",
-  "frisbee",
-  "rifle bullet",
-  "american football",
-  "boomerang"
+    "top",
+    "yo-yo",
+    "frisbee",
+    "rifle bullet",
+    "american football",
+    "boomerang"
   ]
 }
