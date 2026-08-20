@@ -1254,6 +1254,7 @@ const RULE_GROUPS = [
   { id:'hyponym',     label:'Hyponym Categories (Meat, Beverage...)',  pluginIds:[], poolTypes:['hyponym'] },
   { id:'affix',       label:'Prefix / Suffix Compounds',                pluginIds:['affixGroup'], poolTypes:['affix'] },
   { id:'hiddenWord',  label:'Hidden Word / Contains X',                 pluginIds:['hiddenWord'], poolTypes:['hiddenWord'] },
+  { id:'hypernymContains', label:'Contains/Starts/Ends With a Category Member', pluginIds:[], poolTypes:['hypernymContains'] },
   { id:'letterShape', label:'Letter-Shape Properties',                  pluginIds:['restrictedAlphabet'], poolTypes:['letterShape'] },
   { id:'letterEdit',  label:'Letter Change / Add / Remove',             pluginIds:['letterChange','letterAddition','letterRemoval'], poolTypes:[] },
   { id:'wordplay',    label:'Word Structure & Spelling',                pluginIds:['alphabetical','reverseAlphabetical','palindrome','reversal','anagram','silentLetter','allVowels','noVowels','acronym','startsEndsWord','heteronym','homophone'], poolTypes:[] },
@@ -1362,6 +1363,58 @@ function rebuildCategoryPool() {
       if (members.length >= 4) CATEGORY_POOL.push({ name: prop.label, members: [...new Set(members)], type: 'letterShape' });
     }
   }
+
+  // Cross-references the semantic/hypernym-style pool categories (named
+  // trivia sets, wordcat, custom-imported packs, hyponym-mined "type of X"
+  // groups) against the generated Hidden-Word index to build AGGREGATE
+  // "Contains a(n) X" / "Starts With a(n) X" / "Ends With a(n) X"
+  // categories -- e.g. one single category that catches every word hiding
+  // ANY animal (Crowbar, Dogear, Horseplay...), instead of the raw
+  // per-word "Contains COW" / "Contains DOG" / "Contains HORSE" entries
+  // staying permanently separate. Deliberately its own pool type
+  // ('hypernymContains', distinct from the raw 'hiddenWord' type below) so
+  // it can be left ON even when the raw per-word Contains-X / affix pool
+  // is toggled OFF in the Rules Browser -- those two raw types are what
+  // dominate CATEGORY_POOL by sheer count (thousands of one-word-each
+  // entries) and are consequently doing most of the connective work that
+  // lets tryCompleteLoop() find a 4-cycle at all; disabling them collapses
+  // the pool to near-disjoint semantic categories with almost no shared
+  // words between any two of them. These derived categories exist
+  // specifically to give the *semantic* categories a few legitimate,
+  // meaningful bridges to each other without needing the generic
+  // wordplay noise turned on. See rebuildCategoryPool()'s call site below
+  // for the ordering requirement (must run after all semantic types are
+  // already in CATEGORY_POOL, before the final MEMBERSHIP_INDEX pass).
+  const HYPERNYM_POOL_TYPES = new Set(['named', 'wordcat', 'custom', 'hyponym']);
+  function buildHypernymContainmentCategories(pool) {
+    if (!Object.keys(HIDDEN_WORD_GENERATED_CATEGORIES).length) return [];
+    const out = [];
+    const semanticCats = pool.filter(c => HYPERNYM_POOL_TYPES.has(c.type));
+    for (const cat of semanticCats) {
+      const containsSet = new Set();
+      const startsSet = new Set();
+      const endsSet = new Set();
+      for (const m of cat.members) {
+        if (m.length < 3) continue; // 1-2 letter members produce pure noise
+        const hits = HIDDEN_WORD_GENERATED_CATEGORIES[`Contains "${m.toUpperCase()}"`];
+        if (!hits) continue;
+        for (const h of hits) {
+          const hn = norm(h);
+          if (!hn || hn === m) continue;
+          containsSet.add(hn);
+          if (hn.startsWith(m)) startsSet.add(hn);
+          if (hn.endsWith(m)) endsSet.add(hn);
+        }
+      }
+      const label = cat.name.replace(/^Types of /i, '').replace(/^Custom:\s*/i, '').replace(/\s*\(.*\)\s*$/, '');
+      const article = /^[aeiou]/i.test(label) ? 'an' : 'a';
+      if (containsSet.size >= 4) out.push({ name: `Contains ${article} ${label}`, members: [...containsSet], type: 'hypernymContains' });
+      if (startsSet.size >= 4)   out.push({ name: `Starts With ${article} ${label}`, members: [...startsSet], type: 'hypernymContains' });
+      if (endsSet.size >= 4)     out.push({ name: `Ends With ${article} ${label}`,   members: [...endsSet], type: 'hypernymContains' });
+    }
+    return out;
+  }
+  for (const derived of buildHypernymContainmentCategories(CATEGORY_POOL)) CATEGORY_POOL.push(derived);
 
   CATEGORY_NAME_TO_IDX.clear();
   CATEGORY_POOL.forEach((cat, idx) => {

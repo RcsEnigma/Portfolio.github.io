@@ -40,9 +40,9 @@
     "jaguar",
     "cheetah",
     "cougar",
-    "snow leopard",
+    "snow (leopard)",
     "lynx",
-    "clouded leopard",
+    "clouded (leopard)",
     "caracal"
   ],
   "Whales And Dolphins": [
@@ -125,7 +125,7 @@
     "cabbage white",
     "admiral",
     "fritillary",
-    "atlas moth",
+    "atlas (moth)",
     "morpho"
   ],
   "Venomous Creatures": [
@@ -309,9 +309,9 @@
     "coriander",
     "ginger",
     "allspice",
-    "fennel seed",
+    "fennel (seed)",
     "star anise",
-    "mustard seed"
+    "mustard (seed)"
   ],
   "Culinary Herbs": [
     "basil",
@@ -348,13 +348,13 @@
   "Legumes": [
     "lentils",
     "chickpeas",
-    "kidney beans",
-    "black beans",
-    "pinto beans",
+    "kidney (beans)",
+    "black (beans)",
+    "pinto (beans)",
     "soybeans",
     "peas",
-    "lima beans",
-    "fava beans",
+    "lima (beans)",
+    "fava (beans)",
     "edamame"
   ],
   "Classic Desserts": [
@@ -500,7 +500,7 @@
     "satchel",
     "clutch",
     "suitcase",
-    "drawstring bag"
+    "drawstring (bag)"
   ],
   "Types Of Pants": [
     "jeans",
@@ -672,15 +672,15 @@
   ],
   "Power Tools": [
     "drill",
-    "circular saw",
+    "circular (saw)",
     "angle grinder",
     "jigsaw",
     "router",
     "sander",
-    "nail gun",
+    "nail (gun)",
     "impact driver",
-    "reciprocating saw",
-    "heat gun"
+    "reciprocating (saw)",
+    "heat (gun)"
   ],
   "Garden Tools": [
     "rake",
@@ -951,9 +951,9 @@
   ],
   "Glaciers": [
     "ice sheet",
-    "valley glacier",
-    "alpine glacier",
-    "tidewater glacier",
+    "valley (glacier)",
+    "alpine (glacier)",
+    "tidewater (glacier)",
     "ice cap",
     "ice shelf"
   ],
@@ -974,27 +974,27 @@
     "lighthouse of alexandria"
   ],
   "Types Of Telescopes": [
-    "refracting telescope",
-    "reflecting telescope",
-    "radio telescope",
-    "space telescope",
-    "catadioptric telescope"
+    "refracting (telescope)",
+    "reflecting (telescope)",
+    "radio (telescope)",
+    "space (telescope)",
+    "catadioptric (telescope)"
   ],
   "Types Of Batteries": [
-    "alkaline battery",
-    "lithium ion battery",
-    "nickel cadmium battery",
-    "lead acid battery",
+    "alkaline (battery)",
+    "lithium ion (battery)",
+    "nickel cadmium (battery)",
+    "lead acid (battery)",
     "button cell",
-    "car battery"
+    "car (battery)"
   ],
   "Types Of Engines": [
-    "combustion engine",
+    "combustion (engine)",
     "electric motor",
-    "jet engine",
-    "diesel engine",
-    "steam engine",
-    "rotary engine"
+    "jet (engine)",
+    "diesel (engine)",
+    "steam (engine)",
+    "rotary (engine)"
   ],
   "Pizza Toppings": [
     "pepperoni",
@@ -1007,11 +1007,11 @@
     "anchovies"
   ],
   "Tea Types": [
-    "green tea",
-    "black tea",
-    "oolong tea",
-    "white tea",
-    "herbal tea",
+    "green (tea)",
+    "black (tea)",
+    "oolong (tea)",
+    "white (tea)",
+    "herbal (tea)",
     "chai",
     "matcha",
     "earl grey"
@@ -1021,31 +1021,31 @@
     "mustard",
     "mayonnaise",
     "relish",
-    "hot sauce",
-    "soy sauce",
-    "barbecue sauce",
+    "hot (sauce)",
+    "soy (sauce)",
+    "barbecue (sauce)",
     "salsa"
   ],
   "Types Of Pens": [
-    "ballpoint pen",
-    "fountain pen",
-    "gel pen",
-    "rollerball pen",
-    "felt tip pen",
-    "calligraphy pen"
+    "ballpoint (pen)",
+    "fountain (pen)",
+    "gel (pen)",
+    "rollerball (pen)",
+    "felt tip (pen)",
+    "calligraphy (pen)"
   ],
   "Types Of Scissors": [
-    "kitchen shears",
-    "pinking shears",
-    "hair scissors",
-    "garden shears",
-    "embroidery scissors",
-    "safety scissors"
+    "kitchen (shears)",
+    "pinking (shears)",
+    "hair (scissors)",
+    "garden (shears)",
+    "embroidery (scissors)",
+    "safety (scissors)"
   ],
   "Types Of Jackets": [
-    "denim jacket",
-    "leather jacket",
-    "bomber jacket",
+    "denim (jacket)",
+    "leather (jacket)",
+    "bomber (jacket)",
     "windbreaker",
     "parka",
     "blazer",
@@ -1061,16 +1061,16 @@
   ],
   "Types Of Gloves": [
     "mittens",
-    "work gloves",
-    "boxing gloves",
+    "work (gloves)",
+    "boxing (gloves)",
     "oven mitts",
-    "rubber gloves",
-    "winter gloves"
+    "rubber (gloves)",
+    "winter (gloves)"
   ],
   "Types Of Ties": [
-    "bow tie",
+    "bow (tie)",
     "necktie",
-    "bolo tie",
+    "bolo (tie)",
     "ascot",
     "cravat"
   ],
@@ -1083,11 +1083,11 @@
     "roman shade"
   ],
   "Types Of Pianos": [
-    "grand piano",
-    "upright piano",
-    "digital piano",
-    "player piano",
-    "electric piano"
+    "grand (piano)",
+    "upright (piano)",
+    "digital (piano)",
+    "player (piano)",
+    "electric (piano)"
   ],
   "Orchestra Sections": [
     "strings",
@@ -1096,26 +1096,26 @@
     "percussion"
   ],
   "Types Of Anchors": [
-    "fluke anchor",
-    "plow anchor",
-    "mushroom anchor",
-    "grapnel anchor",
-    "claw anchor"
+    "fluke (anchor)",
+    "plow (anchor)",
+    "mushroom (anchor)",
+    "grapnel (anchor)",
+    "claw (anchor)"
   ],
   "Types Of Sails": [
     "mainsail",
     "jib",
     "spinnaker",
     "genoa",
-    "gaff sail",
-    "lateen sail"
+    "gaff (sail)",
+    "lateen (sail)"
   ],
   "Types Of Bridges Materials": [
-    "steel bridge",
-    "concrete bridge",
-    "wooden bridge",
-    "stone bridge",
-    "rope bridge"
+    "steel (bridge)",
+    "concrete (bridge)",
+    "wooden (bridge)",
+    "stone (bridge)",
+    "rope (bridge)"
   ],
   "Extinct Animals": [
     "dodo",
@@ -1126,12 +1126,12 @@
     "great auk"
   ],
   "Types Of Deer": [
-    "whitetail deer",
-    "mule deer",
+    "whitetail (deer)",
+    "mule (deer)",
     "reindeer",
     "elk",
     "moose",
-    "roe deer"
+    "roe (deer)"
   ],
   "Birds Of Prey": [
     "eagle",
@@ -1152,35 +1152,35 @@
     "conure"
   ],
   "Types Of Turtles": [
-    "sea turtle",
-    "box turtle",
-    "snapping turtle",
-    "painted turtle",
+    "sea (turtle)",
+    "box (turtle)",
+    "snapping (turtle)",
+    "painted (turtle)",
     "tortoise",
-    "softshell turtle"
+    "softshell (turtle)"
   ],
   "Types Of Bees": [
     "honeybee",
     "bumblebee",
-    "carpenter bee",
-    "mason bee",
-    "sweat bee",
-    "killer bee"
+    "carpenter (bee)",
+    "mason (bee)",
+    "sweat (bee)",
+    "killer (bee)"
   ],
   "Types Of Frogs": [
     "bullfrog",
-    "tree frog",
-    "poison dart frog",
-    "leopard frog",
-    "glass frog",
-    "tomato frog"
+    "tree (frog)",
+    "poison dart (frog)",
+    "leopard (frog)",
+    "glass (frog)",
+    "tomato (frog)"
   ],
   "Ballet Positions": [
-    "first position",
-    "second position",
-    "third position",
-    "fourth position",
-    "fifth position"
+    "first (position)",
+    "second (position)",
+    "third (position)",
+    "fourth (position)",
+    "fifth (position)"
   ],
   "Poker Variants": [
     "texas holdem",
@@ -1197,5 +1197,78 @@
     "kelvin",
     "mole",
     "candela"
+  ],
+  "Types Of Construction Equipment": [
+    "crane",
+    "bulldozer",
+    "excavator",
+    "backhoe",
+    "forklift",
+    "cement mixer",
+    "scaffold",
+    "dump truck"
+  ],
+  "Card Face Values": [
+    "king",
+    "queen",
+    "jack",
+    "ace",
+    "ten",
+    "joker"
+  ],
+  "Types Of Royal Titles": [
+    "king",
+    "queen",
+    "prince",
+    "princess",
+    "duke",
+    "duchess",
+    "emperor",
+    "empress",
+    "tsar",
+    "sultan"
+  ],
+  "Snooker Ball Colors": [
+    "red",
+    "yellow",
+    "green",
+    "brown",
+    "blue",
+    "pink",
+    "black"
+  ],
+  "Chinese Zodiac Animals": [
+    "rat",
+    "ox",
+    "tiger",
+    "rabbit",
+    "dragon",
+    "snake",
+    "horse",
+    "goat",
+    "monkey",
+    "rooster",
+    "dog",
+    "pig"
+  ],
+  "Greek Alphabet Letters": [
+    "alpha",
+    "beta",
+    "gamma",
+    "delta",
+    "epsilon",
+    "zeta",
+    "eta",
+    "theta",
+    "lambda",
+    "sigma",
+    "omega",
+    "pi"
+  ],
+  "Award And Honor Materials": [
+    "gold",
+    "silver",
+    "bronze",
+    "platinum"
   ]
 }
