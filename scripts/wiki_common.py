@@ -62,44 +62,63 @@ _SKIP_SUFFIXES = {
 }
 
 
-def detect_and_split_suffixes(members, min_shared=2, min_word_len=3):
+def detect_and_split_suffixes(members, min_shared=2, min_word_len=3, max_suffix_words=2):
     """
     Given a raw member list (plain strings, no existing parens), finds any
-    trailing word shared by >= min_shared multi-word entries and rewrites
-    those entries as "primary (suffix)". Entries not part of a qualifying
-    group are left untouched. Returns a new list, same order.
+    trailing PHRASE (1 to max_suffix_words words) shared by >= min_shared
+    multi-word entries and rewrites those entries as "primary (suffix)".
 
-    This is a heuristic, not a guarantee of quality -- it will still split
-    things like proper-name landmarks ("Niagara Falls", "Grand Canyon")
-    that were deliberately left alone by hand in claude-hypernyms.json,
-    because "landmark name vs. generic type" isn't something a trailing-word
-    count can distinguish on its own. Review the output before trusting it,
-    same as you'd review any generated pack -- this just removes the
-    *mechanical* tedium of finding the repeats, not the judgment call of
-    whether splitting is actually appropriate for a given category.
+    Longer shared phrases win over shorter ones: "Yellowstone National
+    Park" / "Grand Canyon National Park" / "Zion National Park" all share
+    the 2-word tail "national park", so that's what gets split off --
+    yielding "yellowstone (national park)" -- rather than only ever
+    checking the single last word, which would wrongly glue "national"
+    onto the primary and produce the far less useful "yellowstone national
+    (park)" (every one of those would then require BOTH "yellowstone" AND
+    "national" together to match, instead of "yellowstone" alone).
+    Entries not part of any qualifying group are left untouched.
+
+    This is still a heuristic, not a guarantee of quality -- see the
+    module docstring's note on proper-name landmarks ("Niagara Falls")
+    getting split even though that's arguably wrong. Review the output
+    before trusting a batch wholesale, same as any generated pack.
     """
     from collections import Counter
 
-    trailing_count = Counter()
-    for m in members:
-        parts = m.split()
-        if len(parts) >= 2 and len(parts[-1]) >= min_word_len:
-            trailing_count[parts[-1].lower()] += 1
+    handled = [False] * len(members)
+    result = list(members)
 
-    qualifying = {w for w, c in trailing_count.items() if c >= min_shared and w not in _SKIP_SUFFIXES}
-    if not qualifying:
-        return list(members)
+    for n in range(max_suffix_words, 0, -1):
+        counts = Counter()
+        for i, m in enumerate(members):
+            if handled[i]:
+                continue
+            parts = m.split()
+            if len(parts) <= n:  # need at least one word left over for the primary
+                continue
+            suffix_words = parts[-n:]
+            if n == 1 and len(suffix_words[0]) < min_word_len:
+                continue  # single-word suffixes still need the length floor;
+                          # multi-word phrases are self-evidently substantive
+            counts[" ".join(suffix_words).lower()] += 1
 
-    out = []
-    for m in members:
-        parts = m.split()
-        if len(parts) >= 2 and parts[-1].lower() in qualifying:
-            primary = " ".join(parts[:-1])
-            suffix = parts[-1]
-            out.append(f"{primary} ({suffix})")
-        else:
-            out.append(m)
-    return out
+        qualifying = {s for s, c in counts.items() if c >= min_shared and s not in _SKIP_SUFFIXES}
+        if not qualifying:
+            continue
+
+        for i, m in enumerate(members):
+            if handled[i]:
+                continue
+            parts = m.split()
+            if len(parts) <= n:
+                continue
+            suffix = " ".join(parts[-n:]).lower()
+            if suffix in qualifying:
+                primary = " ".join(parts[:-n])
+                result[i] = f"{primary} ({' '.join(parts[-n:])})"
+                handled[i] = True
+
+    return result
 
 
 # ── pack file I/O ──
@@ -124,6 +143,47 @@ def merge_into_pack(path, category_name, members, overwrite=False):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     return True
+
+
+# ── English-word filter, to catch scientific-binomial-only labels ──
+def load_english_wordset(path="wordnet_synonyms.json"):
+    """
+    Loads the flat `dictionary` word list out of wordnet_synonyms.json (the
+    same file the app itself uses) into a lowercase set, for filtering out
+    labels that are PURELY a scientific binomial with no English common
+    name at all -- e.g. "sapeornis chaoyangensis" or "hemiscyllium henryi".
+    These are real, currently-valid species; Wikidata/Wikipedia just never
+    gave them an English common name, so there's nothing to "fix" about
+    them upstream -- they're only useful to filter OUT here if you'd rather
+    have a smaller, cleaner category than a bigger, Latin-heavier one.
+
+    Returns None (meaning: skip this filter entirely) if the file can't be
+    found, rather than erroring -- this filter is a nice-to-have, not a
+    requirement, and the two parse_*.py scripts work fine without it.
+    """
+    if not os.path.exists(path):
+        return None
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    words = data.get("dictionary", [])
+    if not words:
+        return None
+    return {w.lower() for w in words}
+
+
+def looks_like_pure_binomial(label, english_words):
+    """
+    True if NONE of the words in `label` appear in `english_words` -- i.e.
+    every word looks like it's scientific Latin, not an English common
+    name. If english_words is None (dictionary not loaded), always returns
+    False so nothing gets filtered.
+    """
+    if english_words is None:
+        return False
+    words = re.findall(r"[a-z]+", label.lower())
+    if not words:
+        return False
+    return not any(w in english_words for w in words)
 
 
 def check_collisions(category_name, other_pack_paths):
