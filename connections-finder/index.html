@@ -326,6 +326,7 @@
         <div class="loop-input-wrap"><span class="loop-input-label">Corner</span><textarea class="loop-input-cell corner" id="loopIn_cornerBR" onpaste="handleSheetsPaste(event)"></textarea></div>
       </div>
       <label class="loop-toggle"><input type="checkbox" id="loopDatamuseToggle"> When every field above is blank, seed the top category from live Datamuse synonyms instead of local lists (slower, needs network)</label>
+      <label class="loop-toggle"><input type="checkbox" id="loopUniqueTypesToggle"> Make all 4 categories different types (no two "Contains ___", two affix groups, two hyponym sets, etc.)</label>
       <div id="loopContent"></div>
     </div>
   </main>
@@ -3186,7 +3187,7 @@ function prioritizeByType(idxs, usedTypes) {
 // Attempts to complete a loop starting from a SPECIFIC category (by pool
 // index) as the top row. Returns a loop object, or null if this category
 // doesn't lead anywhere workable (caller decides whether to retry).
-function tryCompleteLoop(cat1Idx) {
+function tryCompleteLoop(cat1Idx, maxSameType = 2) {
   const cat1 = CATEGORY_POOL[cat1Idx];
   const members = shuffled(cat1.members);
   if (members.length < 4) return null;
@@ -3269,7 +3270,7 @@ function tryCompleteLoop(cat1Idx) {
   const types = [cat1.type, cat2.type, cat3.type, cat4.type];
   const typeCounts = {};
   types.forEach(t => { typeCounts[t] = (typeCounts[t] || 0) + 1; });
-  if (Math.max(...Object.values(typeCounts)) > 2) return null;
+  if (Math.max(...Object.values(typeCounts)) > maxSameType) return null;
 
   return {
     top:    { name: cat1.name, words: [leftHook, ...filler1, rightHook] },
@@ -3399,7 +3400,7 @@ function prioritizeByFit(idxs, relevantInputWords) {
 // Resolution/validity of the locked names themselves happens once, up
 // front, in generateLoopFromInputs() -- by the time this runs, every
 // non-null entry here is guaranteed to be a live, non-excluded index.
-function tryCompleteLoopFromInputs(inputs, reserved, lockedIdx = { top: null, left: null, right: null, bottom: null }) {
+function tryCompleteLoopFromInputs(inputs, reserved, lockedIdx = { top: null, left: null, right: null, bottom: null }, maxSameType = 2) {
   const used = new Set();
 
   // ---- cat1 (top row): locked > seeded from typed top-row words > random ----
@@ -3533,7 +3534,7 @@ function tryCompleteLoopFromInputs(inputs, reserved, lockedIdx = { top: null, le
       const types = [cat1.type, cat2.type, cat3.type, cat4.type];
       const typeCounts = {};
       types.forEach(t => { typeCounts[t] = (typeCounts[t] || 0) + 1; });
-      if (Math.max(...Object.values(typeCounts)) > 2) continue;
+      if (Math.max(...Object.values(typeCounts)) > maxSameType) continue;
 
       return {
         top:    { name: cat1.name, words: [leftHook, ...filler1, rightHook] },
@@ -3605,6 +3606,15 @@ function validateLockedTypedWords(inputs, lockedResolved) {
 // words (checked up front so we don't burn 400 attempts failing
 // identically every time), or null for the ordinary "couldn't find one
 // this time, try again" case.
+// Reads the "make all 4 categories different types" toggle. Off (default)
+// keeps the existing soft cap of at most 2 categories sharing a source
+// type (see the comment above the check itself); on tightens that to
+// exactly 1 -- no two of top/left/right/bottom may come from the same
+// type (affix, hiddenWord/"Contains X", hyponym, wordnet, etc.).
+function maxSameTypeAllowed() {
+  return document.getElementById('loopUniqueTypesToggle')?.checked ? 1 : 2;
+}
+
 function generateLoopFromInputs(maxAttempts = 400) {
   const inputs = readLoopInputs();
   const reserved = allReservedLoopWords(inputs);
@@ -3615,8 +3625,17 @@ function generateLoopFromInputs(maxAttempts = 400) {
   const typedErrors = validateLockedTypedWords(inputs, lockedResolved);
   if (typedErrors.length) return { error: typedErrors[0] };
 
+  const maxSameType = maxSameTypeAllowed();
+  if (maxSameType === 1) {
+    const lockedTypes = Object.values(lockedResolved).filter(v => v !== null).map(idx => CATEGORY_POOL[idx].type);
+    const dupType = lockedTypes.find((t, i) => lockedTypes.indexOf(t) !== i);
+    if (dupType) {
+      return { error: `Two of your locked categories are both type "${dupType}", but "make all 4 categories different types" is turned on — clear one of the locks, or turn that toggle off.` };
+    }
+  }
+
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const loop = tryCompleteLoopFromInputs(inputs, reserved, lockedResolved);
+    const loop = tryCompleteLoopFromInputs(inputs, reserved, lockedResolved, maxSameType);
     if (loop) return loop;
   }
   return null;
@@ -3992,6 +4011,7 @@ async function renderNewLoopFromInputs() {
 async function generateLoopFromDatamuseSeed(maxSeedAttempts = 6, attemptsPerSeed = 15) {
   const vocabWords = [...MEMBERSHIP_INDEX.keys()];
   if (!vocabWords.length) return null;
+  const maxSameType = maxSameTypeAllowed();
 
   for (let s = 0; s < maxSeedAttempts; s++) {
     const seed = vocabWords[Math.floor(Math.random() * vocabWords.length)];
@@ -4025,7 +4045,7 @@ async function generateLoopFromDatamuseSeed(maxSeedAttempts = 6, attemptsPerSeed
     }
 
     let loop = null;
-    for (let a = 0; a < attemptsPerSeed && !loop; a++) loop = tryCompleteLoop(virtualIdx);
+    for (let a = 0; a < attemptsPerSeed && !loop; a++) loop = tryCompleteLoop(virtualIdx, maxSameType);
 
     CATEGORY_POOL.pop();
     for (const m of cat1Members) {
