@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-23T03:56:21.464Z",
+  "generated": "2026-10-14T10:31:57.329Z",
   "tags": [
     "2D",
     "3D",
@@ -14,10 +14,49 @@
     "Multimodal",
     "Photorealism",
     "Pixel",
+    "Sound Design",
     "Trepidation",
     "Violent"
   ],
   "works": [
+    {
+      "id": "Compound",
+      "primaryMedia": "Compound_01.mp4",
+      "allMedia": [
+        "Compound_01.mp4",
+        "Compound_02.PNG",
+        "Compound_03.PNG",
+        "Compound_04.PNG"
+      ],
+      "type": "video",
+      "title": "Compound",
+      "description": "The living quarters of the two main characters from my Trepidation project. Designed initially as a visualization and reference point for my writing, I thought it'd be fun to make a house tour style animation from it, in the stly of a handheld walkthrough. After that render was done, I then realized I mind as well add sound effects. Working on 3D spatial audio was something I was getting more comfortable with, so the next step was quite clear. \n\nAudio/Sound is not my strongsuit so I had some friends give me pointers. The sound effects themselves were downloaded from free libraries.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Animation",
+        "Trepidation",
+        "Sound Design"
+      ],
+      "featured": false,
+      "date": "2026-10",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide",
+      "thumbMedia": null,
+      "modalThumbs": [
+        null,
+        "Compound_02.webp",
+        "Compound_03.webp",
+        "Compound_04.webp"
+      ],
+      "zoomMedia": [
+        null,
+        "Compound_02_zoom.webp",
+        "Compound_03_zoom.webp",
+        "Compound_04_zoom.webp"
+      ]
+    },
     {
       "id": "Antagonist",
       "primaryMedia": "Antagonist_01.png",

@@ -1,0 +1,13 @@
+[title]
+Compound
+
+[description]
+The living quarters of the two main characters from my Trepidation project. Designed initially as a visualization and reference point for my writing, I thought it'd be fun to make a house tour style animation from it, in the stly of a handheld walkthrough. After that render was done, I then realized I mind as well add sound effects. Working on 3D spatial audio was something I was getting more comfortable with, so the next step was quite clear. 
+
+Audio/Sound is not my strongsuit so I had some friends give me pointers. The sound effects themselves were downloaded from free libraries.
+
+[tags]
+3D, Blender, Animation, Trepidation, Sound Design
+
+[date]
+2026-10
