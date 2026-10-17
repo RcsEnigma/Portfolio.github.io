@@ -1,0 +1,13 @@
+[title]
+Laser Creator
+
+[description]
+Recreated a device depicted from Valve's Portal 2 game from scratch, based off a single reference image (attachments 5 & 6). 
+
+Created custom procedural materials for the entire thing, sans the aperture logos on the device's shell.
+
+[tags]
+3D, Blender
+
+[date]
+2026-04

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-15T10:12:35.006Z",
+  "generated": "2026-10-17T14:14:56.419Z",
   "tags": [
     "2D",
     "3D",
@@ -236,6 +236,47 @@
       "zoomMedia": [
         "Trepidation_Rooms_01_zoom.webp",
         "Trepidation_Rooms_02_zoom.webp"
+      ]
+    },
+    {
+      "id": "PortalLaser",
+      "primaryMedia": "PortalLaser_01.PNG",
+      "allMedia": [
+        "PortalLaser_01.PNG",
+        "PortalLaser_02.webp",
+        "PortalLaser_03.webp",
+        "PortalLaser_04.PNG",
+        "PortalLaser_05.webp",
+        "PortalLaser_06.mp4"
+      ],
+      "type": "image",
+      "title": "Laser Creator",
+      "description": "Recreated a device depicted from Valve's Portal 2 game from scratch, based off a single reference image (attachments 5 & 6). \n\nCreated custom procedural materials for the entire thing, sans the aperture logos on the device's shell.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2026-04",
+      "link": "",
+      "aspectRatio": 1.696,
+      "gridSpan": "wide",
+      "thumbMedia": "PortalLaser_01.webp",
+      "modalThumbs": [
+        "PortalLaser_01.webp",
+        "PortalLaser_02.webp",
+        "PortalLaser_03.webp",
+        "PortalLaser_04.webp",
+        "PortalLaser_05.webp",
+        null
+      ],
+      "zoomMedia": [
+        "PortalLaser_01_zoom.webp",
+        "PortalLaser_02_zoom.webp",
+        "PortalLaser_03_zoom.webp",
+        "PortalLaser_04_zoom.webp",
+        "PortalLaser_05_zoom.webp",
+        null
       ]
     },
     {
