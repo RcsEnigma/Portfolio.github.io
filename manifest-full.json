@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-17T14:14:56.419Z",
+  "generated": "2026-10-18T15:28:20.556Z",
   "tags": [
     "2D",
     "3D",
@@ -634,6 +634,56 @@
         "Colleague_Face_02_zoom.webp",
         "Colleague_Face_03_zoom.webp",
         null
+      ]
+    },
+    {
+      "id": "ConcreteMaterial",
+      "primaryMedia": "ConcreteMaterial_01.png",
+      "allMedia": [
+        "ConcreteMaterial_01.png",
+        "ConcreteMaterial_02.png",
+        "ConcreteMaterial_03.png",
+        "ConcreteMaterial_04.png",
+        "ConcreteMaterial_05.png",
+        "ConcreteMaterial_06.png",
+        "ConcreteMaterial_07.png",
+        "ConcreteMaterial_08.png",
+        "ConcreteMaterial_09.png"
+      ],
+      "type": "image",
+      "title": "Concrete Material",
+      "description": "A self-built 100% procedural concrete shader packed full of smart logic. The material is an algorithm that adapts to the geometry of the scene. I designed this to help me make other scenes quicker- you will notice it primarily in projects tagged with 3D and Trepidation.\n\nThe shader has full customizability between all it's features, the following slides showcase some of it's visual capabilities. Remember, all visuals are represented entirely with math- no hand-drawn areas, a surface can extend infinitely without ever repeating patterns.\n\nIn order:\n#2: Moisture stains\n#3: Close-up of tile cracks\n#4: Rare repair patches\n#5: Support to manually draw integrated grime\n#6: Tape guidelines\n#7: Custom plaster decal support (via image importing)\n#8: Remove cut marks\n\nand #9 is simply the nodemap.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2024-10",
+      "link": "",
+      "aspectRatio": 1,
+      "gridSpan": "normal",
+      "thumbMedia": "ConcreteMaterial_01.webp",
+      "modalThumbs": [
+        "ConcreteMaterial_01.webp",
+        "ConcreteMaterial_02.webp",
+        "ConcreteMaterial_03.webp",
+        "ConcreteMaterial_04.webp",
+        "ConcreteMaterial_05.webp",
+        "ConcreteMaterial_06.webp",
+        "ConcreteMaterial_07.webp",
+        "ConcreteMaterial_08.webp",
+        "ConcreteMaterial_09.webp"
+      ],
+      "zoomMedia": [
+        "ConcreteMaterial_01_zoom.webp",
+        "ConcreteMaterial_02_zoom.webp",
+        "ConcreteMaterial_03_zoom.webp",
+        "ConcreteMaterial_04_zoom.webp",
+        "ConcreteMaterial_05_zoom.webp",
+        "ConcreteMaterial_06_zoom.webp",
+        "ConcreteMaterial_07_zoom.webp",
+        "ConcreteMaterial_08_zoom.webp",
+        "ConcreteMaterial_09_zoom.webp"
       ]
     },
     {
