@@ -12,6 +12,9 @@ Keep an eye out for this shader, I use it a lot.
 
 3rd image: Evolution of the shader, from right to left (yes, the setup on the far right is literally just an Image Texture into an Emission BSDF into the Material Output, I actually did that - see image 4, that was January of 2023). You can see one of the middle materials used in "Colleague Face" - at that stage, each tile only had five visual distinctions: Normal, Dim, Only Red, Only Green, and Only Blue. Not very realistic.
 
+[square]
+true
+
 [tags]
 3D, Blender
 
