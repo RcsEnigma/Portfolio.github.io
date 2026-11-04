@@ -1,0 +1,19 @@
+[title]
+Procedural LED Panels Material
+
+[description]
+This is a material I'm incredibly happy with, and I use it almost as often as my concrete shader- both for my Trepidation project.
+
+An image texture is loaded up alongside three mask textures. The image is pixellated according to the scaled-down mask textures, and then it's split into red, green, and blue channels. From there, I use a lot of voronoi and wave patterns to subtly mess with the three channels individually - I then recombine the channels through the individual masks, recreating the iconic RGB pixels which look so beautiful. I also add in some random flickering (with a bias towards the already glitched tiles). I put such a heavy focus on the broken sections because every time I've seen one of these setups in real life, they are never 100% operational.
+
+I can adjust primarily the seed of the breaks/glitches and the scale of the pixels. However, there are plenty of annotated color ramps throughout the nodemap controlling different biases such as: Rate of broken tiles, Rate of downright black (completely broken) tiles, Rate of flickering, and Bias between overwrite vs overay glitch effects. This degree of config allows me to add 'flavor' to a scene's digital screen without being at the mercy of merely the seed to determine whether important information is obscured by the broken tiles.
+
+Keep an eye out for this shader, I use it a lot.
+
+3rd image: Evolution of the shader, from right to left (yes, the setup on the far right is literally just an Image Texture into an Emission BSDF into the Material Output, I actually did that - see image 4, that was January of 2023). You can see one of the middle materials used in "Colleague Face" - at that stage, each tile only had five visual distinctions: Normal, Dim, Only Red, Only Green, and Only Blue. Not very realistic.
+
+[tags]
+3D, Blender
+
+[date]
+2025-09

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-18T15:28:20.556Z",
+  "generated": "2026-11-04T14:17:41.101Z",
   "tags": [
     "2D",
     "3D",
@@ -364,6 +364,41 @@
       "zoomMedia": [
         "MagazineSix_01_zoom.webp",
         "MagazineSix_02_zoom.webp"
+      ]
+    },
+    {
+      "id": "LedPanel",
+      "primaryMedia": "LedPanel_01.mkv",
+      "allMedia": [
+        "LedPanel_01.mkv",
+        "LedPanel_02.png",
+        "LedPanel_03.png",
+        "LedPanel_04.mp4"
+      ],
+      "type": "video",
+      "title": "Procedural LED Panels Material",
+      "description": "This is a material I'm incredibly happy with, and I use it almost as often as my concrete shader- both for my Trepidation project.\n\nAn image texture is loaded up alongside three mask textures. The image is pixellated according to the scaled-down mask textures, and then it's split into red, green, and blue channels. From there, I use a lot of voronoi and wave patterns to subtly mess with the three channels individually - I then recombine the channels through the individual masks, recreating the iconic RGB pixels which look so beautiful. I also add in some random flickering (with a bias towards the already glitched tiles). I put such a heavy focus on the broken sections because every time I've seen one of these setups in real life, they are never 100% operational.\n\nI can adjust primarily the seed of the breaks/glitches and the scale of the pixels. However, there are plenty of annotated color ramps throughout the nodemap controlling different biases such as: Rate of broken tiles, Rate of downright black (completely broken) tiles, Rate of flickering, and Bias between overwrite vs overay glitch effects. This degree of config allows me to add 'flavor' to a scene's digital screen without being at the mercy of merely the seed to determine whether important information is obscured by the broken tiles.\n\nKeep an eye out for this shader, I use it a lot.\n\n3rd image: Evolution of the shader, from right to left (yes, the setup on the far right is literally just an Image Texture into an Emission BSDF into the Material Output, I actually did that - see image 4, that was January of 2023). You can see one of the middle materials used in \"Colleague Face\" - at that stage, each tile only had five visual distinctions: Normal, Dim, Only Red, Only Green, and Only Blue. Not very realistic.",
+      "tags": [
+        "3D",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2025-09",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide",
+      "thumbMedia": null,
+      "modalThumbs": [
+        null,
+        "LedPanel_02.webp",
+        "LedPanel_03.webp",
+        null
+      ],
+      "zoomMedia": [
+        null,
+        "LedPanel_02_zoom.webp",
+        "LedPanel_03_zoom.webp",
+        null
       ]
     },
     {
@@ -1056,9 +1091,14 @@
     },
     {
       "id": "Power",
-      "primaryMedia": "Power.png",
+      "primaryMedia": "Power_01.png",
       "allMedia": [
-        "Power.png"
+        "Power_01.png",
+        "Power_02.png",
+        "Power_03.png",
+        "Power_04.png",
+        "Power_05.png",
+        "Power_06.png"
       ],
       "type": "image",
       "title": "Power",
@@ -1072,12 +1112,22 @@
       "link": "",
       "aspectRatio": 1.778,
       "gridSpan": "wide",
-      "thumbMedia": "Power.webp",
+      "thumbMedia": "Power_01.webp",
       "modalThumbs": [
-        "Power.webp"
+        "Power_01.webp",
+        "Power_02.webp",
+        "Power_03.webp",
+        "Power_04.webp",
+        "Power_05.webp",
+        "Power_06.webp"
       ],
       "zoomMedia": [
-        "Power_zoom.webp"
+        "Power_01_zoom.webp",
+        "Power_02_zoom.webp",
+        "Power_03_zoom.webp",
+        "Power_04_zoom.webp",
+        "Power_05_zoom.webp",
+        "Power_06_zoom.webp"
       ]
     },
     {
