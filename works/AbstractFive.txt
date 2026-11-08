@@ -7,7 +7,7 @@ Insipred by rave visuals. Dizzying shards of glass.
 Seamless
 
 [tags]
-3D, Blender
+3D, Blender, Animation
 
 [square]
 true

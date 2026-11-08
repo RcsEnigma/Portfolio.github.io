@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T12:47:11.161Z",
+  "generated": "2026-11-08T13:34:43.250Z",
   "tags": [
     "2D",
     "3D",
@@ -43,9 +43,9 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null,
+      "thumbMedia": "Compound_01_poster.webp",
       "modalThumbs": [
-        null,
+        "Compound_01_poster.webp",
         "Compound_02.webp",
         "Compound_03.webp",
         "Compound_04.webp"
@@ -57,7 +57,7 @@
         "Compound_04_zoom.webp"
       ],
       "webMedia": [
-        null,
+        "Compound_01_web.mp4",
         null,
         null,
         null
@@ -303,7 +303,7 @@
         "PortalLaser_03.webp",
         "PortalLaser_04.webp",
         "PortalLaser_05.webp",
-        null
+        "PortalLaser_06_poster.webp"
       ],
       "zoomMedia": [
         "PortalLaser_01_zoom.webp",
@@ -510,12 +510,12 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "normal",
-      "thumbMedia": null,
+      "thumbMedia": "LedPanel_01_poster.webp",
       "modalThumbs": [
-        null,
+        "LedPanel_01_poster.webp",
         "LedPanel_02.webp",
         "LedPanel_03.webp",
-        null
+        "LedPanel_04_poster.webp"
       ],
       "zoomMedia": [
         null,
@@ -524,10 +524,10 @@
         null
       ],
       "webMedia": [
+        "LedPanel_01_web.mp4",
         null,
         null,
-        null,
-        null
+        "LedPanel_04_web.mp4"
       ]
     },
     {
@@ -616,15 +616,15 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null,
+      "thumbMedia": "Translation_poster.webp",
       "modalThumbs": [
-        null
+        "Translation_poster.webp"
       ],
       "zoomMedia": [
         null
       ],
       "webMedia": [
-        null
+        "Translation_web.mp4"
       ]
     },
     {
@@ -724,6 +724,36 @@
       ]
     },
     {
+      "id": "Birds_Eye",
+      "primaryMedia": "Birds_Eye_01.mp4",
+      "allMedia": [
+        "Birds_Eye_01.mp4"
+      ],
+      "type": "video",
+      "title": "Bird's Eye",
+      "description": "A portion of a larger animation which I never got around to finishing. It depicts a hunter's route towards a hackerman infiltrating within a facility.\n\nAll assets and materials made by me, apart from the characters, which were taken from Mixamo.",
+      "tags": [
+        "3D",
+        "Blender",
+        "Animation"
+      ],
+      "featured": true,
+      "date": "2025-01",
+      "link": "",
+      "aspectRatio": null,
+      "gridSpan": "wide",
+      "thumbMedia": "Birds_Eye_01_poster.webp",
+      "modalThumbs": [
+        "Birds_Eye_01_poster.webp"
+      ],
+      "zoomMedia": [
+        null
+      ],
+      "webMedia": [
+        "Birds_Eye_01_web.mp4"
+      ]
+    },
+    {
       "id": "Colleague_Face",
       "primaryMedia": "Colleague_Face_01.png",
       "allMedia": [
@@ -752,7 +782,7 @@
         "Colleague_Face_01.webp",
         "Colleague_Face_02.webp",
         "Colleague_Face_03.webp",
-        null
+        "Colleague_Face_04_poster.webp"
       ],
       "zoomMedia": [
         "Colleague_Face_01_zoom.webp",
@@ -764,7 +794,7 @@
         null,
         null,
         null,
-        null
+        "Colleague_Face_04_web.mp4"
       ]
     },
     {
@@ -881,15 +911,15 @@
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null,
+      "thumbMedia": "CardDisplay_poster.webp",
       "modalThumbs": [
-        null
+        "CardDisplay_poster.webp"
       ],
       "zoomMedia": [
         null
       ],
       "webMedia": [
-        null
+        "CardDisplay_web.mp4"
       ]
     },
     {
@@ -1092,7 +1122,7 @@
       "thumbMedia": "Sword_01.webp",
       "modalThumbs": [
         "Sword_01.webp",
-        null
+        "Sword_02_poster.webp"
       ],
       "zoomMedia": [
         "Sword_01_zoom.webp",
@@ -1100,7 +1130,7 @@
       ],
       "webMedia": [
         null,
-        null
+        "Sword_02_web.mp4"
       ]
     },
     {
@@ -1352,7 +1382,7 @@
         "Pixel_Combat_Sprites_03.webp",
         "Pixel_Combat_Sprites_04.webp",
         "Pixel_Combat_Sprites_05.webp",
-        null,
+        "Pixel_Combat_Sprites_06_poster.webp",
         "Pixel_Combat_Sprites_07.webp"
       ],
       "zoomMedia": [
@@ -1370,7 +1400,7 @@
         null,
         null,
         null,
-        null,
+        "Pixel_Combat_Sprites_06_web.mp4",
         null
       ]
     },
@@ -1463,22 +1493,23 @@
       "description": "My thought with this one was an audio visualizer, The text would have the song title. I don't remember what this placeholder text says now. I don't speak Japanese. My inspiration comes from XS Project's music visualizers in some of his videos (https://www.youtube.com/watch?v=cZYqe9Rv-U4).",
       "tags": [
         "3D",
-        "Blender"
+        "Blender",
+        "Animation"
       ],
       "featured": false,
       "date": "2022-09",
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null,
+      "thumbMedia": "AbstractSeven_poster.webp",
       "modalThumbs": [
-        null
+        "AbstractSeven_poster.webp"
       ],
       "zoomMedia": [
         null
       ],
       "webMedia": [
-        null
+        "AbstractSeven_web.mp4"
       ]
     },
     {
@@ -1492,22 +1523,23 @@
       "description": "Mesmerising seamless swirl of weapons. Inspired by Voician's visuals on one of his megamix videos (https://www.youtube.com/watch?v=P6vC0KazSX4).",
       "tags": [
         "3D",
-        "Blender"
+        "Blender",
+        "Animation"
       ],
       "featured": false,
       "date": "2022-06",
       "link": "",
       "aspectRatio": null,
       "gridSpan": "normal",
-      "thumbMedia": null,
+      "thumbMedia": "AbstractSix_poster.webp",
       "modalThumbs": [
-        null
+        "AbstractSix_poster.webp"
       ],
       "zoomMedia": [
         null
       ],
       "webMedia": [
-        null
+        "AbstractSix_web.mp4"
       ]
     },
     {
@@ -1570,22 +1602,23 @@
       "description": "Insipred by rave visuals. Dizzying shards of glass. \n\nSeamless",
       "tags": [
         "3D",
-        "Blender"
+        "Blender",
+        "Animation"
       ],
       "featured": false,
       "date": "2022-04",
       "link": "",
       "aspectRatio": null,
       "gridSpan": "normal",
-      "thumbMedia": null,
+      "thumbMedia": "AbstractFive_poster.webp",
       "modalThumbs": [
-        null
+        "AbstractFive_poster.webp"
       ],
       "zoomMedia": [
         null
       ],
       "webMedia": [
-        null
+        "AbstractFive_web.mp4"
       ]
     },
     {
@@ -1633,22 +1666,23 @@
       "description": "Insipred by rave visuals. This one would be used during the buildup to a drop.",
       "tags": [
         "3D",
-        "Blender"
+        "Blender",
+        "Animation"
       ],
       "featured": false,
       "date": "2022-02",
       "link": "",
       "aspectRatio": null,
       "gridSpan": "normal",
-      "thumbMedia": null,
+      "thumbMedia": "AbstractOne_poster.webp",
       "modalThumbs": [
-        null
+        "AbstractOne_poster.webp"
       ],
       "zoomMedia": [
         null
       ],
       "webMedia": [
-        null
+        "AbstractOne_web.mp4"
       ]
     },
     {
@@ -1663,25 +1697,26 @@
       "description": "Insipred by rave visuals. A little morbid, but I foresee tessellation with some rave song themes.\n\nThe second one would appear when the leitmotif comes back gnarlier(?)",
       "tags": [
         "3D",
-        "Blender"
+        "Blender",
+        "Animation"
       ],
       "featured": false,
       "date": "2022-02",
       "link": "",
       "aspectRatio": null,
       "gridSpan": "wide",
-      "thumbMedia": null,
+      "thumbMedia": "AbstractThree_01_poster.webp",
       "modalThumbs": [
-        null,
-        null
+        "AbstractThree_01_poster.webp",
+        "AbstractThree_02_poster.webp"
       ],
       "zoomMedia": [
         null,
         null
       ],
       "webMedia": [
-        null,
-        null
+        "AbstractThree_01_web.mp4",
+        "AbstractThree_02_web.mp4"
       ]
     },
     {
@@ -1695,22 +1730,23 @@
       "description": "Insipred by rave visuals.\n\nSeamless",
       "tags": [
         "3D",
-        "Blender"
+        "Blender",
+        "Animation"
       ],
       "featured": false,
       "date": "2022-02",
       "link": "",
       "aspectRatio": null,
       "gridSpan": "normal",
-      "thumbMedia": null,
+      "thumbMedia": "AbstractTwo_poster.webp",
       "modalThumbs": [
-        null
+        "AbstractTwo_poster.webp"
       ],
       "zoomMedia": [
         null
       ],
       "webMedia": [
-        null
+        "AbstractTwo_web.mp4"
       ]
     },
     {

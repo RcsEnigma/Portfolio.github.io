@@ -5,7 +5,7 @@ AbstractCharge
 My thought with this one was an audio visualizer, The text would have the song title. I don't remember what this placeholder text says now. I don't speak Japanese. My inspiration comes from XS Project's music visualizers in some of his videos (https://www.youtube.com/watch?v=cZYqe9Rv-U4).
 
 [tags]
-3D, Blender
+3D, Blender, Animation
 
 [date]
 2022-09

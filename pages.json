@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T12:47:11.194Z",
+  "generated": "2026-11-08T13:34:44.120Z",
   "pages": [
     {
       "slug": "cross-connections",
@@ -142,9 +142,9 @@
             {
               "file": "CardDisplay.mp4",
               "type": "video",
-              "thumb": null,
+              "thumb": "CardDisplay_poster.webp",
               "zoomThumb": null,
-              "webFile": null
+              "webFile": "CardDisplay_web.mp4"
             }
           ],
           "background": "#EDEAE4",

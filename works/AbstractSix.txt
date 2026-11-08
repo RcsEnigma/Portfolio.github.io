@@ -5,7 +5,7 @@ AbstractWeapons
 Mesmerising seamless swirl of weapons. Inspired by Voician's visuals on one of his megamix videos (https://www.youtube.com/watch?v=P6vC0KazSX4).
 
 [tags]
-3D, Blender
+3D, Blender, Animation
 
 [square]
 true

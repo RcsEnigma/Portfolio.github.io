@@ -1,0 +1,16 @@
+[title]
+Bird's Eye
+
+[description]
+A portion of a larger animation which I never got around to finishing. It depicts a hunter's route towards a hackerman infiltrating within a facility.
+
+All assets and materials made by me, apart from the characters, which were taken from Mixamo.
+
+[tags]
+3D, Blender, Animation
+
+[featured]
+true
+
+[date]
+2025-01

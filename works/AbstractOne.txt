@@ -5,7 +5,7 @@ AbstractCharge
 Insipred by rave visuals. This one would be used during the buildup to a drop.
 
 [tags]
-3D, Blender
+3D, Blender, Animation
 
 [square]
 true
