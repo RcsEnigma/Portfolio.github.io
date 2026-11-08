@@ -24,6 +24,17 @@ try { execSync("ffmpeg -version", { stdio:"pipe" }); hasFfmpeg = true; } catch(_
 let hasFfprobe = false;
 try { execSync("ffprobe -version", { stdio:"pipe" }); hasFfprobe = true; } catch(_) {}
 
+// What this machine's ffmpeg is and can do — printed at the start of a run so
+// "it didn't convert my .mkv" is diagnosable at a glance.
+let ffmpegVersionLine = "", hasX264 = true;
+if (hasFfmpeg) {
+  try { ffmpegVersionLine = execSync("ffmpeg -version", { stdio:"pipe" }).toString().split(/\r?\n/)[0]; } catch(_) {}
+  try { hasX264 = /libx264/.test(execSync("ffmpeg -hide_banner -encoders", { stdio:"pipe", maxBuffer: 16*1024*1024 }).toString()); } catch(_) {}
+}
+// Every video that ended up without a poster and/or web-safe copy, with the
+// reason — summarised at the end of the run.
+const videoProblems = [];
+
 // ── Video / size-limit settings ──────────────────────────────
 // GitHub rejects any pushed file over 100 MB; 95 MB leaves headroom.
 const SIZE_LIMIT_BYTES = 95 * 1024 * 1024;
@@ -265,6 +276,24 @@ function ffErr(e) {
   return t.trim().split("\n").slice(-2).join(" | ").slice(0, 220);
 }
 
+// Turn a raw ffmpeg failure into something actionable.
+function ffHint(e, probe) {
+  const t = ((e && e.stderr ? e.stderr.toString() : "") + " " + ((e && e.message) || "")).toLowerCase();
+  const codec = probe && probe.vcodec ? " (" + probe.vcodec + ")" : "";
+  if (/decoder.*not found|unknown decoder|no decoder|decoding.*not supported/.test(t))
+    return "this ffmpeg can't decode the video's codec" + codec + " — update ffmpeg";
+  if (/unknown encoder|libx264/.test(t) && /encoder/.test(t))
+    return "this ffmpeg build has no libx264 encoder — install a full ffmpeg build";
+  if (/moov atom not found|invalid data found|end of file|truncated/.test(t))
+    return "the file looks damaged or incomplete";
+  return "";
+}
+function noteProblem(file, what, e, probe) {
+  const hint = ffHint(e, probe);
+  videoProblems.push({ file, what, why: ffErr(e), hint });
+  return hint ? "  (" + hint + ")" : "";
+}
+
 function runFfmpeg(args) {
   return execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args],
     { stdio: ["ignore", "pipe", "pipe"], maxBuffer: 256 * 1024 * 1024 });
@@ -358,6 +387,14 @@ function makeWebCopy(srcPath, thumbDir, srcFilename, cache, probe) {
   const srcSize = fs.statSync(srcPath).size;
   if (cache[cacheKey] === srcSize && fs.existsSync(outPath)) return outName;
 
+  if (reason !== "metadata at end of file" && !hasX264) {
+    logLine("  web copy skipped for " + srcFilename + ": this ffmpeg build has no libx264 encoder.");
+    videoProblems.push({ file: srcFilename, what: "web copy", why: "no libx264 encoder", hint: "install a full ffmpeg build" });
+    return null;
+  }
+  if (hasFfprobe && !probe) {
+    videoProblems.push({ file: srcFilename, what: "probe", why: "ffprobe couldn't read this file", hint: "the file may be damaged, or ffmpeg is too old for its format" });
+  }
   const remux = reason === "metadata at end of file";
   logLine("  web copy: " + srcFilename + "  (" + reason + (remux ? ", lossless remux" : ", re-encoding") + ")");
   const tmp = outPath + ".tmp";
@@ -380,7 +417,7 @@ function makeWebCopy(srcPath, thumbDir, srcFilename, cache, probe) {
     return outName;
   } catch (e) {
     try { fs.unlinkSync(tmp); } catch (_) {}
-    logLine("  web copy FAILED for " + srcFilename + ": " + ffErr(e));
+    logLine("  web copy FAILED for " + srcFilename + ": " + ffErr(e) + noteProblem(srcFilename, "web copy", e, probe));
     return null;
   }
 }
@@ -396,8 +433,14 @@ function posterCandidateTimes(duration) {
 
 // One decoded frame as a PNG buffer (long side capped at maxPx).
 function grabFrame(srcPath, seconds, maxPx) {
-  return runFfmpeg(["-ss", String(seconds), "-i", srcPath, "-frames:v", "1",
-    "-vf", capScale(maxPx), "-f", "image2pipe", "-vcodec", "png", "pipe:1"]);
+  const tail = ["-frames:v", "1", "-vf", capScale(maxPx), "-f", "image2pipe", "-vcodec", "png", "pipe:1"];
+  try {
+    const fast = runFfmpeg(["-ss", String(seconds), "-i", srcPath, ...tail]);
+    if (fast && fast.length) return fast;
+  } catch (_) {}
+  // Slower but more forgiving (files with a missing/odd seek index, e.g. an
+  // unfinished recording): decode up to the timestamp instead of seeking.
+  return runFfmpeg(["-i", srcPath, "-ss", String(seconds), ...tail]);
 }
 
 // Returns the poster filename (e.g. "myvideo_poster.webp") or null.
@@ -415,10 +458,10 @@ async function makeVideoPoster(srcPath, thumbDir, srcFilename, cache, probe) {
     const outPath = path.join(thumbDir, outName);
     if (cache[cacheKey] === srcSize && fs.existsSync(outPath)) return outName;
     try {
-      let chosen = null, best = null;
+      let chosen = null, best = null, lastErr = null;
       for (const t of posterCandidateTimes(probe ? probe.duration : 0)) {
         let buf;
-        try { buf = grabFrame(srcPath, t, 320); } catch (_) { continue; }
+        try { buf = grabFrame(srcPath, t, 320); } catch (e) { lastErr = e; continue; }
         if (!buf || !buf.length) continue;
         const st = await sharp(buf).stats();
         const ch = st.channels;
@@ -430,7 +473,8 @@ async function makeVideoPoster(srcPath, thumbDir, srcFilename, cache, probe) {
         const score = luma * Math.min(1, sd / POSTER_MIN_STDEV);
         if (!best || score > best.score) best = { t, score };
       }
-      const at = chosen !== null ? chosen : (best ? best.t : 0);
+      if (chosen === null && !best) throw (lastErr || new Error("no frame could be decoded"));
+      const at = chosen !== null ? chosen : best.t;
       const frame = grabFrame(srcPath, at, THUMB_MAX_PX);
       if (!frame || !frame.length) throw new Error("no frame decoded");
       await sharp(frame)
@@ -443,7 +487,7 @@ async function makeVideoPoster(srcPath, thumbDir, srcFilename, cache, probe) {
       cache[cacheKey] = srcSize;
       return outName;
     } catch (e) {
-      logLine("  poster FAILED for " + srcFilename + ": " + ffErr(e));
+      logLine("  poster FAILED for " + srcFilename + ": " + ffErr(e) + noteProblem(srcFilename, "poster", e, probe));
       return null;
     }
   }
@@ -458,7 +502,7 @@ async function makeVideoPoster(srcPath, thumbDir, srcFilename, cache, probe) {
     cache[cacheKey] = srcSize;
     return outName;
   } catch (e) {
-    logLine("  poster FAILED for " + srcFilename + ": " + ffErr(e));
+    logLine("  poster FAILED for " + srcFilename + ": " + ffErr(e) + noteProblem(srcFilename, "poster", e, probe));
     return null;
   }
 }
@@ -982,6 +1026,7 @@ function writeStubs(pages) {
 async function build() {
   // Report thumbnail tool availability
   if (!sharp) console.log("\nNote: sharp not installed — skipping image thumbnails. Run: npm install sharp\n");
+  if (hasFfmpeg) console.log("ffmpeg: " + (ffmpegVersionLine || "found") + (hasFfprobe ? "" : "  (no ffprobe)") + (hasX264 ? "" : "  (NO libx264 encoder)") + "\n");
   if (!hasFfmpeg) console.log("Note: ffmpeg not found — skipping video poster frames and web-safe video copies.\n");
   else if (!hasFfprobe) console.log("Note: ffprobe not found (it normally ships with ffmpeg) — videos will only be converted by container, not by codec.\n");
 
@@ -1028,6 +1073,12 @@ async function build() {
   const webCopies = manifestFull.works.reduce((n, e) => n + (e.webMedia || []).filter(Boolean).length, 0);
   if (webCopies) console.log("\n" + webCopies + " video(s) in works/ have a web-safe copy in works/thumbs/ (served instead of the original).");
   warnLargeFiles();
+  if (videoProblems.length) {
+    console.log("\nVideos with problems (they will be retried on the next run):");
+    for (const pr of videoProblems)
+      console.log("  " + pr.file + "  [" + pr.what + "]  " + pr.why + (pr.hint ? "\n      -> " + pr.hint : ""));
+    console.log("\nIf several of these mention a missing decoder/encoder, update ffmpeg and re-run.");
+  }
   console.log("");
 }
 
