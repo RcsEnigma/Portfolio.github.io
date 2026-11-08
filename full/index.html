@@ -174,6 +174,7 @@ body {
 .carousel-dot.active::after {
   animation: carousel-progress 5s linear forwards;
 }
+#carousel-dots.is-paused .carousel-dot.active::after { animation-play-state: paused; }
 @keyframes carousel-progress {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
@@ -447,6 +448,49 @@ body {
   pointer-events: none; z-index: 301; transition: opacity 0.6s ease;
 }
 
+/* Prev/next arrows inside the zoom overlay (browse the work's attached media) */
+.zoom-arrow {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8); width: 38px; height: 38px;
+  border-radius: 50%; cursor: pointer; font-size: 1.2rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 301; transition: background 0.2s;
+}
+.zoom-arrow:hover { background: rgba(255,255,255,0.1); }
+.zoom-arrow.is-hidden { display: none; }
+#zoom-prev { left: 1rem; }
+#zoom-next { right: 1rem; }
+/* Video shown in place of the pan/zoom canvas when zoom steps onto a video */
+#zoom-video {
+  position: absolute; inset: 0; display: none;
+  align-items: center; justify-content: center; pointer-events: none;
+}
+#zoom-video.open { display: flex; }
+#zoom-video video { max-width: 100%; max-height: 100%; background: #000; pointer-events: auto; }
+
+/* ── Post-to-post navigation (newer / older work, follows active filters) ─
+   Wide screens: tall rectangular buttons just outside the modal card.
+   Narrower screens + phones: small rectangles in the top bar, next to ZOOM and X. */
+.post-nav-hidden { display: none !important; }
+.post-nav-side {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  width: 38px; height: 76px; border-radius: var(--radius);
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  color: var(--muted); font-size: 1.5rem; line-height: 1; cursor: pointer;
+  display: none; align-items: center; justify-content: center;
+  transition: all 0.2s; z-index: 201;
+}
+.post-nav-side:hover { background: rgba(255,255,255,0.1); color: var(--text); border-color: var(--muted); }
+#post-side-prev { left: max(0.5rem, calc(50% - 590px)); }
+#post-side-next { right: max(0.5rem, calc(50% - 590px)); }
+#modal-topbar .mbtn.mbtn-post {
+  width: 22px; height: 28px; padding: 0; font-size: 1.05rem;
+  display: none; align-items: center; justify-content: center; text-transform: none;
+}
+@media (min-width: 1181px) { .post-nav-side { display: flex; } }
+@media (max-width: 1180px) { #modal-topbar .mbtn.mbtn-post { display: flex; } }
+
 /* ── Static pages ─────────────────────────────────────────── */
 .static-page { display: none; max-width: 680px; margin: 6rem auto; padding: 0 2.5rem; }
 .static-page.active { display: block; }
@@ -534,6 +578,9 @@ footer span {
   #modal-prev { left: 0.3rem; }
   #modal-next { right: 0.3rem; }
   .modal-arrow { width: 32px; height: 32px; font-size: 1rem; }
+  .zoom-arrow { width: 34px; height: 34px; font-size: 1.1rem; }
+  #zoom-prev { left: 0.5rem; }
+  #zoom-next { right: 0.5rem; }
   #modal-info-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); flex: 1; }
   .mbtn:not(.mbtn-icon) { padding: 0.22rem 0.48rem; font-size: 0.58rem; }
 
@@ -609,11 +656,21 @@ footer span {
 
 <!-- ── MODAL — two-column card ───────────────────────────────── -->
 <div id="modal-overlay" onclick="handleOverlayClick(event)">
+  <button class="post-nav-side post-nav-hidden" id="post-side-prev" data-post-dir="-1"
+          title="Newer post (↑)" aria-label="Newer post"
+          onclick="event.stopPropagation(); stepPost(-1)">&#8249;</button>
+  <button class="post-nav-side post-nav-hidden" id="post-side-next" data-post-dir="1"
+          title="Older post (↓)" aria-label="Older post"
+          onclick="event.stopPropagation(); stepPost(1)">&#8250;</button>
   <div id="modal-inner" onclick="event.stopPropagation()">
 
     <div id="modal-topbar">
       <span id="modal-title-display"></span>
       <div id="modal-topbar-actions">
+        <button class="mbtn mbtn-post post-nav-hidden" data-post-dir="-1"
+                title="Newer post (↑)" aria-label="Newer post" onclick="stepPost(-1)">&#8249;</button>
+        <button class="mbtn mbtn-post post-nav-hidden" data-post-dir="1"
+                title="Older post (↓)" aria-label="Older post" onclick="stepPost(1)">&#8250;</button>
         <button class="mbtn" id="modal-zoom-btn" onclick="openZoom()">Zoom</button>
         <button class="mbtn mbtn-icon" onclick="closeModal()">&#x2715;</button>
       </div>
@@ -644,7 +701,10 @@ footer span {
 <div id="zoom-overlay">
   <button id="zoom-close-btn" onclick="closeZoom()">&#x2715;</button>
   <div id="zoom-canvas"></div>
-  <div id="zoom-hint">Scroll to zoom &nbsp;&middot;&nbsp; Drag to pan &nbsp;&middot;&nbsp; Esc to close</div>
+  <div id="zoom-video"></div>
+  <button class="zoom-arrow is-hidden" id="zoom-prev" aria-label="Previous image" onclick="stepZoom(-1)">&#8249;</button>
+  <button class="zoom-arrow is-hidden" id="zoom-next" aria-label="Next image" onclick="stepZoom(1)">&#8250;</button>
+  <div id="zoom-hint"></div>
 </div>
 
 <!-- ── FOOTER ────────────────────────────────────────────────── -->
@@ -662,6 +722,7 @@ let pagesData        = { pages: [] };
 let activeFilters    = new Set(["all"]);
 let carouselIndex    = 0;
 let carouselTimer    = null;
+let carouselPaused   = false;   // true while the work modal is open
 let modalWork        = null;
 let modalMediaIndex  = 0;
 let currentSlot      = 'a';
@@ -872,7 +933,7 @@ function buildCarousel() {
   };
 
   clearInterval(carouselTimer);
-  if (slides.length > 1)
+  if (slides.length > 1 && !carouselPaused)
     carouselTimer = setInterval(() => goCarousel((carouselIndex + 1) % slides.length), 5000);
 }
 
@@ -882,8 +943,22 @@ function goCarousel(idx) {
   carouselIndex = idx;
   clearInterval(carouselTimer);
   const total = document.querySelectorAll(".carousel-slide").length;
-  if (total > 1)
+  if (total > 1 && !carouselPaused)
     carouselTimer = setInterval(() => goCarousel((carouselIndex + 1) % total), 5000);
+}
+
+// Hero autoplay is frozen while a work is open so the slide behind the modal
+// doesn't wander off; it restarts (from the same slide) when the modal closes.
+function pauseCarousel() {
+  carouselPaused = true;
+  clearInterval(carouselTimer);
+  document.getElementById("carousel-dots")?.classList.add("is-paused");
+}
+function resumeCarousel() {
+  if (!carouselPaused) return;
+  carouselPaused = false;
+  document.getElementById("carousel-dots")?.classList.remove("is-paused");
+  goCarousel(carouselIndex);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -950,7 +1025,12 @@ function buildGrid() {
 //  MODAL
 // ═══════════════════════════════════════════════════════════════
 function openModal(work) {
+  // Stepping between posts re-uses this function while the modal is already
+  // open — in that case the existing history entry is kept (no extra push).
+  const alreadyOpen = document.getElementById("modal-overlay").classList.contains("open");
   modalWork = work; modalMediaIndex = 0; currentSlot = 'a';
+  pauseCarousel();
+  document.getElementById("modal-info-panel").scrollTop = 0;
 
   ["a","b"].forEach(id => {
     const s = document.getElementById("modal-slot-" + id);
@@ -969,6 +1049,7 @@ function openModal(work) {
   else lnk.style.display = "none";
 
   buildModalDots(work);
+  updatePostNav();
   const multi = work.allMedia?.length > 1;
   document.getElementById("modal-prev").style.display = multi ? "" : "none";
   document.getElementById("modal-next").style.display = multi ? "" : "none";
@@ -980,7 +1061,48 @@ function openModal(work) {
 
   document.getElementById("modal-overlay").classList.add("open");
   document.body.style.overflow = "hidden";
-  history.pushState({ _portfolio: "modal" }, "");
+  if (!alreadyOpen) history.pushState({ _portfolio: "modal" }, "");
+}
+
+// ── Post-to-post navigation ──────────────────────────────────────
+// "Previous" (-1) = newer work, "next" (+1) = older work, matching the grid's
+// top-left → bottom-right order. The list follows whatever filters are active,
+// so with "3D" selected you only step through 3D work. If the open work isn't
+// in the filtered list (e.g. opened from the hero), the full list is used.
+// Set POST_NAV_WRAP = false to stop at the first/last work instead of looping.
+const POST_NAV_WRAP = true;
+
+function getPostNavList() {
+  const all = manifest?.works || [];
+  const filtered = activeFilters.has("all")
+    ? all
+    : all.filter(w => [...activeFilters].every(t => w.tags.includes(t)));
+  return filtered.includes(modalWork) ? filtered : all;
+}
+
+function updatePostNav() {
+  const list = getPostNavList();
+  const show = list.length > 1;
+  const idx  = list.indexOf(modalWork);
+  document.querySelectorAll("[data-post-dir]").forEach(b => {
+    const dir = Number(b.dataset.postDir);
+    b.classList.toggle("post-nav-hidden", !show);
+    const atEdge = !POST_NAV_WRAP && (idx + dir < 0 || idx + dir >= list.length);
+    b.disabled = atEdge;
+    b.style.opacity = atEdge ? "0.3" : "";
+  });
+}
+
+function stepPost(dir) {
+  if (!modalWork) return;
+  const list = getPostNavList();
+  if (list.length <= 1) return;
+  let i = list.indexOf(modalWork) + dir;
+  if (i < 0 || i >= list.length) {
+    if (!POST_NAV_WRAP) return;
+    i = (i + list.length) % list.length;
+  }
+  openModal(list[i]);
 }
 
 function buildModalDots(work) {
@@ -1157,38 +1279,112 @@ function _zoomAt(cx, cy, factor) {
   _zoomApply();
 }
 
-function openZoom() {
-  if (!modalWork) return;
-  const src = modalWork.allMedia?.[modalMediaIndex];
-  if (!src) return;
-  if ((getMediaType(src) || modalWork.type) !== "image") return;
+// Zoom browses the open work's attached media (modalWork.allMedia). Stepping
+// onto a video shows it fitted to the screen (no pan/zoom). The modal behind
+// is brought up to date when zoom closes, so closing lands on the item that
+// was being viewed.
+let _zoomStepped = false, _zoomIsVideo = false, _zoomToken = 0;
 
-  // The zoom-tier image (generated by generate-manifest.js, "<name>_zoom.webp")
+function _zoomMultiCount() { return modalWork?.allMedia?.length || 0; }
+
+function _zoomSetHint() {
+  const bits = [];
+  if (!_zoomIsVideo) bits.push("Scroll to zoom", "Drag to pan");
+  if (_zoomMultiCount() > 1) bits.push("\u2190 \u2192 to browse");
+  bits.push("Esc to close");
+  const hint = document.getElementById("zoom-hint");
+  hint.textContent = bits.join(" \u00b7 ");
+  hint.style.opacity = "1";
+  clearTimeout(hint._t);
+  hint._t = setTimeout(() => { hint.style.opacity = "0"; }, 2200);
+}
+
+function _zoomClearVideo() {
+  const box = document.getElementById("zoom-video");
+  box.querySelectorAll("video").forEach(v => { v.pause(); v.removeAttribute("src"); v.load(); });
+  box.innerHTML = ""; box.classList.remove("open");
+}
+
+function showZoomItem(i) {
+  const src = modalWork?.allMedia?.[i];
+  if (!src) return;
+  const type = getMediaType(src) || modalWork.type;
+  const canvas = document.getElementById("zoom-canvas");
+  const ov = document.getElementById("zoom-overlay");
+  const token = ++_zoomToken;
+
+  _zoomClearVideo();
+  canvas.innerHTML = "";
+
+  // Reset state AND apply it immediately — before the new image starts
+  // loading — so the canvas always starts from a clean identity transform.
+  // (A new image could otherwise land in a canvas still sitting at whatever
+  // scale/position the last zoom session left behind, forcing the browser to
+  // composite a hugely inflated layer the instant it was inserted.)
+  _zoomScale = 1; _zoomFitScale = 1; _zoomX = 0; _zoomY = 0;
+  _zoomApply();
+
+  if (type !== "image") {
+    _zoomIsVideo = true;
+    ov.style.cursor = "default";
+    const v = makeVideo("/works/" + src);
+    document.getElementById("zoom-video").appendChild(v);
+    document.getElementById("zoom-video").classList.add("open");
+    v.play().catch(() => {});
+    _zoomSetHint();
+    return;
+  }
+
+  _zoomIsVideo = false;
+  ov.style.cursor = "";
+
+  // The zoom-tier image (generated by generate-manifest.js, "<n>_zoom.webp")
   // is size-capped so it can't overrun a phone's GPU texture/compositor limit
   // (see ZOOM_MAX_PX comment in generate-manifest.js). Desktops/laptops have
   // far more memory headroom, so give those the true full-resolution original
   // instead — isLikelyDesktop() is a heuristic, not a hardware benchmark (see
   // its definition above). Falls back to the full original on phones too if
   // no zoom-tier asset exists (e.g. sharp wasn't installed at build time).
-  const activeSlot = document.getElementById("modal-slot-" + currentSlot);
-  const slotImg = activeSlot?.querySelector("img");
-  const fullUrl = slotImg?.dataset?.origSrc || ("/works/" + src);
-  const zoomFile = modalWork.zoomMedia?.[modalMediaIndex];
+  const fullUrl = "/works/" + src;
+  const zoomFile = modalWork.zoomMedia?.[i];
   const cappedUrl = zoomFile ? "/works/thumbs/" + zoomFile : fullUrl;
   const origUrl = isLikelyDesktop() ? fullUrl : cappedUrl;
 
-  const canvas = document.getElementById("zoom-canvas");
-  canvas.innerHTML = "";
+  const img = new Image();
+  img.draggable = false;
+  img.style.opacity = "0"; // hidden until sized, so there's no unscaled top-left flash
+  img.onload = () => {
+    if (token !== _zoomToken) return; // viewer already stepped elsewhere
+    const fw = window.innerWidth  / img.naturalWidth;
+    const fh = window.innerHeight / img.naturalHeight;
+    _zoomFitScale = Math.min(fw, fh);
+    _zoomScale    = _zoomFitScale;
+    _zoomX = (window.innerWidth  - img.naturalWidth  * _zoomScale) / 2;
+    _zoomY = (window.innerHeight - img.naturalHeight * _zoomScale) / 2;
+    _zoomApply();
+    img.style.opacity = "1";
+  };
+  img.src = origUrl;
+  canvas.appendChild(img);
+  _zoomSetHint();
+}
 
-  // Reset state AND apply it immediately — before the new image starts
-  // loading — so the canvas always starts from a clean identity transform.
-  // Previously only the variables were reset here, not the actual CSS
-  // transform, so a new image could land in a canvas still sitting at
-  // whatever scale/position the last zoom session left behind (e.g.
-  // scale(8) off in a corner), forcing the browser to composite a hugely
-  // inflated layer the instant it was inserted.
-  _zoomScale = 1; _zoomFitScale = 1; _zoomX = 0; _zoomY = 0;
-  _zoomApply();
+function stepZoom(dir) {
+  const n = _zoomMultiCount();
+  if (!modalWork || n <= 1) return;
+  modalMediaIndex = (modalMediaIndex + dir + n) % n;
+  _zoomStepped = true;
+  updateModalDots();          // dots + ZOOM button follow along
+  showZoomItem(modalMediaIndex);
+}
+
+function openZoom() {
+  if (!modalWork) return;
+  const src = modalWork.allMedia?.[modalMediaIndex];
+  if (!src) return;
+  if ((getMediaType(src) || modalWork.type) !== "image") return;
+
+  _zoomStepped = false;
 
   // Blank ALL grid thumbnails AND modal images before loading the zoom image.
   // Grid thumbnails load fast and many stay decoded in GPU simultaneously;
@@ -1202,34 +1398,20 @@ function openZoom() {
   // Without this, iOS intercepts two-finger touches as a page-zoom gesture
   // instead of delivering them to our touchmove handler.
   const _vp = document.querySelector("meta[name=viewport]");
-  if (_vp) { _vp.dataset.savedContent = _vp.content; _vp.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"; }
+  if (_vp && !_vp.dataset.savedContent) { _vp.dataset.savedContent = _vp.content; _vp.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"; }
 
-  const img = new Image();
-  img.draggable = false;
-  img.style.opacity = "0"; // hidden until sized, so there's no unscaled top-left flash
-  img.onload = () => {
-    const fw = window.innerWidth  / img.naturalWidth;
-    const fh = window.innerHeight / img.naturalHeight;
-    _zoomFitScale = Math.min(fw, fh);
-    _zoomScale    = _zoomFitScale;
-    _zoomX = (window.innerWidth  - img.naturalWidth  * _zoomScale) / 2;
-    _zoomY = (window.innerHeight - img.naturalHeight * _zoomScale) / 2;
-    _zoomApply();
-    img.style.opacity = "1";
-  };
-  img.src = origUrl;
-  canvas.appendChild(img);
+  const multi = _zoomMultiCount() > 1;
+  document.getElementById("zoom-prev").classList.toggle("is-hidden", !multi);
+  document.getElementById("zoom-next").classList.toggle("is-hidden", !multi);
 
   document.getElementById("zoom-overlay").classList.add("open");
-
-  const hint = document.getElementById("zoom-hint");
-  hint.style.opacity = "1";
-  clearTimeout(hint._t);
-  hint._t = setTimeout(() => { hint.style.opacity = "0"; }, 2200);
+  showZoomItem(modalMediaIndex);
 }
 
 function closeZoom() {
   document.getElementById("zoom-overlay").classList.remove("open");
+  _zoomToken++;               // cancel any in-flight image load
+  _zoomClearVideo();
   document.getElementById("zoom-canvas").innerHTML = "";
   // Restore all blanked images from browser cache.
   document.querySelectorAll(".modal-slot img, .grid-item img").forEach(img => {
@@ -1244,6 +1426,9 @@ function closeZoom() {
     _vp.content = _vp.dataset.savedContent;
     delete _vp.dataset.savedContent;
   }
+  // If the viewer browsed to another item in zoom, bring the modal up to date.
+  if (_zoomStepped && modalWork) renderModalMedia();
+  _zoomStepped = false;
 }
 
 // Scroll-wheel zoom anchored to cursor
@@ -1274,14 +1459,32 @@ window.addEventListener("mouseup", () => {
   if (ov.classList.contains("open")) ov.style.cursor = "crosshair";
 });
 
-// Pinch-zoom + touch-drag
+// Pinch-zoom + touch-drag. Swipe left/right browses the work's media, but only
+// when the image is fully zoomed out (otherwise a one-finger drag pans), and
+// never over a video (its scrub bar needs horizontal drags).
+let _zoomSwipeSX = 0, _zoomSwipeSY = 0, _zoomSwipeOK = false, _zoomMulti = false;
+function _zoomAtFit() { return _zoomScale <= _zoomFitScale * 1.01; }
+
+// Keep arrow presses from starting a pan / pinch / swipe on the overlay
+["zoom-prev", "zoom-next"].forEach(id => {
+  const b = document.getElementById(id);
+  b.addEventListener("mousedown", e => e.stopPropagation());
+  b.addEventListener("touchstart", e => e.stopPropagation(), { passive: true });
+  b.addEventListener("touchend", e => e.stopPropagation(), { passive: true });
+  b.addEventListener("wheel", e => e.stopPropagation());
+});
+
 document.getElementById("zoom-overlay").addEventListener("touchstart", e => {
   if (e.touches.length === 2) {
+    _zoomMulti = true; _zoomSwipeOK = false;
     _zoomDragging = false;
     _zoomPinchDist = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY);
   } else if (e.touches.length === 1) {
+    _zoomMulti = false;
+    _zoomSwipeOK = !_zoomIsVideo && _zoomMultiCount() > 1 && _zoomAtFit();
+    _zoomSwipeSX = e.touches[0].clientX; _zoomSwipeSY = e.touches[0].clientY;
     _zoomDragging = true;
     _zoomDragSX = e.touches[0].clientX; _zoomDragSY = e.touches[0].clientY;
     _zoomOX = _zoomX; _zoomOY = _zoomY;
@@ -1304,8 +1507,16 @@ document.getElementById("zoom-overlay").addEventListener("touchmove", e => {
     _zoomApply();
   }
 }, { passive: false });
-document.getElementById("zoom-overlay").addEventListener("touchend", () => {
+document.getElementById("zoom-overlay").addEventListener("touchend", e => {
   _zoomDragging = false; _zoomPinchDist = 0;
+  if (e.touches.length === 0) {
+    if (_zoomSwipeOK && !_zoomMulti && e.changedTouches.length === 1 && _zoomAtFit()) {
+      const dx = e.changedTouches[0].clientX - _zoomSwipeSX;
+      const dy = e.changedTouches[0].clientY - _zoomSwipeSY;
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) stepZoom(dx < 0 ? 1 : -1);
+    }
+    _zoomSwipeOK = false; _zoomMulti = false;
+  }
 }, { passive: true });
 
 function closeModal() {
@@ -1314,6 +1525,7 @@ function closeModal() {
   document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
   document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
   modalWork = null;
+  resumeCarousel();
   if (history.state?._portfolio === "modal") history.back();
 }
 
@@ -1330,17 +1542,23 @@ window.addEventListener("popstate", () => {
     document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
     document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
     modalWork = null;
+    resumeCarousel();
   }
 });
 
 document.addEventListener("keydown", e => {
   if (document.getElementById("zoom-overlay").classList.contains("open")) {
     if (e.key === "Escape") closeZoom();
+    else if (e.key === "ArrowLeft")  { e.preventDefault(); stepZoom(-1); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); stepZoom(1); }
     return;
   }
   if (e.key === "Escape") closeModal();
+  // ←/→ move within the open work's media; ↑/↓ move between works
   if (e.key === "ArrowLeft"  && modalWork) stepMedia(-1);
   if (e.key === "ArrowRight" && modalWork) stepMedia(1);
+  if (e.key === "ArrowUp"    && modalWork) { e.preventDefault(); stepPost(-1); }
+  if (e.key === "ArrowDown"  && modalWork) { e.preventDefault(); stepPost(1); }
   if ((e.key === "z" || e.key === "Z") && modalWork) openZoom();
 });
 

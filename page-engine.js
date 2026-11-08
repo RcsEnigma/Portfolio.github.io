@@ -8,6 +8,18 @@
   const SLUG = window.PAGE_SLUG;
   let pagesData = null;
 
+  // ── Platform flag ────────────────────────────────────────────────
+  // Android Chrome fights the game-embed scroll-snap (see injected CSS
+  // below), so Android gets a class that switches snapping off. Checks both
+  // the legacy UA string and Client Hints. Note: Chrome's "Request desktop
+  // site" mode hides "Android" from the UA, so snapping returns in that mode.
+  ;(function flagPlatform() {
+    const ua = navigator.userAgent || "";
+    const hint = navigator.userAgentData && navigator.userAgentData.platform;
+    if (/Android/i.test(ua) || hint === "Android")
+      document.documentElement.classList.add("is-android");
+  })();
+
   // ── Critical styles injected at boot ────────────────────────────
   // Lives here rather than page-widgets.css so a stale CDN-cached
   // stylesheet can never break these features.
@@ -54,6 +66,8 @@
         "animation:wcd-fill 5s linear forwards;" +
       "}" +
       "@keyframes wcd-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}" +
+      // Frozen while the zoom overlay is open
+      ".w-carousel.is-paused .w-carousel-dot.active::after{animation-play-state:paused;}" +
 
       // Carousel controls row
       ".w-carousel-controls{" +
@@ -78,6 +92,9 @@
       // instead.
       "html{scroll-snap-type:y proximity;}" +
       ".w-game-embed-bleed{scroll-snap-align:center;}" +
+      // Android: no snapping at all
+      "html.is-android{scroll-snap-type:none!important;}" +
+      ".is-android .w-game-embed-bleed{scroll-snap-align:none!important;}" +
       // Two-layer structure on purpose: .w-game-embed-bleed does ONLY the
       // viewport breakout (must stay in pure vw units — left:50% +
       // margin:-50vw is the scrollbar-safe version of this trick; mixing
@@ -146,6 +163,31 @@
         "z-index:10000;transition:background .2s;" +
       "}" +
       "#page-zoom-close:hover{background:rgba(255,255,255,.1);}" +
+      // Prev/next arrows (only shown when the widget has more than one media item)
+      ".page-zoom-arrow{" +
+        "position:fixed;top:50%;transform:translateY(-50%);" +
+        "background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);" +
+        "color:rgba(255,255,255,.8);width:38px;height:38px;" +
+        "border-radius:50%;cursor:pointer;font-size:1.2rem;line-height:1;" +
+        "display:flex;align-items:center;justify-content:center;" +
+        "z-index:10000;transition:background .2s;" +
+      "}" +
+      ".page-zoom-arrow:hover{background:rgba(255,255,255,.1);}" +
+      ".page-zoom-arrow.is-hidden{display:none;}" +
+      "#page-zoom-prev{left:1rem;}#page-zoom-next{right:1rem;}" +
+      "@media (max-width:640px){" +
+        ".page-zoom-arrow{width:34px;height:34px;font-size:1.1rem;}" +
+        "#page-zoom-prev{left:.5rem;}#page-zoom-next{right:.5rem;}" +
+      "}" +
+      // Video shown in place of the pan/zoom canvas when stepping onto a video
+      "#page-zoom-video{" +
+        "position:absolute;inset:0;display:none;align-items:center;justify-content:center;" +
+        "pointer-events:none;" +
+      "}" +
+      "#page-zoom-video.open{display:flex;}" +
+      "#page-zoom-video video{" +
+        "max-width:100%;max-height:100%;background:#000;pointer-events:auto;" +
+      "}" +
       "#page-zoom-hint{" +
         "position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);" +
         "font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;" +
@@ -259,6 +301,7 @@
     if (item.type === "video") {
       const v = document.createElement("video");
       v.src = origUrl;
+      if (!opts.noGroup) v.dataset.pz = "1"; // member of its widget's zoom set
       v.muted = true; v.loop = true; v.playsInline = true;
       v.controls = !!opts.controls;
       v.controlsList = "nodownload nofullscreen";
@@ -279,9 +322,10 @@
     img.src = thumbUrl || origUrl;
     img.dataset.orig = zoomUrl;
     img.dataset.origFull = origUrl;
+    if (!opts.noGroup) img.dataset.pz = "1"; // member of its widget's zoom set
     if (!opts.noZoom) {
       img.style.cursor = "zoom-in";
-      img.onclick = () => openZoom(zoomUrl, origUrl);
+      img.onclick = () => openZoom(zoomUrl, origUrl, img);
     }
     return img;
   }
@@ -442,7 +486,7 @@
 
     const posterItem = w.media && w.media[0];
     if (posterItem) {
-      const img = buildMediaEl(slug, posterItem, { noZoom: true });
+      const img = buildMediaEl(slug, posterItem, { noZoom: true, noGroup: true });
       if (img) poster.appendChild(img);
     }
 
@@ -500,7 +544,7 @@
 
     const items = w.media;
     const N = items.length;
-    let active = 0, timer = null;
+    let active = 0, timer = null, paused = false;
 
     // cx     = centre of item as % of stage width
     // scale  = CSS scale() applied via transform (1.0 = full size, fills the 44% box)
@@ -587,7 +631,7 @@
             img.style.cursor    = "zoom-in";
             // dataset.orig/origFull are set by buildMediaEl; openZoom picks
             // between them based on isLikelyDesktop()
-            img.onclick = e => { e.stopPropagation(); openZoom(img.dataset.orig || img.src, img.dataset.origFull || img.src); };
+            img.onclick = e => { e.stopPropagation(); openZoom(img.dataset.orig || img.src, img.dataset.origFull || img.src, img); };
           }
           const vid = el.querySelector("video");
           if (vid) {
@@ -653,8 +697,16 @@
       });
 
       clearInterval(timer);
-      if (N > 1) timer = setInterval(() => go(active + 1), 5000);
+      if (N > 1 && !paused) timer = setInterval(() => go(active + 1), 5000);
     }
+
+    // Used by the zoom overlay: autoplay stays frozen while zoom is open,
+    // then restarts from whichever slide the viewer ended on.
+    wrap._carousel = {
+      go: n => go(n),
+      pause() { paused = true; clearInterval(timer); wrap.classList.add("is-paused"); },
+      resume() { paused = false; wrap.classList.remove("is-paused"); go(active); },
+    };
 
     // Pause/resume center video when widget scrolls in/out of view
     const obs = new IntersectionObserver(entries => {
@@ -693,6 +745,13 @@
   let _pzDrag = false, _pzDragSX = 0, _pzDragSY = 0, _pzOX = 0, _pzOY = 0;
   let _pzPinchDist = 0;
   const PZ_MAX = 12;
+  // Zoom set = every [data-pz] media element inside the same widget as the
+  // one that was clicked (each widget is its own "post"; zoom never jumps
+  // between widgets).
+  let _pzGroup = [], _pzIndex = 0, _pzToken = 0;
+  let _pzIsVideo = false, _pzVideoBox = null, _pzPrev = null, _pzNext = null;
+  let _pzSwipeSX = 0, _pzSwipeSY = 0, _pzSwipeOK = false, _pzMulti = false;
+  let _pzCarousel = null;
 
   // See the matching comment in index.html — same heuristic, duplicated
   // here since subpages don't share a script context with the main page.
@@ -737,12 +796,35 @@
     _pzCanvas = document.createElement("div");
     _pzCanvas.id = "page-zoom-canvas";
 
+    _pzVideoBox = document.createElement("div");
+    _pzVideoBox.id = "page-zoom-video";
+
+    _pzPrev = document.createElement("button");
+    _pzPrev.id = "page-zoom-prev"; _pzPrev.className = "page-zoom-arrow is-hidden";
+    _pzPrev.innerHTML = "&#8249;"; _pzPrev.setAttribute("aria-label", "Previous");
+    _pzPrev.onclick = () => stepZoom(-1);
+
+    _pzNext = document.createElement("button");
+    _pzNext.id = "page-zoom-next"; _pzNext.className = "page-zoom-arrow is-hidden";
+    _pzNext.innerHTML = "&#8250;"; _pzNext.setAttribute("aria-label", "Next");
+    _pzNext.onclick = () => stepZoom(1);
+
+    // Keep arrow presses from starting a pan / pinch / swipe on the overlay
+    [_pzPrev, _pzNext].forEach(b => {
+      b.addEventListener("mousedown", e => e.stopPropagation());
+      b.addEventListener("touchstart", e => e.stopPropagation(), { passive: true });
+      b.addEventListener("touchend", e => e.stopPropagation(), { passive: true });
+      b.addEventListener("wheel", e => e.stopPropagation());
+    });
+
     _pzHint = document.createElement("div");
     _pzHint.id = "page-zoom-hint";
-    _pzHint.textContent = "Scroll to zoom \u00b7 Drag to pan \u00b7 Esc to close";
 
     _pzOverlay.appendChild(btn);
     _pzOverlay.appendChild(_pzCanvas);
+    _pzOverlay.appendChild(_pzVideoBox);
+    _pzOverlay.appendChild(_pzPrev);
+    _pzOverlay.appendChild(_pzNext);
     _pzOverlay.appendChild(_pzHint);
     document.body.appendChild(_pzOverlay);
 
@@ -773,9 +855,15 @@
     // Pinch + touch-drag
     _pzOverlay.addEventListener("touchstart", e => {
       if (e.touches.length === 2) {
+        _pzMulti = true; _pzSwipeOK = false;
         _pzDrag = false;
         _pzPinchDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
       } else if (e.touches.length === 1) {
+        _pzMulti = false;
+        // Swipe-to-browse only when fully zoomed out (otherwise one-finger drag pans),
+        // and never over a video (its scrub bar needs horizontal drags).
+        _pzSwipeOK = !_pzIsVideo && _pzGroup.length > 1 && _pzAtFit();
+        _pzSwipeSX = e.touches[0].clientX; _pzSwipeSY = e.touches[0].clientY;
         _pzDrag = true;
         _pzDragSX = e.touches[0].clientX; _pzDragSY = e.touches[0].clientY;
         _pzOX = _pzX; _pzOY = _pzY;
@@ -795,61 +883,164 @@
         _pzClamp(); _pzApply();
       }
     }, { passive: false });
-    _pzOverlay.addEventListener("touchend", () => { _pzDrag = false; _pzPinchDist = 0; }, { passive: true });
+    _pzOverlay.addEventListener("touchend", e => {
+      _pzDrag = false; _pzPinchDist = 0;
+      if (e.touches.length === 0) {
+        if (_pzSwipeOK && !_pzMulti && e.changedTouches.length === 1 && _pzAtFit()) {
+          const dx = e.changedTouches[0].clientX - _pzSwipeSX;
+          const dy = e.changedTouches[0].clientY - _pzSwipeSY;
+          if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) stepZoom(dx < 0 ? 1 : -1);
+        }
+        _pzSwipeOK = false; _pzMulti = false;
+      }
+    }, { passive: true });
 
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape" && _pzOverlay.classList.contains("open")) closeZoom();
+      if (!_pzOverlay.classList.contains("open")) return;
+      if (e.key === "Escape") closeZoom();
+      else if (e.key === "ArrowLeft")  { e.preventDefault(); stepZoom(-1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); stepZoom(1); }
     });
   }
 
-  function openZoom(cappedSrc, fullSrc) {
-    initZoom();
+  function _pzAtFit() { return _pzScale <= _pzFitScale * 1.01; }
+
+  function _pzSetHint() {
+    const multi = _pzGroup.length > 1;
+    const bits = [];
+    if (!_pzIsVideo) bits.push("Scroll to zoom", "Drag to pan");
+    if (multi) bits.push("\u2190 \u2192 to browse");
+    bits.push("Esc to close");
+    _pzHint.textContent = bits.join(" \u00b7 ");
+    _pzHint.style.opacity = "1";
+    clearTimeout(_pzHint._t);
+    _pzHint._t = setTimeout(() => { _pzHint.style.opacity = "0"; }, 2200);
+  }
+
+  // Build the zoom set for the clicked element: all [data-pz] media in the
+  // same widget, in DOM order (for the carousel that's slide order).
+  function _pzBuildGroup(srcEl) {
+    _pzGroup = []; _pzIndex = 0; _pzCarousel = null;
+    const widget = srcEl && srcEl.closest ? srcEl.closest(".widget") : null;
+    if (!widget) return;
+    _pzGroup = Array.from(widget.querySelectorAll("[data-pz]"));
+    _pzIndex = Math.max(0, _pzGroup.indexOf(srcEl));
+    const car = widget.querySelector(".w-carousel");
+    if (car && car._carousel) _pzCarousel = car._carousel;
+  }
+
+  function _pzShowItem(i) {
+    const el = _pzGroup[i];
+    const token = ++_pzToken;
+
+    // Clear whatever was showing
+    _pzVideoBox.querySelectorAll("video").forEach(v => { v.pause(); v.removeAttribute("src"); v.load(); });
+    _pzVideoBox.innerHTML = ""; _pzVideoBox.classList.remove("open");
     _pzCanvas.innerHTML = "";
     _pzScale = 1; _pzFitScale = 1; _pzX = 0; _pzY = 0;
     _pzApply();
 
-    // Desktops/laptops have far more memory headroom than phones, so give
-    // them the true full-resolution original; phones/tablets get the
-    // size-capped zoom-tier image instead. See isLikelyDesktop() above.
-    const origSrc = isLikelyDesktop() ? (fullSrc || cappedSrc) : cappedSrc;
+    if (el.tagName === "VIDEO") {
+      _pzIsVideo = true;
+      _pzOverlay.style.cursor = "default";
+      const v = document.createElement("video");
+      v.src = el.getAttribute("src") || el.currentSrc;
+      v.muted = true; v.loop = true; v.playsInline = true; v.controls = true;
+      v.controlsList = "nodownload"; v.disablePictureInPicture = true;
+      if (el.poster) v.poster = el.poster;
+      _pzVideoBox.appendChild(v);
+      _pzVideoBox.classList.add("open");
+      v.play().catch(() => {});
+    } else {
+      _pzIsVideo = false;
+      _pzOverlay.style.cursor = "crosshair";
+      // Desktops/laptops get the true full-resolution original; phones/tablets get
+      // the size-capped zoom-tier image. See isLikelyDesktop() above.
+      const capped = el.dataset.orig || el.src;
+      const full   = el.dataset.origFull || capped;
+      const origSrc = isLikelyDesktop() ? full : capped;
+
+      const img = new Image();
+      img.draggable = false;
+      img.style.opacity = "0"; // hidden until sized, so there's no unscaled top-left flash
+      img.onload = () => {
+        if (token !== _pzToken) return; // viewer already stepped elsewhere
+        const fw = window.innerWidth  / img.naturalWidth;
+        const fh = window.innerHeight / img.naturalHeight;
+        _pzFitScale = Math.min(fw, fh);
+        _pzScale = _pzFitScale;
+        _pzX = (window.innerWidth  - img.naturalWidth  * _pzScale) / 2;
+        _pzY = (window.innerHeight - img.naturalHeight * _pzScale) / 2;
+        _pzApply();
+        img.style.opacity = "1";
+      };
+      img.src = origSrc;
+      _pzCanvas.appendChild(img);
+      _pzApply();
+    }
+    _pzSetHint();
+  }
+
+  function stepZoom(dir) {
+    const n = _pzGroup.length;
+    if (n <= 1) return;
+    _pzIndex = (_pzIndex + dir + n) % n;
+    _pzShowItem(_pzIndex);
+    // Keep the carousel strip underneath on the slide being viewed
+    if (_pzCarousel) {
+      const idx = _pzGroup.length ? _pzIndex : 0;
+      _pzCarousel.go(idx);
+    }
+  }
+
+  function openZoom(cappedSrc, fullSrc, srcEl) {
+    initZoom();
+    _pzBuildGroup(srcEl);
+
+    // Fallback for callers that didn't pass an element: a one-item set
+    if (!_pzGroup.length) {
+      const probe = document.createElement("img");
+      probe.dataset.orig = cappedSrc; probe.dataset.origFull = fullSrc || cappedSrc;
+      _pzGroup = [probe]; _pzIndex = 0;
+    }
+
+    // Freeze the widget's carousel (if any) while zoom is open
+    if (_pzCarousel) _pzCarousel.pause();
 
     // Disable native browser pinch-zoom while our zoom canvas is active —
     // otherwise iOS intercepts two-finger touches as a page-zoom gesture
     // instead of delivering them to our touchmove handler. (Matches
     // index.html's gallery zoom, which already does this.)
     const _vp = document.querySelector("meta[name=viewport]");
-    if (_vp) { _vp.dataset.savedContent = _vp.content; _vp.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"; }
+    if (_vp && !_vp.dataset.savedContent) {
+      _vp.dataset.savedContent = _vp.content;
+      _vp.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
+    }
 
-    const img = new Image();
-    img.draggable = false;
-    img.style.opacity = "0"; // hidden until sized, so there's no unscaled top-left flash
-    img.onload = () => {
-      const fw = window.innerWidth  / img.naturalWidth;
-      const fh = window.innerHeight / img.naturalHeight;
-      _pzFitScale = Math.min(fw, fh);
-      _pzScale = _pzFitScale;
-      _pzX = (window.innerWidth  - img.naturalWidth  * _pzScale) / 2;
-      _pzY = (window.innerHeight - img.naturalHeight * _pzScale) / 2;
-      _pzApply();
-      img.style.opacity = "1";
-    };
-    img.src = origSrc;
-    _pzCanvas.appendChild(img);
-    _pzApply();
+    const multi = _pzGroup.length > 1;
+    _pzPrev.classList.toggle("is-hidden", !multi);
+    _pzNext.classList.toggle("is-hidden", !multi);
+
+    _pzShowItem(_pzIndex);
 
     _pzOverlay.classList.add("open");
     document.body.style.overflow = "hidden";
-
-    _pzHint.style.opacity = "1";
-    clearTimeout(_pzHint._t);
-    _pzHint._t = setTimeout(() => { _pzHint.style.opacity = "0"; }, 2200);
   }
 
   function closeZoom() {
     if (!_pzOverlay) return;
     _pzOverlay.classList.remove("open");
     document.body.style.overflow = "";
-    setTimeout(() => { if (_pzCanvas) _pzCanvas.innerHTML = ""; }, 230);
+    _pzToken++; // cancel any in-flight image load
+    _pzVideoBox.querySelectorAll("video").forEach(v => { v.pause(); v.removeAttribute("src"); v.load(); });
+    setTimeout(() => {
+      if (_pzCanvas) _pzCanvas.innerHTML = "";
+      if (_pzVideoBox) { _pzVideoBox.innerHTML = ""; _pzVideoBox.classList.remove("open"); }
+    }, 230);
+
+    // Let the carousel autoplay again, starting from the slide that was viewed
+    if (_pzCarousel) { _pzCarousel.resume(); _pzCarousel = null; }
+    _pzGroup = [];
 
     // Re-enable native pinch-zoom.
     const _vp = document.querySelector("meta[name=viewport]");
