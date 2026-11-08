@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T08:45:34.723Z",
+  "generated": "2026-11-08T12:28:53.802Z",
   "tags": [
     "2D",
     "3D",
@@ -55,6 +55,12 @@
         "Compound_02_zoom.webp",
         "Compound_03_zoom.webp",
         "Compound_04_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -97,6 +103,14 @@
         "Antagonist_04_zoom.webp",
         "Antagonist_05_zoom.webp",
         "Antagonist_06_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -129,6 +143,10 @@
       "zoomMedia": [
         "Fixer_01_zoom.webp",
         "Fixer_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -164,6 +182,11 @@
         "Hatamoto_01_zoom.webp",
         "Hatamoto_02_zoom.webp",
         "Hatamoto_03_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null
       ]
     },
     {
@@ -206,6 +229,14 @@
         "PosterOne_04_zoom.webp",
         "PosterOne_05_zoom.webp",
         "PosterOne_06_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -236,6 +267,10 @@
       "zoomMedia": [
         "Trepidation_Rooms_01_zoom.webp",
         "Trepidation_Rooms_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -277,6 +312,14 @@
         "PortalLaser_04_zoom.webp",
         "PortalLaser_05_zoom.webp",
         null
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -309,6 +352,10 @@
       "zoomMedia": [
         "MagazineOne_01_zoom.webp",
         "MagazineOne_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -336,6 +383,9 @@
       ],
       "zoomMedia": [
         "Grungy_Shower_zoom.webp"
+      ],
+      "webMedia": [
+        null
       ]
     },
     {
@@ -366,6 +416,10 @@
       "zoomMedia": [
         "MagazineSix_01_zoom.webp",
         "MagazineSix_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -394,6 +448,9 @@
       ],
       "zoomMedia": [
         "MagazineSeven_zoom.webp"
+      ],
+      "webMedia": [
+        null
       ]
     },
     {
@@ -425,6 +482,10 @@
       "zoomMedia": [
         "4Arms_01_zoom.webp",
         "4Arms_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -441,7 +502,8 @@
       "description": "This is a material I'm incredibly happy with, and I use it almost as often as my concrete shader- both for my Trepidation project.\n\nAn image texture is loaded up alongside three mask textures. The image is pixellated according to the scaled-down mask textures, and then it's split into red, green, and blue channels. From there, I use a lot of voronoi and wave patterns to subtly mess with the three channels individually - I then recombine the channels through the individual masks, recreating the iconic RGB pixels which look so beautiful. I also add in some random flickering (with a bias towards the already glitched tiles). I put such a heavy focus on the broken sections because every time I've seen one of these setups in real life, they are never 100% operational.\n\nI can adjust primarily the seed of the breaks/glitches and the scale of the pixels. However, there are plenty of annotated color ramps throughout the nodemap controlling different biases such as: Rate of broken tiles, Rate of downright black (completely broken) tiles, Rate of flickering, and Bias between overwrite vs overay glitch effects. This degree of config allows me to add 'flavor' to a scene's digital screen without being at the mercy of merely the seed to determine whether important information is obscured by the broken tiles.\n\nKeep an eye out for this shader, I use it a lot.\n\n3rd image: Evolution of the shader, from right to left (yes, the setup on the far right is literally just an Image Texture into an Emission BSDF into the Material Output, I actually did that - see image 4, that was January of 2023). You can see one of the middle materials used in \"Colleague Face\" - at that stage, each tile only had five visual distinctions: Normal, Dim, Only Red, Only Green, and Only Blue. Not very realistic.",
       "tags": [
         "3D",
-        "Blender"
+        "Blender",
+        "Photorealism"
       ],
       "featured": false,
       "date": "2025-09",
@@ -459,6 +521,12 @@
         null,
         "LedPanel_02_zoom.webp",
         "LedPanel_03_zoom.webp",
+        null
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
         null
       ]
     },
@@ -489,6 +557,10 @@
       "zoomMedia": [
         "MagazineFour_01_zoom.webp",
         "MagazineFour_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -518,6 +590,10 @@
       "zoomMedia": [
         "MagazineThree_01_zoom.webp",
         "MagazineThree_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -545,6 +621,9 @@
         null
       ],
       "zoomMedia": [
+        null
+      ],
+      "webMedia": [
         null
       ]
     },
@@ -575,6 +654,10 @@
       "zoomMedia": [
         "MagazineFive_01_zoom.webp",
         "MagazineFive_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -602,6 +685,9 @@
       ],
       "zoomMedia": [
         "MagazineTwo_zoom.webp"
+      ],
+      "webMedia": [
+        null
       ]
     },
     {
@@ -631,6 +717,10 @@
       "zoomMedia": [
         "Gummy_01_zoom.webp",
         "Gummy_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -669,6 +759,12 @@
         "Colleague_Face_02_zoom.webp",
         "Colleague_Face_03_zoom.webp",
         null
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -690,7 +786,8 @@
       "description": "A self-built 100% procedural concrete shader packed full of smart logic. The material is an algorithm that adapts to the geometry of the scene. I designed this to help me make other scenes quicker- you will notice it primarily in projects tagged with 3D and Trepidation.\n\nThe shader has full customizability between all it's features, the following slides showcase some of it's visual capabilities. Remember, all visuals are represented entirely with math- no hand-drawn areas, a surface can extend infinitely without ever repeating patterns.\n\nIn order:\n#2: Moisture stains\n#3: Close-up of tile cracks\n#4: Rare repair patches\n#5: Support to manually draw integrated grime\n#6: Tape guidelines\n#7: Custom plaster decal support (via image importing)\n#8: Remove cut marks\n\nand #9 is simply the nodemap.",
       "tags": [
         "3D",
-        "Blender"
+        "Blender",
+        "Photorealism"
       ],
       "featured": false,
       "date": "2024-10",
@@ -719,6 +816,17 @@
         "ConcreteMaterial_07_zoom.webp",
         "ConcreteMaterial_08_zoom.webp",
         "ConcreteMaterial_09_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -749,6 +857,10 @@
       "zoomMedia": [
         "Procedural_Land_01_zoom.webp",
         "Procedural_Land_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -774,6 +886,9 @@
         null
       ],
       "zoomMedia": [
+        null
+      ],
+      "webMedia": [
         null
       ]
     },
@@ -802,6 +917,9 @@
       ],
       "zoomMedia": [
         "Skull_ArtOne_zoom.webp"
+      ],
+      "webMedia": [
+        null
       ]
     },
     {
@@ -842,6 +960,13 @@
         "Scientist_Winged_03_zoom.webp",
         "Scientist_Winged_04_zoom.webp",
         "Scientist_Winged_05_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -868,6 +993,9 @@
       ],
       "zoomMedia": [
         "Skull_ArtTwo_zoom.webp"
+      ],
+      "webMedia": [
+        null
       ]
     },
     {
@@ -898,6 +1026,10 @@
       "zoomMedia": [
         "Fossil_Walker_01_zoom.webp",
         "Fossil_Walker_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -930,6 +1062,11 @@
         "Frozen Aperture_01_zoom.webp",
         "Frozen Aperture_02_zoom.webp",
         "Frozen Aperture_03_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null
       ]
     },
     {
@@ -959,6 +1096,10 @@
       ],
       "zoomMedia": [
         "Sword_01_zoom.webp",
+        null
+      ],
+      "webMedia": [
+        null,
         null
       ]
     },
@@ -997,6 +1138,12 @@
         "Spine_02_zoom.webp",
         "Spine_03_zoom.webp",
         "Spine_04_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -1027,6 +1174,10 @@
       "zoomMedia": [
         "Pyroclastic_Elemental_01_zoom.webp",
         "Pyroclastic_Elemental_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -1061,6 +1212,11 @@
         "Scientist_Thermal_01_zoom.webp",
         "Scientist_Thermal_02_zoom.webp",
         "Scientist_Thermal_03_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null
       ]
     },
     {
@@ -1091,6 +1247,10 @@
       "zoomMedia": [
         "Spiderman_01_zoom.webp",
         "Spiderman_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -1121,6 +1281,10 @@
       "zoomMedia": [
         "Creeping_Shade_01_zoom.webp",
         "Creeping_Shade_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -1151,6 +1315,10 @@
       "zoomMedia": [
         "Dimension_Jumper_01_zoom.webp",
         "Dimension_Jumper_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -1195,6 +1363,15 @@
         "Pixel_Combat_Sprites_05_zoom.webp",
         null,
         "Pixel_Combat_Sprites_07_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -1235,6 +1412,13 @@
         "Nephilim_03_zoom.webp",
         "Nephilim_04_zoom.webp",
         "Nephilim_05_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -1263,6 +1447,9 @@
       ],
       "zoomMedia": [
         "Scientist_Sketches_zoom.webp"
+      ],
+      "webMedia": [
+        null
       ]
     },
     {
@@ -1289,6 +1476,9 @@
       ],
       "zoomMedia": [
         null
+      ],
+      "webMedia": [
+        null
       ]
     },
     {
@@ -1314,6 +1504,9 @@
         null
       ],
       "zoomMedia": [
+        null
+      ],
+      "webMedia": [
         null
       ]
     },
@@ -1356,6 +1549,14 @@
         "Power_04_zoom.webp",
         "Power_05_zoom.webp",
         "Power_06_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -1381,6 +1582,9 @@
         null
       ],
       "zoomMedia": [
+        null
+      ],
+      "webMedia": [
         null
       ]
     },
@@ -1412,6 +1616,10 @@
       "zoomMedia": [
         "Energy_01_zoom.webp",
         "Energy_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -1437,6 +1645,9 @@
         null
       ],
       "zoomMedia": [
+        null
+      ],
+      "webMedia": [
         null
       ]
     },
@@ -1467,6 +1678,10 @@
       "zoomMedia": [
         null,
         null
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     },
     {
@@ -1492,6 +1707,9 @@
         null
       ],
       "zoomMedia": [
+        null
+      ],
+      "webMedia": [
         null
       ]
     },
@@ -1524,6 +1742,10 @@
       "zoomMedia": [
         "Scientist_And_Colleague_01_zoom.webp",
         "Scientist_And_Colleague_02_zoom.webp"
+      ],
+      "webMedia": [
+        null,
+        null
       ]
     }
   ]

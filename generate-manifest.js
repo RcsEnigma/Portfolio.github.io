@@ -11,16 +11,32 @@
 
 const fs   = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
+const { execSync, execFileSync } = require("child_process");
 
 // ── Optional thumbnail dependencies ─────────────────────────
 // sharp: npm install sharp  (images → compressed WebP thumbnails)
-// ffmpeg: system install    (videos → poster frame JPEGs)
+// ffmpeg (+ffprobe): system install (videos → poster frames, web-safe copies)
 let sharp = null;
 try { sharp = require("sharp"); } catch(_) {}
 
 let hasFfmpeg = false;
 try { execSync("ffmpeg -version", { stdio:"pipe" }); hasFfmpeg = true; } catch(_) {}
+let hasFfprobe = false;
+try { execSync("ffprobe -version", { stdio:"pipe" }); hasFfprobe = true; } catch(_) {}
+
+// ── Video / size-limit settings ──────────────────────────────
+// GitHub rejects any pushed file over 100 MB; 95 MB leaves headroom.
+const SIZE_LIMIT_BYTES = 95 * 1024 * 1024;
+// Originals of files that had to be shrunk are parked here (git-ignored, so
+// they stay on this machine only — keep your own backup too).
+const SRC_BACKUP_DIR = "works-src";
+// Web-safe video copies (see makeWebCopy): long side capped at this, x264 CRF.
+const VIDEO_WEB_MAX_LONG_SIDE = 1920;
+const VIDEO_WEB_CRF = 23;
+// Poster-frame picker: a candidate frame counts as "good" when its average
+// brightness (0-255) and contrast (std-dev) both clear these floors.
+const POSTER_MIN_LUMA  = 40;
+const POSTER_MIN_STDEV = 12;
 
 const THUMB_DIR    = "thumbs";   // subfolder name inside works/ and pages/<slug>/
 const THUMB_MAX_PX = 1200;       // longest side of grid/modal thumbnail
@@ -237,23 +253,386 @@ async function makeZoomImage(srcPath, thumbDir, srcFilename, cache) {
   }
 }
 
-// Returns the poster filename (e.g. "myvideo_poster.jpg") or null.
-function makeVideoThumb(srcPath, thumbDir, srcFilename, cache) {
-  if (!hasFfmpeg) return null;
-  const baseName  = path.basename(srcFilename, path.extname(srcFilename));
-  const thumbName = baseName + "_poster.jpg";
-  const thumbPath = path.join(thumbDir, thumbName);
-  const cacheKey  = srcFilename + "::poster";
+// ── Video toolkit ────────────────────────────────────────────
+
+// Print a line without being garbled by the single-line progress bar.
+function logLine(msg) {
+  process.stdout.write("\r" + " ".repeat(100) + "\r" + msg + "\n");
+}
+
+function ffErr(e) {
+  const t = (e && e.stderr ? e.stderr.toString() : "") || (e && e.message) || String(e);
+  return t.trim().split("\n").slice(-2).join(" | ").slice(0, 220);
+}
+
+function runFfmpeg(args) {
+  return execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args],
+    { stdio: ["ignore", "pipe", "pipe"], maxBuffer: 256 * 1024 * 1024 });
+}
+
+// ffmpeg scale expression that caps the LONG side at maxPx (never upscales)
+// and keeps both dimensions even (x264 + yuv420p requires that).
+function capScale(maxPx) {
+  return `scale='if(gt(iw,ih),min(${maxPx},iw),-2)':'if(gt(iw,ih),-2,min(${maxPx},ih))',` +
+         `scale=trunc(iw/2)*2:trunc(ih/2)*2`;
+}
+
+function probeVideo(file) {
+  if (!hasFfprobe) return null;
   try {
-    const srcSize = fs.statSync(srcPath).size;
-    if (cache[cacheKey] === srcSize && fs.existsSync(thumbPath)) return thumbName;
-    execSync(
-      `ffmpeg -i "${srcPath}" -vf "thumbnail=300,scale=${THUMB_MAX_PX}:-1" -frames:v 1 "${thumbPath}" -y`,
-      { stdio:"pipe" }
-    );
+    const out = execFileSync("ffprobe",
+      ["-v", "error", "-print_format", "json", "-show_streams", "-show_format", file],
+      { maxBuffer: 16 * 1024 * 1024, stdio: ["ignore", "pipe", "pipe"] }).toString();
+    const j = JSON.parse(out);
+    const v = (j.streams || []).find(x => x.codec_type === "video");
+    const a = (j.streams || []).find(x => x.codec_type === "audio");
+    if (!v) return null;
+    return {
+      duration: parseFloat((j.format && j.format.duration) || v.duration || "0") || 0,
+      vcodec: v.codec_name, pix_fmt: v.pix_fmt,
+      width: v.width || 0, height: v.height || 0,
+      acodec: a ? a.codec_name : null,
+    };
+  } catch (_) { return null; }
+}
+
+// True if an MP4/MOV's "moov" metadata box comes BEFORE the media data
+// ("faststart"). When it's at the end, iOS Safari has to download most of the
+// file before it can start — a common cause of long gray loading screens.
+// Returns null when it can't tell.
+function moovBeforeMdat(file) {
+  let fd;
+  try {
+    fd = fs.openSync(file, "r");
+    const size = fs.fstatSync(fd).size;
+    const hdr = Buffer.alloc(16);
+    let pos = 0;
+    for (let i = 0; i < 64 && pos + 8 <= size; i++) {
+      fs.readSync(fd, hdr, 0, 16, pos);
+      let len = hdr.readUInt32BE(0);
+      const type = hdr.toString("ascii", 4, 8);
+      if (type === "moov") return true;
+      if (type === "mdat") return false;
+      if (len === 1) len = Number(hdr.readBigUInt64BE(8));
+      else if (len === 0) len = size - pos;
+      if (len < 8) return null;
+      pos += len;
+    }
+    return null;
+  } catch (_) { return null; }
+  finally { if (fd !== undefined) { try { fs.closeSync(fd); } catch (_) {} } }
+}
+
+// Why (if at all) this video needs a web-safe copy. null = plays fine as-is.
+function webCopyReason(filePath, probe) {
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext !== ".mp4") return "container " + ext;
+  if (!probe) return null; // no ffprobe: can only judge by container
+  if (probe.vcodec !== "h264") return "video codec " + probe.vcodec;
+  if (probe.pix_fmt && probe.pix_fmt !== "yuv420p") return "pixel format " + probe.pix_fmt;
+  if (probe.acodec && !["aac", "mp3"].includes(probe.acodec)) return "audio codec " + probe.acodec;
+  if (Math.max(probe.width, probe.height) > VIDEO_WEB_MAX_LONG_SIDE) return "larger than 1080p";
+  if (moovBeforeMdat(filePath) === false) return "metadata at end of file";
+  return null;
+}
+
+function mbOf(bytes) { return (bytes / 1048576).toFixed(1) + " MB"; }
+
+// Returns the filename (inside thumbs/) of a web-safe H.264/AAC MP4, or null
+// when the original already plays everywhere (no copy is made in that case, so
+// compatible files never double in repo size). If the ONLY problem is
+// metadata-at-end, the streams are copied untouched (lossless, fast).
+function makeWebCopy(srcPath, thumbDir, srcFilename, cache, probe) {
+  if (!hasFfmpeg) return null;
+  const baseName = path.basename(srcFilename, path.extname(srcFilename));
+  const outName  = baseName + "_web.mp4";
+  const outPath  = path.join(thumbDir, outName);
+  const cacheKey = srcFilename + "::web";
+  let reason;
+  try { reason = webCopyReason(srcPath, probe); } catch (_) { reason = null; }
+  if (!reason) {
+    if (fs.existsSync(outPath)) { try { fs.unlinkSync(outPath); } catch (_) {} }
+    delete cache[cacheKey];
+    return null;
+  }
+  const srcSize = fs.statSync(srcPath).size;
+  if (cache[cacheKey] === srcSize && fs.existsSync(outPath)) return outName;
+
+  const remux = reason === "metadata at end of file";
+  logLine("  web copy: " + srcFilename + "  (" + reason + (remux ? ", lossless remux" : ", re-encoding") + ")");
+  const tmp = outPath + ".tmp";
+  const args = ["-i", srcPath, "-map", "0:v:0", "-map", "0:a:0?", "-sn", "-dn"];
+  if (remux) {
+    args.push("-c", "copy", "-movflags", "+faststart");
+  } else {
+    args.push("-vf", capScale(VIDEO_WEB_MAX_LONG_SIDE),
+      "-c:v", "libx264", "-preset", "medium", "-crf", String(VIDEO_WEB_CRF),
+      "-profile:v", "high", "-pix_fmt", "yuv420p",
+      "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", "-max_muxing_queue_size", "1024");
+  }
+  args.push("-f", "mp4", tmp);
+  try {
+    runFfmpeg(args);
+    fs.renameSync(tmp, outPath);
     cache[cacheKey] = srcSize;
-    return thumbName;
-  } catch(_) { return null; }
+    const outSize = fs.statSync(outPath).size;
+    logLine("    -> thumbs/" + outName + "  (" + mbOf(srcSize) + " -> " + mbOf(outSize) + ")");
+    return outName;
+  } catch (e) {
+    try { fs.unlinkSync(tmp); } catch (_) {}
+    logLine("  web copy FAILED for " + srcFilename + ": " + ffErr(e));
+    return null;
+  }
+}
+
+// Candidate timestamps (seconds) to sample for a poster frame.
+function posterCandidateTimes(duration) {
+  const t = [0, 0.5, 1, 2, 3, 5];
+  if (duration > 0) t.push(duration * 0.1, duration * 0.25, duration * 0.5);
+  const limit = duration > 0 ? Math.max(duration - 0.1, 0.01) : Infinity;
+  return [...new Set(t.filter(x => x < limit).map(x => Math.round(x * 100) / 100))]
+    .sort((x, y) => x - y).slice(0, 9);
+}
+
+// One decoded frame as a PNG buffer (long side capped at maxPx).
+function grabFrame(srcPath, seconds, maxPx) {
+  return runFfmpeg(["-ss", String(seconds), "-i", srcPath, "-frames:v", "1",
+    "-vf", capScale(maxPx), "-f", "image2pipe", "-vcodec", "png", "pipe:1"]);
+}
+
+// Returns the poster filename (e.g. "myvideo_poster.webp") or null.
+// Instead of blindly taking frame 0 (often black — fade-ins, title cards), it
+// samples several candidate frames and uses the first one that's bright and
+// contrasty enough; if none qualifies, the best-scoring candidate wins.
+async function makeVideoPoster(srcPath, thumbDir, srcFilename, cache, probe) {
+  if (!hasFfmpeg) return null;
+  const baseName = path.basename(srcFilename, path.extname(srcFilename));
+  const cacheKey = srcFilename + "::poster2";
+  const srcSize  = fs.statSync(srcPath).size;
+
+  if (sharp) {
+    const outName = baseName + "_poster.webp";
+    const outPath = path.join(thumbDir, outName);
+    if (cache[cacheKey] === srcSize && fs.existsSync(outPath)) return outName;
+    try {
+      let chosen = null, best = null;
+      for (const t of posterCandidateTimes(probe ? probe.duration : 0)) {
+        let buf;
+        try { buf = grabFrame(srcPath, t, 320); } catch (_) { continue; }
+        if (!buf || !buf.length) continue;
+        const st = await sharp(buf).stats();
+        const ch = st.channels;
+        const luma = ch.length >= 3
+          ? 0.299 * ch[0].mean + 0.587 * ch[1].mean + 0.114 * ch[2].mean
+          : ch[0].mean;
+        const sd = ch.reduce((acc, c) => acc + c.stdev, 0) / ch.length;
+        if (luma >= POSTER_MIN_LUMA && sd >= POSTER_MIN_STDEV) { chosen = t; break; }
+        const score = luma * Math.min(1, sd / POSTER_MIN_STDEV);
+        if (!best || score > best.score) best = { t, score };
+      }
+      const at = chosen !== null ? chosen : (best ? best.t : 0);
+      const frame = grabFrame(srcPath, at, THUMB_MAX_PX);
+      if (!frame || !frame.length) throw new Error("no frame decoded");
+      await sharp(frame)
+        .resize(THUMB_MAX_PX, THUMB_MAX_PX, { fit: "inside", withoutEnlargement: true })
+        .webp({ quality: THUMB_QUALITY })
+        .toFile(outPath);
+      // Older versions wrote a JPEG poster; drop it so it doesn't linger.
+      const oldJpg = path.join(thumbDir, baseName + "_poster.jpg");
+      if (fs.existsSync(oldJpg)) { try { fs.unlinkSync(oldJpg); } catch (_) {} }
+      cache[cacheKey] = srcSize;
+      return outName;
+    } catch (e) {
+      logLine("  poster FAILED for " + srcFilename + ": " + ffErr(e));
+      return null;
+    }
+  }
+
+  // No sharp: plain ffmpeg JPEG at ~1s (no brightness check).
+  const outName = baseName + "_poster.jpg";
+  const outPath = path.join(thumbDir, outName);
+  if (cache[cacheKey] === srcSize && fs.existsSync(outPath)) return outName;
+  try {
+    runFfmpeg(["-ss", "1", "-i", srcPath, "-frames:v", "1", "-vf", capScale(THUMB_MAX_PX), outPath]);
+    if (!fs.existsSync(outPath)) runFfmpeg(["-i", srcPath, "-frames:v", "1", "-vf", capScale(THUMB_MAX_PX), outPath]);
+    cache[cacheKey] = srcSize;
+    return outName;
+  } catch (e) {
+    logLine("  poster FAILED for " + srcFilename + ": " + ffErr(e));
+    return null;
+  }
+}
+
+// ── Oversize files (GitHub's 100 MB push limit) ──────────────
+//
+// Any media file over SIZE_LIMIT_BYTES is shrunk automatically:
+//   1. the untouched original is copied to works-src/<same relative path>
+//      (git-ignored — it lives on this machine only),
+//   2. a smaller version is made (videos -> H.264 .mp4, big PNG/WebP/AVIF ->
+//      high-quality .webp, big JPEG -> re-encoded .jpg),
+//   3. only once that result is verified to be under the limit does it replace
+//      the original in works/ (or pages/<slug>/).
+// If the file's extension changes (e.g. .mkv -> .mp4), any [extra] / [media] /
+// carousel_media lines in the neighbouring .txt files that name it are
+// updated to match. If a result can't get under the limit, the original is
+// left exactly as it was and a warning is printed.
+
+function ensureGitignoreEntry(entry) {
+  const gi = path.join(__dirname, ".gitignore");
+  let cur = "";
+  try { cur = fs.readFileSync(gi, "utf8"); } catch (_) {}
+  const has = cur.split(/\r?\n/).some(l => l.trim().replace(/^\//, "") === entry);
+  if (has) return;
+  fs.writeFileSync(gi, cur + (cur && !cur.endsWith("\n") ? "\n" : "") + entry + "\n");
+  logLine("  added " + entry + " to .gitignore");
+}
+
+function updateTxtReferences(dir, oldName, newName) {
+  let files; try { files = fs.readdirSync(dir); } catch (_) { return; }
+  for (const f of files) {
+    if (path.extname(f).toLowerCase() !== ".txt") continue;
+    const fp = path.join(dir, f);
+    let txt; try { txt = fs.readFileSync(fp, "utf8"); } catch (_) { continue; }
+    if (!txt.includes(oldName)) continue;
+    fs.writeFileSync(fp, txt.split(oldName).join(newName));
+    logLine("    updated reference in " + f + ": " + oldName + " -> " + newName);
+  }
+}
+
+async function shrinkVideo(full, tmp, limit) {
+  const probe = probeVideo(full);
+  const dur = probe ? probe.duration : 0;
+  const attempts = [{ crf: VIDEO_WEB_CRF, maxPx: VIDEO_WEB_MAX_LONG_SIDE }];
+  if (dur > 0) {
+    const audioBps = 128000;
+    const base = Math.floor((limit * 8 * 0.9) / dur) - audioBps;
+    if (base < 250000) { logLine("    video is too long to fit under the limit at a watchable bitrate"); }
+    else {
+      attempts.push({ vbps: base,                    maxPx: VIDEO_WEB_MAX_LONG_SIDE });
+      attempts.push({ vbps: Math.floor(base * 0.8),  maxPx: VIDEO_WEB_MAX_LONG_SIDE });
+      attempts.push({ vbps: Math.floor(base * 0.65), maxPx: 1280 });
+    }
+  }
+  for (const at of attempts) {
+    const args = ["-i", full, "-map", "0:v:0", "-map", "0:a:0?", "-sn", "-dn",
+      "-vf", capScale(at.maxPx), "-c:v", "libx264", "-preset", "medium"];
+    if (at.crf) args.push("-crf", String(at.crf));
+    else args.push("-b:v", String(at.vbps), "-maxrate", String(Math.floor(at.vbps * 1.4)),
+                   "-bufsize", String(at.vbps * 2));
+    args.push("-profile:v", "high", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k",
+      "-movflags", "+faststart", "-max_muxing_queue_size", "1024", "-f", "mp4", tmp);
+    try { runFfmpeg(args); } catch (e) { logLine("    encode failed: " + ffErr(e)); return false; }
+    const size = fs.statSync(tmp).size;
+    logLine("    attempt -> " + mbOf(size) + (size <= limit ? "  (under limit)" : "  (still too big, retrying lower)"));
+    if (size <= limit) return true;
+  }
+  return false;
+}
+
+async function shrinkImage(full, tmp, limit, outExt) {
+  const steps = [{ q: 92, s: 1 }, { q: 85, s: 1 }, { q: 80, s: 0.85 }, { q: 75, s: 0.7 }, { q: 70, s: 0.5 }];
+  const meta = await sharp(full, { limitInputPixels: false }).metadata();
+  for (const st of steps) {
+    let img = sharp(full, { limitInputPixels: false });
+    if (st.s < 1 && meta.width) img = img.resize(Math.round(meta.width * st.s));
+    img = outExt === ".jpg" ? img.jpeg({ quality: st.q, mozjpeg: true }) : img.webp({ quality: st.q });
+    await img.toFile(tmp);
+    const size = fs.statSync(tmp).size;
+    logLine("    attempt q" + st.q + (st.s < 1 ? " @" + Math.round(st.s * 100) + "%" : "") + " -> " + mbOf(size));
+    if (size <= limit) return true;
+  }
+  return false;
+}
+
+async function shrinkFile(dir, f) {
+  const full = path.join(dir, f);
+  const type = mediaType(f);
+  const ext  = path.extname(f).toLowerCase();
+  const base = path.basename(f, path.extname(f));
+  const size = fs.statSync(full).size;
+
+  if (type === "video" && !hasFfmpeg) { logLine("  " + f + " is " + mbOf(size) + " but ffmpeg isn't installed — can't shrink it."); return; }
+  if (type === "image" && (!sharp || ext === ".gif" || ext === ".svg")) {
+    logLine("  " + f + " is " + mbOf(size) + " — " + (ext === ".gif" || ext === ".svg" ? ext + " files can't be shrunk automatically" : "sharp isn't installed") + "; GitHub will reject it. Shrink it by hand.");
+    return;
+  }
+
+  const outExt = type === "video" ? ".mp4" : (ext === ".jpg" || ext === ".jpeg") ? ".jpg" : ".webp";
+  const finalPath = path.join(dir, base + outExt);
+  if (finalPath !== full && fs.existsSync(finalPath)) {
+    logLine("  " + f + " is " + mbOf(size) + " but " + base + outExt + " already exists next to it — rename one and re-run.");
+    return;
+  }
+
+  logLine("  " + f + " is " + mbOf(size) + " (limit " + mbOf(SIZE_LIMIT_BYTES) + ") — shrinking…");
+
+  // 1. Park the untouched original (verified) in works-src/
+  const rel = path.relative(__dirname, full);
+  const backup = path.join(__dirname, SRC_BACKUP_DIR, rel);
+  fs.mkdirSync(path.dirname(backup), { recursive: true });
+  if (!fs.existsSync(backup) || fs.statSync(backup).size !== size) fs.copyFileSync(full, backup);
+  if (fs.statSync(backup).size !== size) { logLine("    backup copy failed verification — leaving the original alone."); return; }
+  ensureGitignoreEntry(SRC_BACKUP_DIR + "/");
+
+  // 2. Make the smaller version next to it
+  const tmp = full + ".shrink.tmp";
+  let ok = false;
+  try {
+    ok = type === "video" ? await shrinkVideo(full, tmp, SIZE_LIMIT_BYTES)
+                          : await shrinkImage(full, tmp, SIZE_LIMIT_BYTES, outExt);
+  } catch (e) { logLine("    failed: " + ffErr(e)); }
+  if (!ok) {
+    try { fs.unlinkSync(tmp); } catch (_) {}
+    logLine("    couldn't get " + f + " under the limit — original left untouched; GitHub will still reject it.");
+    return;
+  }
+
+  // 3. Swap it in
+  fs.renameSync(tmp, finalPath);
+  if (finalPath !== full) {
+    fs.unlinkSync(full);
+    updateTxtReferences(dir, f, base + outExt);
+  }
+  logLine("    done: " + rel + " -> " + path.relative(__dirname, finalPath) + "  (original kept in " + SRC_BACKUP_DIR + "/" + rel + ")");
+}
+
+async function enforceSizeLimits() {
+  const dirs = [WORKS_DIR];
+  if (fs.existsSync(PAGES_DIR)) {
+    for (const f of fs.readdirSync(PAGES_DIR)) {
+      const d = path.join(PAGES_DIR, f);
+      try { if (fs.statSync(d).isDirectory()) dirs.push(d); } catch (_) {}
+    }
+  }
+  for (const dir of dirs) {
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir)) {
+      const full = path.join(dir, f);
+      let st; try { st = fs.statSync(full); } catch (_) { continue; }
+      if (!st.isFile() || f.startsWith(".")) continue;
+      if (!MEDIA_EXT.has(path.extname(f).toLowerCase())) continue;
+      if (st.size > SIZE_LIMIT_BYTES) await shrinkFile(dir, f);
+    }
+  }
+}
+
+// Last check: anything still over the limit anywhere in the repo (including
+// non-media files like game builds) — GitHub would reject the push.
+function warnLargeFiles() {
+  const hits = [];
+  (function walk(dir) {
+    let entries; try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (_) { return; }
+    for (const e of entries) {
+      if (e.name === ".git" || e.name === "node_modules" || e.name === SRC_BACKUP_DIR) continue;
+      const fp = path.join(dir, e.name);
+      if (e.isDirectory()) walk(fp);
+      else { try { const sz = fs.statSync(fp).size; if (sz > SIZE_LIMIT_BYTES) hits.push([path.relative(__dirname, fp), sz]); } catch (_) {} }
+    }
+  })(__dirname);
+  if (hits.length) {
+    console.log("\nWARNING: files over " + mbOf(SIZE_LIMIT_BYTES) + " (GitHub rejects pushes with files over 100 MB):");
+    for (const [f, sz] of hits) console.log("  " + f + "  (" + mbOf(sz) + ")");
+  }
 }
 
 function ensureThumbDir(dir) {
@@ -335,6 +714,9 @@ async function buildWorks() {
     // doubles as the grid/carousel thumbnail (thumbMedia, kept below for
     // backward compatibility with the existing grid rendering code).
     const modalThumbs = [];
+    // Web-safe MP4 copies (in thumbs/) for videos that wouldn't play on every
+    // browser as-is (see makeWebCopy); null for images and already-fine videos.
+    const webMedia = [];
     // Size-capped zoom-tier images for every image in allMedia — what the
     // pan/zoom overlay opens instead of the raw original (see ZOOM_MAX_PX).
     const zoomMedia = [];
@@ -345,12 +727,16 @@ async function buildWorks() {
       if (mt === "image") {
         modalThumbs.push(exists ? await makeImageThumb(fp, thumbDir, file, cache) : null);
         zoomMedia.push(exists ? await makeZoomImage(fp, thumbDir, file, cache) : null);
+        webMedia.push(null);
       } else if (mt === "video") {
-        modalThumbs.push(exists ? makeVideoThumb(fp, thumbDir, file, cache) : null);
+        const probe = exists ? probeVideo(fp) : null;
+        modalThumbs.push(exists ? await makeVideoPoster(fp, thumbDir, file, cache, probe) : null);
+        webMedia.push(exists ? makeWebCopy(fp, thumbDir, file, cache, probe) : null);
         zoomMedia.push(null);
       } else {
         modalThumbs.push(null);
         zoomMedia.push(null);
+        webMedia.push(null);
       }
       if (exists) tickProgress(file);
     }
@@ -361,7 +747,7 @@ async function buildWorks() {
       title:meta.title||canon, description:meta.description,
       tags:meta.tags, featured:meta.featured, date:meta.date, link:meta.link,
       aspectRatio:ar, gridSpan: meta.square ? "normal" : deriveSpan(ar,type),
-      thumbMedia, modalThumbs, zoomMedia,
+      thumbMedia, modalThumbs, zoomMedia, webMedia,
     });
   }
 
@@ -462,11 +848,16 @@ async function buildPages() {
         const mtype = mediaType(file);
         const srcPath = path.join(pageDir, file);
         const srcExists = fs.existsSync(srcPath);
-        let thumb = null, zoomThumb = null;
+        let thumb = null, zoomThumb = null, webFile = null;
+        let probe = null;
+        if (mtype === "video" && srcExists) probe = probeVideo(srcPath);
         if (w.compress && srcExists) {
           if (mtype === "image") thumb = await makeImageThumb(srcPath, thumbDir, file, cache);
-          else if (mtype === "video") thumb = makeVideoThumb(srcPath, thumbDir, file, cache);
+          else if (mtype === "video") thumb = await makeVideoPoster(srcPath, thumbDir, file, cache, probe);
         }
+        // A web-safe copy is about playback compatibility (e.g. iOS can't play
+        // .mkv), not quality, so — like the zoom tier — it ignores [compress].
+        if (mtype === "video" && srcExists) webFile = makeWebCopy(srcPath, thumbDir, file, cache, probe);
         // Zoom-tier generation always runs for images, regardless of
         // [compress] — that flag controls display-thumbnail quality, but the
         // zoom-tier cap is a stability safeguard (see ZOOM_MAX_PX above), not
@@ -475,7 +866,7 @@ async function buildPages() {
           zoomThumb = await makeZoomImage(srcPath, thumbDir, file, cache);
         }
         if (srcExists) tickProgress(file);
-        mediaItems.push({ file, type:mtype, thumb, zoomThumb });
+        mediaItems.push({ file, type:mtype, thumb, zoomThumb, webFile });
       }
       w.media = mediaItems;
 
@@ -591,7 +982,10 @@ function writeStubs(pages) {
 async function build() {
   // Report thumbnail tool availability
   if (!sharp) console.log("\nNote: sharp not installed — skipping image thumbnails. Run: npm install sharp\n");
-  if (!hasFfmpeg) console.log("Note: ffmpeg not found — skipping video poster frames.\n");
+  if (!hasFfmpeg) console.log("Note: ffmpeg not found — skipping video poster frames and web-safe video copies.\n");
+  else if (!hasFfprobe) console.log("Note: ffprobe not found (it normally ships with ffmpeg) — videos will only be converted by container, not by codec.\n");
+
+  await enforceSizeLimits();
 
   progress.total = countMediaFiles(WORKS_DIR) + countMediaFiles(PAGES_DIR);
   if (progress.total > 0 && sharp) {
@@ -631,7 +1025,10 @@ async function build() {
   for (const p of pages)
     console.log("  /"+p.slug+"/  \""+p.label+"\"  "+p.widgets.length+" widget(s)"+(p.featured?"  [carousel]":""));
 
-  console.log("\nNote: .mkv files need H.264/VP8/VP9 codec to play in-browser.\n");
+  const webCopies = manifestFull.works.reduce((n, e) => n + (e.webMedia || []).filter(Boolean).length, 0);
+  if (webCopies) console.log("\n" + webCopies + " video(s) in works/ have a web-safe copy in works/thumbs/ (served instead of the original).");
+  warnLargeFiles();
+  console.log("");
 }
 
 build().catch(e => { console.error("Build error:", e.message); process.exit(1); });

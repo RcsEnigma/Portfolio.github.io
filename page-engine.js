@@ -299,15 +299,23 @@
     const zoomUrl  = item.zoomThumb ? "/pages/" + slug + "/thumbs/" + item.zoomThumb : origUrl;
 
     if (item.type === "video") {
+      // Web-safe MP4 copy (made by generate-manifest.js for files browsers
+      // can't all play, e.g. .mkv on iOS) is preferred over the original.
+      const playUrl = item.webFile ? "/pages/" + slug + "/thumbs/" + item.webFile : origUrl;
       const v = document.createElement("video");
-      v.src = origUrl;
+      // muted/playsinline ATTRIBUTES before src — iOS Safari is stricter about
+      // autoplay when only the JS properties are set.
+      v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("webkit-playsinline", "");
+      v.preload = (opts.autoplay || opts.manage === "autoplay") ? "auto" : "metadata";
       if (!opts.noGroup) v.dataset.pz = "1"; // member of its widget's zoom set
       v.muted = true; v.loop = true; v.playsInline = true;
       v.controls = !!opts.controls;
       v.controlsList = "nodownload nofullscreen";
       v.disablePictureInPicture = true;
       if (thumbUrl) v.poster = thumbUrl; // poster frame from ffmpeg
-      if (opts.autoplay) v.autoplay = true;
+      if (opts.autoplay) { v.setAttribute("autoplay", ""); v.autoplay = true; }
+      // No poster available: the #t fragment makes Safari paint the first frame.
+      v.src = (!thumbUrl && !opts.autoplay) ? playUrl + "#t=0.001" : playUrl;
       if (opts.manage === "autoplay")        autoplayObserver.observe(v);
       else if (opts.manage === "pause-only") pauseOnlyObserver.observe(v);
       return v;

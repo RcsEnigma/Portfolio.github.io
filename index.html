@@ -268,6 +268,23 @@ body {
   color: rgba(255,255,255,0.65); letter-spacing: 0.08em;
   border-radius: 2px; z-index: 2; backdrop-filter: blur(4px);
 }
+/* Play-triangle badge: marks grid tiles whose primary media is a video */
+.video-badge {
+  position: absolute; right: 0.8rem; bottom: 0.8rem;
+  width: 22px; height: 22px; z-index: 2; pointer-events: none;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.75));
+}
+.video-badge svg { display: block; width: 100%; height: 100%; }
+
+/* Shown inside the modal when a video can't be loaded/played */
+.modal-video-error {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; gap: 0.6rem;
+  align-items: center; justify-content: center; text-align: center; padding: 1rem;
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em;
+  color: var(--muted); background: rgba(0,0,0,0.45); pointer-events: none;
+}
+.modal-video-error a { color: var(--accent); pointer-events: auto; }
 .grid-item.hidden { display: none; }
 
 /* ── Modal — two-column centered card ────────────────────── */
@@ -876,7 +893,7 @@ function buildCarousel() {
       const work = item.data;
       slide.onclick = () => openModal(work);
 
-      const mEl = createMediaEl(work.primaryMedia, work.type, true, work.thumbMedia);
+      const mEl = createMediaEl(work.primaryMedia, work.type, true, work.thumbMedia, work.webMedia?.[0]);
       if (mEl) {
         if (work.aspectRatio && work.aspectRatio < 0.85) mEl.classList.add("portrait-pan");
         slide.appendChild(mEl);
@@ -898,7 +915,8 @@ function buildCarousel() {
       const page = item.data;
       slide.onclick = () => { window.location.href = "/" + page.slug + "/"; };
 
-      const mEl = createPageMediaEl(page.slug, page.carouselMedia, page.carouselType, true);
+      const mi = (page.widgets || []).flatMap(w => w.media || []).find(m => m.file === page.carouselMedia);
+      const mEl = createPageMediaEl(page.slug, page.carouselMedia, page.carouselType, true, mi?.webFile, mi?.thumb);
       if (mEl) {
         slide.appendChild(mEl);
       } else {
@@ -935,10 +953,22 @@ function buildCarousel() {
   clearInterval(carouselTimer);
   if (slides.length > 1 && !carouselPaused)
     carouselTimer = setInterval(() => goCarousel((carouselIndex + 1) % slides.length), 5000);
+  syncCarouselVideos(carouselIndex || 0);
+}
+
+// Only the visible hero slide plays; the others are paused.
+function syncCarouselVideos(idx) {
+  document.querySelectorAll(".carousel-slide").forEach((s, i) => {
+    const v = s.querySelector("video");
+    if (!v) return;
+    if (i === idx) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+    else v.pause();
+  });
 }
 
 function goCarousel(idx) {
   document.querySelectorAll(".carousel-slide").forEach((s,i) => s.classList.toggle("active", i===idx));
+  syncCarouselVideos(idx);
   document.querySelectorAll(".carousel-dot").forEach((d,i)  => d.classList.toggle("active", i===idx));
   carouselIndex = idx;
   clearInterval(carouselTimer);
@@ -981,10 +1011,11 @@ function buildGrid() {
     const span = getSpan(work);
     if (span !== "normal") item.dataset.span = span;
 
-    const mEl = createMediaEl(work.primaryMedia, work.type, false, work.thumbMedia);
+    const mEl = createMediaEl(work.primaryMedia, work.type, false, work.thumbMedia,
+                              work.webMedia?.[0], COARSE_TOUCH);
     if (mEl) {
       item.appendChild(mEl);
-      if (work.type === "video") gridVideoObserver.observe(mEl);
+      if (mEl.tagName === "VIDEO") gridVideoObserver.observe(mEl);
     } else {
       const ph = document.createElement("div");
       ph.className = "grid-placeholder " + DEMO_GRADS[i % DEMO_GRADS.length];
@@ -992,6 +1023,14 @@ function buildGrid() {
       lbl.className = "demo-content";
       lbl.textContent = work.id.replace(/_/g," ");
       ph.appendChild(lbl); item.appendChild(ph);
+    }
+
+    if (work.type === "video") {
+      const vb = document.createElement("div");
+      vb.className = "video-badge";
+      vb.setAttribute("aria-hidden", "true");
+      vb.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 3.5v17l14-8.5z" fill="#fff"/></svg>';
+      item.appendChild(vb);
     }
 
     if (work.allMedia?.length > 1) {
@@ -1155,9 +1194,10 @@ function loadSlotDirect(slotId, work) {
     img.src = thumb || "/works/" + src;
     slotEl.appendChild(img);
   } else {
-    const v = makeVideo("/works/" + src);
+    const v = makeVideo(workVideoUrl(work, modalMediaIndex), workVideoPoster(work, modalMediaIndex));
     slotEl.appendChild(v);
     activate();
+    watchVideo(v, slotEl, "/works/" + src);
     v.play().catch(()=>{});
   }
 }
@@ -1194,19 +1234,43 @@ function renderModalMedia() {
     img.src = thumb || "/works/" + src;
     toEl.appendChild(img);
   } else {
-    const v = makeVideo("/works/" + src);
+    const v = makeVideo(workVideoUrl(modalWork, modalMediaIndex), workVideoPoster(modalWork, modalMediaIndex));
     toEl.appendChild(v);
     swap();
+    watchVideo(v, toEl, "/works/" + src);
     setTimeout(() => v.play().catch(()=>{}), 60);
   }
 }
 
-function makeVideo(src) {
-  const v = document.createElement("video");
-  v.src = src; v.muted = true; v.loop = true; v.playsInline = true; v.controls = true;
+function makeVideo(src, poster) {
+  const v = baseVideo();
+  v.controls = true;
   v.controlsList = "nodownload";
   v.disablePictureInPicture = true;
+  v.preload = "auto";
+  if (poster) v.poster = poster;
+  v.src = src;
   return v;
+}
+
+// Modal video feedback: the spinner stays up until data has actually arrived
+// (the poster shows meanwhile), and a message replaces the player if the file
+// can't be loaded at all (e.g. an .mkv in Safari) instead of a silent gray box.
+function watchVideo(v, slotEl, originalUrl) {
+  if (v.readyState < 2) showSpinner(true);
+  const ready = () => showSpinner(false);
+  v.addEventListener("loadeddata", ready, { once: true });
+  v.addEventListener("canplay", ready, { once: true });
+  v.addEventListener("error", () => {
+    showSpinner(false);
+    v.controls = false;
+    if (slotEl.querySelector(".modal-video-error")) return;
+    const d = document.createElement("div");
+    d.className = "modal-video-error";
+    d.innerHTML = "<div>This video can\u2019t be played in this browser.</div>" +
+                  '<a href="' + esc(originalUrl) + '" target="_blank" rel="noopener">Open the file</a>';
+    slotEl.appendChild(d);
+  }, { once: true });
 }
 
 function makeDemoPlaceholder(index) {
@@ -1327,7 +1391,7 @@ function showZoomItem(i) {
   if (type !== "image") {
     _zoomIsVideo = true;
     ov.style.cursor = "default";
-    const v = makeVideo("/works/" + src);
+    const v = makeVideo(workVideoUrl(modalWork, i), workVideoPoster(modalWork, i));
     document.getElementById("zoom-video").appendChild(v);
     document.getElementById("zoom-video").classList.add("open");
     v.play().catch(() => {});
@@ -1585,17 +1649,78 @@ function getMediaType(filename) {
   return null;
 }
 
-function createMediaEl(src, type, autoplay, thumb) {
+// ── Video playback helpers ─────────────────────────────────────
+// Phones/tablets (no hover, coarse pointer): grid videos are shown as static
+// poster stills — nothing is downloaded until a work is opened.
+const COARSE_TOUCH = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+const VIDEO_MIME = { mp4: "video/mp4", webm: "video/webm", mov: "video/quicktime",
+                     mkv: "video/x-matroska", ogg: "video/ogg" };
+
+// false only when the browser says outright that it can't handle the format
+// (e.g. .mkv in iOS Safari). Unknown formats count as playable.
+function browserCanPlay(file) {
+  const mime = VIDEO_MIME[(String(file).split("?")[0].split(".").pop() || "").toLowerCase()];
+  if (!mime) return true;
+  try { return document.createElement("video").canPlayType(mime) !== ""; } catch (_) { return true; }
+}
+
+// URL to actually play for item i of a work: the web-safe copy when
+// generate-manifest.js made one, otherwise the original.
+function workVideoUrl(work, i) {
+  const web = work.webMedia?.[i];
+  return web ? "/works/thumbs/" + web : "/works/" + work.allMedia[i];
+}
+function workVideoPoster(work, i) {
+  const t = work.modalThumbs?.[i];
+  return t ? "/works/thumbs/" + t : null;
+}
+
+// Muted, inline, autoplay-ready <video>. The muted/playsinline ATTRIBUTES are
+// set before src — iOS Safari is stricter about autoplay when only the JS
+// properties are set.
+function baseVideo() {
+  const v = document.createElement("video");
+  v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("webkit-playsinline", "");
+  v.muted = true; v.playsInline = true; v.loop = true;
+  return v;
+}
+
+// Hero autoplay: keep trying to start; if the browser refuses (Low Power
+// Mode, data saver, unsupported file) the element simply keeps showing its
+// poster still, and tapping the slide opens the work as usual.
+function attachAutoplayGuard(v) {
+  const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => { v.dataset.autoplay = "blocked"; }); };
+  v.addEventListener("loadeddata", tryPlay, { once: true });
+  v.addEventListener("error", () => { v.dataset.autoplay = "failed"; });
+  tryPlay();
+}
+
+function stillImg(url, alt) {
+  const img = document.createElement("img");
+  img.src = url; img.alt = alt || ""; img.loading = "lazy"; img.dataset.videoStill = "1";
+  return img;
+}
+
+function createMediaEl(src, type, autoplay, thumb, webFile, staticOnly) {
   if (!src) return null;
   const orig = "/works/" + src;
   const disp = thumb ? "/works/thumbs/" + thumb : orig;
   if (type === "video") {
-    const v = document.createElement("video");
-    v.src = orig; v.muted = true; v.loop = true; v.playsInline = true;
+    const playUrl = webFile ? "/works/thumbs/" + webFile : orig;
+    const poster  = thumb ? "/works/thumbs/" + thumb : null;
+    // Static still instead of a <video>: touch grids, or a file this browser
+    // definitively can't play (so there's never a blank/black tile).
+    if (poster && (staticOnly || !browserCanPlay(playUrl))) return stillImg(poster, src);
+    const v = baseVideo();
     v.controlsList = "nodownload";
     v.disablePictureInPicture = true;
-    if (thumb) v.poster = "/works/thumbs/" + thumb;
-    if (autoplay) v.autoplay = true;
+    v.preload = autoplay ? "auto" : "metadata";
+    if (poster) v.poster = poster;
+    if (autoplay) { v.setAttribute("autoplay", ""); v.autoplay = true; }
+    // No poster available: the #t fragment makes Safari paint the first frame.
+    v.src = (!poster && !autoplay) ? playUrl + "#t=0.001" : playUrl;
+    if (autoplay) attachAutoplayGuard(v);
     return v;
   }
   if (type === "image") {
@@ -1606,13 +1731,20 @@ function createMediaEl(src, type, autoplay, thumb) {
   return null;
 }
 
-function createPageMediaEl(slug, file, type, autoplay) {
+function createPageMediaEl(slug, file, type, autoplay, webFile, thumb) {
   if (!file) return null;
-  const p = "/pages/" + slug + "/" + file;
+  const base = "/pages/" + slug + "/";
+  const p = base + file;
   if (type === "video") {
-    const v = document.createElement("video");
-    v.src = p; v.muted = true; v.loop = true; v.playsInline = true;
-    if (autoplay) v.autoplay = true;
+    const playUrl = webFile ? base + "thumbs/" + webFile : p;
+    const poster  = thumb ? base + "thumbs/" + thumb : null;
+    if (poster && !browserCanPlay(playUrl)) return stillImg(poster, "");
+    const v = baseVideo();
+    v.preload = autoplay ? "auto" : "metadata";
+    if (poster) v.poster = poster;
+    if (autoplay) { v.setAttribute("autoplay", ""); v.autoplay = true; }
+    v.src = playUrl;
+    if (autoplay) attachAutoplayGuard(v);
     return v;
   }
   const img = document.createElement("img");

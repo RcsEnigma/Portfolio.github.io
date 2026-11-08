@@ -16,7 +16,7 @@ Keep an eye out for this shader, I use it a lot.
 true
 
 [tags]
-3D, Blender
+3D, Blender, Photorealism
 
 [date]
 2025-09

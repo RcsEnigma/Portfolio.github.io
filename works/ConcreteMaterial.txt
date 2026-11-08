@@ -18,7 +18,7 @@ In order:
 and #9 is simply the nodemap. 
 
 [tags]
-3D, Blender
+3D, Blender, Photorealism
 
 [date]
 2024-10
