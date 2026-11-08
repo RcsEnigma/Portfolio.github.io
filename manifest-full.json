@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T13:34:43.250Z",
+  "generated": "2026-11-08T13:53:06.938Z",
   "tags": [
     "2D",
     "3D",
@@ -727,7 +727,11 @@
       "id": "Birds_Eye",
       "primaryMedia": "Birds_Eye_01.mp4",
       "allMedia": [
-        "Birds_Eye_01.mp4"
+        "Birds_Eye_01.mp4",
+        "Birds_Eye_02.png",
+        "Birds_Eye_03.png",
+        "Birds_Eye_04.png",
+        "Birds_Eye_05.png"
       ],
       "type": "video",
       "title": "Bird's Eye",
@@ -744,13 +748,25 @@
       "gridSpan": "wide",
       "thumbMedia": "Birds_Eye_01_poster.webp",
       "modalThumbs": [
-        "Birds_Eye_01_poster.webp"
+        "Birds_Eye_01_poster.webp",
+        "Birds_Eye_02.webp",
+        "Birds_Eye_03.webp",
+        "Birds_Eye_04.webp",
+        "Birds_Eye_05.webp"
       ],
       "zoomMedia": [
-        null
+        null,
+        "Birds_Eye_02_zoom.webp",
+        "Birds_Eye_03_zoom.webp",
+        "Birds_Eye_04_zoom.webp",
+        "Birds_Eye_05_zoom.webp"
       ],
       "webMedia": [
-        "Birds_Eye_01_web.mp4"
+        "Birds_Eye_01_web.mp4",
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
