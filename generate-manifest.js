@@ -72,6 +72,10 @@ const THUMB_QUALITY = 82;        // WebP quality (0-100)
 const ZOOM_MAX_PX  = 4096;
 const ZOOM_QUALITY = 90;
 
+// Printed at the top of every run, so you can tell at a glance which copy of
+// this script you're running.
+const SCRIPT_VERSION = "video pipeline v2 (2026-11-08)";
+
 const WORKS_DIR   = path.join(__dirname, "works");
 const PAGES_DIR   = path.join(__dirname, "pages");
 const MANIFEST_OUT = path.join(__dirname, "manifest.json");
@@ -79,6 +83,22 @@ const MANIFEST_FULL_OUT = path.join(__dirname, "manifest-full.json");
 const PAGES_OUT   = path.join(__dirname, "pages.json");
 const STUB_MARKER = "AUTO-GENERATED-PAGE-STUB";
 const FULL_PAGE_DIR = path.join(__dirname, "full");
+
+// ── Link previews (shareable per-work URLs) ───────────────────
+// Every work gets one tiny HTML file — w/<slug>.html, served by GitHub Pages
+// at /w/<slug> — whose <meta> tags give Discord/Slack/iMessage/etc. a title,
+// description and image for the link. Visitors who open it are forwarded
+// straight into the gallery with that work open. Gated works get theirs under
+// full/w/ (so their link contains /full) with a BLURRED preview image.
+const SITE_URL  = "https://ajambrozic.com";   // no trailing slash
+const SITE_NAME = "AJ Ambrozic";
+const PREVIEW_DIR      = path.join(__dirname, "w");
+const FULL_PREVIEW_DIR = path.join(FULL_PAGE_DIR, "w");
+const PREVIEW_MARKER   = "AUTO-GENERATED-WORK-PREVIEW";
+const OG_DESC_MAX = 200;                       // characters of description shown
+const OG_VIDEO_MAX_BYTES = 20 * 1024 * 1024;   // og:video only when the MP4 is this small
+const OG_BLUR_WIDTH = 600;                     // gated preview: size and blur strength
+const OG_BLUR_SIGMA = 28;
 
 // Works tagged with any of these (case-insensitive) are left out of
 // manifest.json entirely — not just hidden client-side, they're never sent
@@ -127,6 +147,14 @@ function slugify(name) {
   return name.toLowerCase().trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+// URL-friendly name for a work: "Neon Drift!" -> "neon-drift". Accents are
+// folded ("café" -> "cafe") so non-English titles don't collapse to nothing.
+function workSlugBase(id) {
+  const s = String(id).normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return s || "work";
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -802,6 +830,17 @@ async function buildWorks() {
     return a.title.localeCompare(b.title);
   });
 
+  // Stable URL slugs (derived from the work's id, which comes from its filename;
+  // renaming a file changes its slug). Duplicates get -2, -3, ...
+  const usedSlugs = new Set();
+  for (const e of entries) {
+    let slug = workSlugBase(e.id), n = 2;
+    while (usedSlugs.has(slug)) slug = workSlugBase(e.id) + "-" + n++;
+    usedSlugs.add(slug);
+    e.slug = slug;
+    if (isGatedWork(e)) e.gated = true;   // only ever appears in manifest-full.json
+  }
+
   const allTags = [...new Set(entries.flatMap(e=>e.tags))].sort();
   return { generated:new Date().toISOString(), tags:allTags, works:entries };
 }
@@ -861,6 +900,10 @@ async function buildPages() {
     if (!slug) continue;
     if (slug === "full") {
       console.log("  skipping /pages/" + folderName + "/ — \"full\" is reserved for the gated-content page (see GATED_TAGS); rename the folder.");
+      continue;
+    }
+    if (slug === "w") {
+      console.log("  skipping /pages/" + folderName + "/ — \"w\" is reserved for shareable work links (/w/<name>); rename the folder.");
       continue;
     }
 
@@ -989,6 +1032,168 @@ function writeFullPageStub() {
   fs.copyFileSync(rootIndexPath, path.join(FULL_PAGE_DIR, "index.html"));
 }
 
+function escAttr(v) {
+  return String(v).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function absUrl(rel) {   // "works/thumbs/a b.webp" -> "https://site/works/thumbs/a%20b.webp"
+  return SITE_URL + "/" + rel.split("/").map(encodeURIComponent).join("/");
+}
+function excerpt(work) {
+  let t = String(work.description || "").replace(/\s+/g, " ").trim();
+  if (!t) return (work.tags && work.tags.length) ? work.tags.join(" \u00b7 ") : "A work by " + SITE_NAME;
+  if (t.length > OG_DESC_MAX) {
+    t = t.slice(0, OG_DESC_MAX);
+    const sp = t.lastIndexOf(" ");
+    if (sp > OG_DESC_MAX * 0.6) t = t.slice(0, sp);
+    t = t.replace(/[\s,.;:\u2014-]+$/, "") + "\u2026";
+  }
+  return t;
+}
+
+// Preview image for an ordinary (public) work: the existing WebP thumbnail /
+// video poster, else the original if it's a web-friendly image. Returns
+// { url, width, height } or null.
+async function publicPreviewImage(w) {
+  let rel = null;
+  if (w.thumbMedia) rel = "works/thumbs/" + w.thumbMedia;
+  else if (w.type === "image" && /\.(jpe?g|png|webp)$/i.test(w.primaryMedia)) rel = "works/" + w.primaryMedia;
+  if (!rel) return null;
+  const file = path.join(__dirname, rel);
+  if (!fs.existsSync(file)) return null;
+  let width = null, height = null;
+  if (sharp) { try { const m = await sharp(file).metadata(); width = m.width; height = m.height; } catch (_) {} }
+  return { url: absUrl(rel), width, height };
+}
+
+// Gated works: a small, heavily blurred copy of the image, saved next to the
+// stub (full/w/<slug>.preview.webp). The real image is never used in the
+// preview. No sharp -> no image at all (never fall back to the sharp original).
+async function gatedPreviewImage(w, dir) {
+  if (!sharp) return null;
+  let src = null;
+  if (w.thumbMedia && fs.existsSync(path.join(__dirname, "works", "thumbs", w.thumbMedia)))
+    src = path.join(__dirname, "works", "thumbs", w.thumbMedia);
+  else if (w.type === "image" && fs.existsSync(path.join(__dirname, "works", w.primaryMedia)))
+    src = path.join(__dirname, "works", w.primaryMedia);
+  if (!src) return null;
+  const file = w.slug + ".preview.webp";
+  try {
+    const info = await sharp(src, { limitInputPixels: false })
+      .resize(OG_BLUR_WIDTH, null, { withoutEnlargement: true })
+      .blur(OG_BLUR_SIGMA).webp({ quality: 70 }).toFile(path.join(dir, file));
+    return { url: SITE_URL + "/full/w/" + encodeURIComponent(file), width: info.width, height: info.height, file };
+  } catch (e) { logLine("  blurred preview FAILED for " + w.slug + ": " + (e.message || e)); return null; }
+}
+
+// og:video (plays inline in Discord): only for public video works whose
+// playable file is a small MP4.
+function publicPreviewVideo(w) {
+  if (w.type !== "video") return null;
+  let rel = null;
+  if (w.webMedia && w.webMedia[0]) rel = "works/thumbs/" + w.webMedia[0];
+  else if (/\.mp4$/i.test(w.primaryMedia)) rel = "works/" + w.primaryMedia;
+  if (!rel) return null;
+  const file = path.join(__dirname, rel);
+  let size; try { size = fs.statSync(file).size; } catch (_) { return null; }
+  if (size > OG_VIDEO_MAX_BYTES) return null;
+  const pr = probeVideo(file);
+  return { url: absUrl(rel), width: pr ? pr.width : null, height: pr ? pr.height : null };
+}
+
+function previewStubHtml(w, ctx) {
+  const e = escAttr;
+  const title = w.title;
+  const desc  = excerpt(w);
+  const target = (w.gated ? "/full/" : "/") + "?work=" + encodeURIComponent(w.slug);
+  const m = [];
+  m.push(`<meta name="robots" content="noindex, nofollow">`);
+  m.push(`<link rel="canonical" href="${e(ctx.url)}">`);
+  m.push(`<meta name="description" content="${e(desc)}">`);
+  m.push(`<meta property="og:site_name" content="${e(SITE_NAME)}">`);
+  m.push(`<meta property="og:type" content="${ctx.video ? "video.other" : "website"}">`);
+  m.push(`<meta property="og:title" content="${e(title)}">`);
+  m.push(`<meta property="og:description" content="${e(desc)}">`);
+  m.push(`<meta property="og:url" content="${e(ctx.url)}">`);
+  if (ctx.image) {
+    m.push(`<meta property="og:image" content="${e(ctx.image.url)}">`);
+    if (ctx.image.width && ctx.image.height) {
+      m.push(`<meta property="og:image:width" content="${ctx.image.width}">`);
+      m.push(`<meta property="og:image:height" content="${ctx.image.height}">`);
+    }
+    m.push(`<meta property="og:image:alt" content="${e(title)}">`);
+  }
+  if (ctx.video) {
+    m.push(`<meta property="og:video" content="${e(ctx.video.url)}">`);
+    m.push(`<meta property="og:video:secure_url" content="${e(ctx.video.url)}">`);
+    m.push(`<meta property="og:video:type" content="video/mp4">`);
+    if (ctx.video.width && ctx.video.height) {
+      m.push(`<meta property="og:video:width" content="${ctx.video.width}">`);
+      m.push(`<meta property="og:video:height" content="${ctx.video.height}">`);
+    }
+  }
+  m.push(`<meta name="twitter:card" content="${ctx.image ? "summary_large_image" : "summary"}">`);
+  m.push(`<meta name="twitter:title" content="${e(title)}">`);
+  m.push(`<meta name="twitter:description" content="${e(desc)}">`);
+  if (ctx.image) m.push(`<meta name="twitter:image" content="${e(ctx.image.url)}">`);
+  return `<!DOCTYPE html>
+<!-- ${PREVIEW_MARKER}: ${w.slug} -- do not edit; regenerated by generate-manifest.js -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${e(title)} — ${e(SITE_NAME)}</title>
+${m.join("\n")}
+<script>
+// Link-preview bots read the tags above and stop here. People get forwarded
+// into the gallery with this work open (any ?m= / ?zoom= is passed along).
+(function () {
+  var q = location.search.replace(/^\\?/, "");
+  location.replace(${JSON.stringify(target)} + (q ? "&" + q : ""));
+})();
+</script>
+</head>
+<body style="background:#0e0e0e;color:#e8e4dc;font-family:sans-serif;padding:2rem">
+<p>Opening <a href="${e(target)}" style="color:#c8b89a">${e(title)}</a>…</p>
+</body>
+</html>
+`;
+}
+
+async function writePreviewStubs(works) {
+  const keep = new Map([[PREVIEW_DIR, new Set()], [FULL_PREVIEW_DIR, new Set()]]);
+  let count = 0, blurred = 0;
+  for (const w of works) {
+    const gated = !!w.gated;
+    const dir = gated ? FULL_PREVIEW_DIR : PREVIEW_DIR;
+    fs.mkdirSync(dir, { recursive: true });
+    const url = SITE_URL + (gated ? "/full/w/" : "/w/") + w.slug;
+    const image = gated ? await gatedPreviewImage(w, dir) : await publicPreviewImage(w);
+    const video = gated ? null : publicPreviewVideo(w);
+    if (gated && image) { blurred++; keep.get(dir).add(image.file); }
+    const name = w.slug + ".html";
+    fs.writeFileSync(path.join(dir, name), previewStubHtml(w, { url, image, video }));
+    keep.get(dir).add(name);
+    count++;
+  }
+  // Remove stubs/previews for works that no longer exist (only files we made).
+  for (const [dir, keepSet] of keep) {
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir)) {
+      if (keepSet.has(f)) continue;
+      const fp = path.join(dir, f);
+      try {
+        if (f.endsWith(".preview.webp")) { fs.unlinkSync(fp); continue; }
+        if (f.endsWith(".html") && fs.readFileSync(fp, "utf8").includes(PREVIEW_MARKER)) {
+          fs.unlinkSync(fp);
+          logLine("  removed stale link preview: " + path.relative(__dirname, fp));
+        }
+      } catch (_) {}
+    }
+    try { if (fs.readdirSync(dir).length === 0) fs.rmdirSync(dir); } catch (_) {}
+  }
+  return { count, blurred };
+}
+
 function writeStubs(pages) {
   const validSlugs = new Set(pages.map(p=>p.slug));
   // Version stamp changes on every run, forcing browsers/CDNs to fetch
@@ -1024,6 +1229,7 @@ function writeStubs(pages) {
 //  MAIN
 // ══════════════════════════════════════════════════════════════
 async function build() {
+  console.log("generate-manifest.js — " + SCRIPT_VERSION + "\n");
   // Report thumbnail tool availability
   if (!sharp) console.log("\nNote: sharp not installed — skipping image thumbnails. Run: npm install sharp\n");
   if (hasFfmpeg) console.log("ffmpeg: " + (ffmpegVersionLine || "found") + (hasFfprobe ? "" : "  (no ffprobe)") + (hasX264 ? "" : "  (NO libx264 encoder)") + "\n");
@@ -1053,16 +1259,22 @@ async function build() {
   fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifestPublic,null,2));
   fs.writeFileSync(MANIFEST_FULL_OUT, JSON.stringify(manifestFull,null,2));
   writeFullPageStub();
+  const previews = await writePreviewStubs(manifestFull.works);
 
   console.log("manifest.json: " + publicWorks.length + " work(s), " + publicTags.length + " tag(s)"
     + (gatedCount ? "  (+" + gatedCount + " gated — see manifest-full.json / /full/)" : "") + "\n");
   for (const e of manifestFull.works) {
     const span  = e.gridSpan.padEnd(10);
     const ar    = e.aspectRatio ? e.aspectRatio+" ar" : "no dims";
-    const thumb = e.thumbMedia ? " [thumb: "+e.thumbMedia+"]" : (sharp ? " [no thumb]" : "");
+    let thumb = e.thumbMedia ? " [thumb: "+e.thumbMedia+"]" : (sharp ? " [no thumb]" : "");
+    if (e.type === "video" && !e.thumbMedia)
+      thumb = !hasFfmpeg ? " [NO VIDEO POSTER: ffmpeg not found]"
+            : " [NO VIDEO POSTER: see \"Videos with problems\" below]";
     const gated = isGatedWork(e) ? "  [GATED, /full/ only]" : "";
     console.log("  "+span+" "+e.title+"  ("+ar+", "+e.allMedia.length+" file(s))"+thumb+gated);
   }
+
+  console.log("\nlink previews: " + previews.count + " file(s) in w/ and full/w/" + (previews.blurred ? " (" + previews.blurred + " blurred gated preview image(s))" : ""));
 
   fs.writeFileSync(PAGES_OUT, JSON.stringify({generated:new Date().toISOString(),pages},null,2));
   writeStubs(pages);
@@ -1073,6 +1285,21 @@ async function build() {
   const webCopies = manifestFull.works.reduce((n, e) => n + (e.webMedia || []).filter(Boolean).length, 0);
   if (webCopies) console.log("\n" + webCopies + " video(s) in works/ have a web-safe copy in works/thumbs/ (served instead of the original).");
   warnLargeFiles();
+  if (!hasFfmpeg) {
+    let vids = 0;
+    for (const e of manifestFull.works) vids += (e.allMedia || []).filter(f => mediaType(f) === "video").length;
+    for (const pg of pages) for (const w of pg.widgets) vids += (w.media || []).filter(m => m.type === "video").length;
+    if (vids) {
+      console.log("\n" + "=".repeat(64));
+      console.log("WARNING: ffmpeg was NOT FOUND on this computer, so " + vids + " video(s) got");
+      console.log("no poster image and no web-safe copy. On iPhones, videos without a");
+      console.log("poster show up blank in the grid, and .mkv files won't play at all.");
+      console.log("Install ffmpeg, open a NEW terminal window, confirm that");
+      console.log("  ffmpeg -version");
+      console.log("prints a version number, then run this script again.");
+      console.log("=".repeat(64));
+    }
+  }
   if (videoProblems.length) {
     console.log("\nVideos with problems (they will be retried on the next run):");
     for (const pr of videoProblems)

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T13:53:06.938Z",
+  "generated": "2026-11-08T18:32:34.652Z",
   "tags": [
     "2D",
     "3D",
@@ -61,7 +61,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "compound"
     },
     {
       "id": "Antagonist",
@@ -111,7 +112,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "antagonist"
     },
     {
       "id": "Fixer",
@@ -147,7 +149,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "fixer"
     },
     {
       "id": "Hatamoto",
@@ -187,7 +190,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "hatamoto"
     },
     {
       "id": "PosterOne",
@@ -237,7 +241,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "posterone"
     },
     {
       "id": "Trepidation_Rooms",
@@ -271,7 +276,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "trepidation-rooms"
     },
     {
       "id": "PortalLaser",
@@ -320,7 +326,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "portallaser"
     },
     {
       "id": "MagazineOne",
@@ -356,7 +363,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "magazineone"
     },
     {
       "id": "Grungy_Shower",
@@ -386,7 +394,8 @@
       ],
       "webMedia": [
         null
-      ]
+      ],
+      "slug": "grungy-shower"
     },
     {
       "id": "MagazineSix",
@@ -420,7 +429,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "magazinesix"
     },
     {
       "id": "MagazineSeven",
@@ -451,7 +461,9 @@
       ],
       "webMedia": [
         null
-      ]
+      ],
+      "slug": "magazineseven",
+      "gated": true
     },
     {
       "id": "4Arms",
@@ -486,7 +498,9 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "4arms",
+      "gated": true
     },
     {
       "id": "LedPanel",
@@ -528,7 +542,8 @@
         null,
         null,
         "LedPanel_04_web.mp4"
-      ]
+      ],
+      "slug": "ledpanel"
     },
     {
       "id": "MagazineFour",
@@ -561,7 +576,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "magazinefour"
     },
     {
       "id": "MagazineThree",
@@ -594,7 +610,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "magazinethree"
     },
     {
       "id": "Translation",
@@ -625,7 +642,8 @@
       ],
       "webMedia": [
         "Translation_web.mp4"
-      ]
+      ],
+      "slug": "translation"
     },
     {
       "id": "MagazineFive",
@@ -658,7 +676,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "magazinefive"
     },
     {
       "id": "MagazineTwo",
@@ -688,7 +707,8 @@
       ],
       "webMedia": [
         null
-      ]
+      ],
+      "slug": "magazinetwo"
     },
     {
       "id": "Gummy",
@@ -721,7 +741,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "gummy"
     },
     {
       "id": "Birds_Eye",
@@ -767,7 +788,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "birds-eye"
     },
     {
       "id": "Colleague_Face",
@@ -811,7 +833,9 @@
         null,
         null,
         "Colleague_Face_04_web.mp4"
-      ]
+      ],
+      "slug": "colleague-face",
+      "gated": true
     },
     {
       "id": "ConcreteMaterial",
@@ -873,7 +897,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "concretematerial"
     },
     {
       "id": "Procedural_Land",
@@ -907,7 +932,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "procedural-land"
     },
     {
       "id": "CardDisplay",
@@ -936,7 +962,8 @@
       ],
       "webMedia": [
         "CardDisplay_web.mp4"
-      ]
+      ],
+      "slug": "carddisplay"
     },
     {
       "id": "Skull_ArtOne",
@@ -966,7 +993,9 @@
       ],
       "webMedia": [
         null
-      ]
+      ],
+      "slug": "skull-artone",
+      "gated": true
     },
     {
       "id": "Scientist_Winged",
@@ -1013,7 +1042,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "scientist-winged"
     },
     {
       "id": "Skull_ArtTwo",
@@ -1042,7 +1072,8 @@
       ],
       "webMedia": [
         null
-      ]
+      ],
+      "slug": "skull-arttwo"
     },
     {
       "id": "Fossil_Walker",
@@ -1076,7 +1107,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "fossil-walker"
     },
     {
       "id": "Frozen Aperture",
@@ -1113,7 +1145,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "frozen-aperture"
     },
     {
       "id": "Sword",
@@ -1147,7 +1180,8 @@
       "webMedia": [
         null,
         "Sword_02_web.mp4"
-      ]
+      ],
+      "slug": "sword"
     },
     {
       "id": "Spine",
@@ -1190,7 +1224,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "spine"
     },
     {
       "id": "Pyroclastic_Elemental",
@@ -1224,7 +1259,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "pyroclastic-elemental"
     },
     {
       "id": "Scientist_Thermal",
@@ -1263,7 +1299,9 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "scientist-thermal",
+      "gated": true
     },
     {
       "id": "Spiderman",
@@ -1297,7 +1335,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "spiderman"
     },
     {
       "id": "Creeping_Shade",
@@ -1331,7 +1370,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "creeping-shade"
     },
     {
       "id": "Dimension_Jumper",
@@ -1365,7 +1405,8 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "dimension-jumper"
     },
     {
       "id": "Pixel_Combat_Sprites",
@@ -1418,7 +1459,8 @@
         null,
         "Pixel_Combat_Sprites_06_web.mp4",
         null
-      ]
+      ],
+      "slug": "pixel-combat-sprites"
     },
     {
       "id": "Nephilim",
@@ -1465,7 +1507,9 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "nephilim",
+      "gated": true
     },
     {
       "id": "Scientist_Sketches",
@@ -1496,7 +1540,9 @@
       ],
       "webMedia": [
         null
-      ]
+      ],
+      "slug": "scientist-sketches",
+      "gated": true
     },
     {
       "id": "AbstractSeven",
@@ -1526,7 +1572,8 @@
       ],
       "webMedia": [
         "AbstractSeven_web.mp4"
-      ]
+      ],
+      "slug": "abstractseven"
     },
     {
       "id": "AbstractSix",
@@ -1556,7 +1603,8 @@
       ],
       "webMedia": [
         "AbstractSix_web.mp4"
-      ]
+      ],
+      "slug": "abstractsix"
     },
     {
       "id": "Power",
@@ -1605,7 +1653,8 @@
         null,
         null,
         null
-      ]
+      ],
+      "slug": "power"
     },
     {
       "id": "AbstractFive",
@@ -1635,7 +1684,8 @@
       ],
       "webMedia": [
         "AbstractFive_web.mp4"
-      ]
+      ],
+      "slug": "abstractfive"
     },
     {
       "id": "Energy",
@@ -1669,7 +1719,9 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "energy",
+      "gated": true
     },
     {
       "id": "AbstractOne",
@@ -1699,7 +1751,8 @@
       ],
       "webMedia": [
         "AbstractOne_web.mp4"
-      ]
+      ],
+      "slug": "abstractone"
     },
     {
       "id": "AbstractThree",
@@ -1733,7 +1786,8 @@
       "webMedia": [
         "AbstractThree_01_web.mp4",
         "AbstractThree_02_web.mp4"
-      ]
+      ],
+      "slug": "abstractthree"
     },
     {
       "id": "AbstractTwo",
@@ -1763,7 +1817,8 @@
       ],
       "webMedia": [
         "AbstractTwo_web.mp4"
-      ]
+      ],
+      "slug": "abstracttwo"
     },
     {
       "id": "Scientist_And_Colleague",
@@ -1798,7 +1853,9 @@
       "webMedia": [
         null,
         null
-      ]
+      ],
+      "slug": "scientist-and-colleague",
+      "gated": true
     }
   ]
 }

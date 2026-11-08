@@ -273,7 +273,10 @@ body {
   position: absolute; right: 0.8rem; bottom: 0.8rem;
   width: 22px; height: 22px; z-index: 2; pointer-events: none;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,0.75));
+  transition: opacity 0.2s ease;
 }
+/* Desktop hover preview is playing: the triangle steps aside, then returns */
+.grid-item.is-playing .video-badge { opacity: 0; }
 .video-badge svg { display: block; width: 100%; height: 100%; }
 
 /* Shown inside the modal when a video can't be loaded/played */
@@ -458,6 +461,16 @@ body {
   z-index: 301; transition: background 0.2s;
 }
 #zoom-close-btn:hover { background: rgba(255,255,255,0.1); }
+#zoom-link-btn {
+  position: fixed; top: 1rem; right: 3.4rem;
+  background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8); height: 34px; padding: 0 0.85rem;
+  border-radius: 17px; cursor: pointer;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 301; transition: background 0.2s;
+}
+#zoom-link-btn:hover { background: rgba(255,255,255,0.1); }
 #zoom-hint {
   position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%);
   font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;
@@ -688,6 +701,7 @@ footer span {
                 title="Newer post (↑)" aria-label="Newer post" onclick="stepPost(-1)">&#8249;</button>
         <button class="mbtn mbtn-post post-nav-hidden" data-post-dir="1"
                 title="Older post (↓)" aria-label="Older post" onclick="stepPost(1)">&#8250;</button>
+        <button class="mbtn" id="modal-link-btn" onclick="copyWorkLink(this)" title="Copy a link to this post">Link</button>
         <button class="mbtn" id="modal-zoom-btn" onclick="openZoom()">Zoom</button>
         <button class="mbtn mbtn-icon" onclick="closeModal()">&#x2715;</button>
       </div>
@@ -717,6 +731,7 @@ footer span {
 <!-- ── ZOOM OVERLAY ──────────────────────────────────────────── -->
 <div id="zoom-overlay">
   <button id="zoom-close-btn" onclick="closeZoom()">&#x2715;</button>
+  <button id="zoom-link-btn" onclick="copyWorkLink(this, true)" title="Copy a link to this exact image">Link</button>
   <div id="zoom-canvas"></div>
   <div id="zoom-video"></div>
   <button class="zoom-arrow is-hidden" id="zoom-prev" aria-label="Previous image" onclick="stepZoom(-1)">&#8249;</button>
@@ -737,6 +752,8 @@ footer span {
 let manifest        = null;
 let pagesData        = { pages: [] };
 let activeFilters    = new Set(["all"]);
+let GRID_PATH        = "/";     // "/" on the public site, "/full/" on the gated page (set in boot)
+let _suppressPop     = false;   // swallow the popstate we cause ourselves when closing zoom
 let carouselIndex    = 0;
 let carouselTimer    = null;
 let carouselPaused   = false;   // true while the work modal is open
@@ -766,6 +783,7 @@ async function boot() {
   // underlying image files are just as publicly reachable as anything else
   // on GitHub Pages to anyone who has (or guesses) the direct URL.
   const isFullPath = /^\/full\/?$/.test(location.pathname);
+  GRID_PATH = isFullPath ? "/full/" : "/";
   const manifestUrl = isFullPath ? "/manifest-full.json" : "/manifest.json";
   try {
     const res = await fetch(manifestUrl + "?" + Date.now());
@@ -786,6 +804,101 @@ async function boot() {
   // Deep-link support: visiting /#about or /#contact (e.g. from a subpage) lands on that tab
   const hash = location.hash.replace('#','');
   if (hash === 'about' || hash === 'contact') showPage(hash);
+
+  applyUrlState();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SHAREABLE URLS
+//    /?tag=3D&tag=art                 grid with those filters
+//    /w/<slug>?m=2                    a work, on its 2nd attached item
+//    /w/<slug>?m=2&zoom=1             ...in the full-screen zoom view
+//  /w/<slug> is a tiny generated page that gives link previews their title /
+//  description / image and then forwards into /?work=<slug>. Gated works use
+//  /full/w/<slug>. The address bar always shows the preview-friendly form,
+//  so whatever you copy from it embeds properly.
+// ═══════════════════════════════════════════════════════════════
+function workSlug(w) { return w.slug || w.id; }
+function workPath(w) { return (w.gated ? "/full/w/" : "/w/") + encodeURIComponent(workSlug(w)); }
+function workUrlPath(w, idx, zoom) {
+  const q = new URLSearchParams();
+  if (idx > 0) q.set("m", String(idx + 1));        // 1-based; omitted for the first item
+  if (zoom) q.set("zoom", "1");
+  const qs = q.toString();
+  return workPath(w) + (qs ? "?" + qs : "");
+}
+function gridUrlPath() {
+  const q = new URLSearchParams();
+  [...activeFilters].filter(t => t !== "all").forEach(t => q.append("tag", t));
+  const qs = q.toString();
+  return GRID_PATH + (qs ? "?" + qs : "");
+}
+
+// Keep the address bar in step with what's showing. These REPLACE the current
+// history entry — they never add one — so the Back button is unaffected.
+function syncUrl() {
+  if (!modalWork) return;
+  const zoom = document.getElementById("zoom-overlay").classList.contains("open");
+  try { history.replaceState(history.state, "", workUrlPath(modalWork, modalMediaIndex, zoom)); } catch (_) {}
+}
+function syncFilterUrl() {
+  if (modalWork) return;
+  try { history.replaceState(history.state, "", gridUrlPath()); } catch (_) {}
+}
+
+// Apply ?tag= / ?work= / ?m= / ?zoom= on load.
+function applyUrlState() {
+  const q = new URLSearchParams(location.search);
+  const wantTags = q.getAll("tag");
+  const slug = q.get("work");
+
+  if (wantTags.length) {
+    const valid = wantTags
+      .map(t => (manifest.tags || []).find(x => x.toLowerCase() === t.toLowerCase()))
+      .filter(Boolean);
+    if (valid.length) {
+      activeFilters = new Set(valid);
+      document.querySelectorAll(".filter-tag").forEach(btn =>
+        btn.classList.toggle("active", activeFilters.has(btn.dataset.tag)));
+      filterGrid();
+    }
+  }
+  if (!slug && !wantTags.length) return;
+
+  // Make the entry the visitor landed on the plain grid URL first, so Back from
+  // the popup lands on the grid (grid -> popup -> zoom, one step each).
+  try { history.replaceState(null, "", gridUrlPath()); } catch (_) {}
+  if (!slug) return;
+
+  const work = (manifest.works || []).find(w => workSlug(w) === slug || w.id === slug);
+  if (!work) return;                       // unknown / renamed / gated: just show the grid
+  const n = work.allMedia?.length || 1;
+  const m = Math.min(Math.max(parseInt(q.get("m"), 10) || 1, 1), n);
+  openModal(work, m - 1);
+  if (q.get("zoom") === "1" &&
+      (getMediaType(work.allMedia?.[m - 1]) || work.type) === "image") openZoom();
+}
+
+function copyWorkLink(btn, zoom) {
+  if (!modalWork) return;
+  const url = location.origin + workUrlPath(modalWork, modalMediaIndex, zoom === true);
+  const done = () => {
+    const old = btn.dataset.label || btn.textContent;
+    btn.dataset.label = old;
+    btn.textContent = "Copied";
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => { btn.textContent = old; }, 1400);
+  };
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = url; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (_) {}
+    ta.remove(); done();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(url).then(done, fallback);
+  else fallback();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -855,6 +968,7 @@ function toggleFilter(tag) {
   document.querySelectorAll(".filter-tag").forEach(btn =>
     btn.classList.toggle("active", activeFilters.has(btn.dataset.tag)));
   filterGrid();
+  syncFilterUrl();
 }
 
 function filterGrid() {
@@ -1015,7 +1129,14 @@ function buildGrid() {
                               work.webMedia?.[0], COARSE_TOUCH);
     if (mEl) {
       item.appendChild(mEl);
-      if (mEl.tagName === "VIDEO") gridVideoObserver.observe(mEl);
+      if (mEl.tagName === "VIDEO") {
+        gridVideoObserver.observe(mEl);
+        // Track the preview's REAL playback state (not just hover), so the play
+        // badge is hidden exactly while frames are advancing.
+        mEl.addEventListener("playing", () => item.classList.add("is-playing"));
+        ["pause", "ended", "emptied"].forEach(ev =>
+          mEl.addEventListener(ev, () => item.classList.remove("is-playing")));
+      }
     } else {
       const ph = document.createElement("div");
       ph.className = "grid-placeholder " + DEMO_GRADS[i % DEMO_GRADS.length];
@@ -1063,11 +1184,13 @@ function buildGrid() {
 // ═══════════════════════════════════════════════════════════════
 //  MODAL
 // ═══════════════════════════════════════════════════════════════
-function openModal(work) {
+function openModal(work, startIndex) {
   // Stepping between posts re-uses this function while the modal is already
   // open — in that case the existing history entry is kept (no extra push).
   const alreadyOpen = document.getElementById("modal-overlay").classList.contains("open");
-  modalWork = work; modalMediaIndex = 0; currentSlot = 'a';
+  modalWork = work; currentSlot = 'a';
+  const _n = work.allMedia?.length || 1;
+  modalMediaIndex = Math.min(Math.max(startIndex | 0, 0), _n - 1);   // 0 unless deep-linked
   pauseCarousel();
   document.getElementById("modal-info-panel").scrollTop = 0;
 
@@ -1088,19 +1211,19 @@ function openModal(work) {
   else lnk.style.display = "none";
 
   buildModalDots(work);
+  updateModalDots();           // active dot + ZOOM button for the starting item
   updatePostNav();
   const multi = work.allMedia?.length > 1;
   document.getElementById("modal-prev").style.display = multi ? "" : "none";
   document.getElementById("modal-next").style.display = multi ? "" : "none";
 
-  const firstType = getMediaType(work.allMedia?.[0]) || work.type;
-  document.getElementById("modal-zoom-btn").style.display = firstType === "image" ? "" : "none";
 
   loadSlotDirect("a", work);
 
   document.getElementById("modal-overlay").classList.add("open");
   document.body.style.overflow = "hidden";
-  if (!alreadyOpen) history.pushState({ _portfolio: "modal" }, "");
+  if (!alreadyOpen) history.pushState({ _portfolio: "modal" }, "", workUrlPath(work, modalMediaIndex, false));
+  else syncUrl();
 }
 
 // ── Post-to-post navigation ──────────────────────────────────────
@@ -1204,6 +1327,7 @@ function loadSlotDirect(slotId, work) {
 
 function renderModalMedia() {
   if (!modalWork) return;
+  syncUrl();
   const src    = modalWork.allMedia?.[modalMediaIndex];
   const type   = getMediaType(src) || modalWork.type;
   const nextId = currentSlot === "a" ? "b" : "a";
@@ -1439,6 +1563,7 @@ function stepZoom(dir) {
   modalMediaIndex = (modalMediaIndex + dir + n) % n;
   _zoomStepped = true;
   updateModalDots();          // dots + ZOOM button follow along
+  syncUrl();
   showZoomItem(modalMediaIndex);
 }
 
@@ -1469,10 +1594,13 @@ function openZoom() {
   document.getElementById("zoom-next").classList.toggle("is-hidden", !multi);
 
   document.getElementById("zoom-overlay").classList.add("open");
+  // Zoom is its own history step (grid -> popup -> zoom): Back from zoom lands on
+  // the popup, one more Back lands on the grid. The URL gains ?zoom=1.
+  history.pushState({ _portfolio: "zoom" }, "", workUrlPath(modalWork, modalMediaIndex, true));
   showZoomItem(modalMediaIndex);
 }
 
-function closeZoom() {
+function closeZoom(fromPop) {
   document.getElementById("zoom-overlay").classList.remove("open");
   _zoomToken++;               // cancel any in-flight image load
   _zoomClearVideo();
@@ -1493,6 +1621,12 @@ function closeZoom() {
   // If the viewer browsed to another item in zoom, bring the modal up to date.
   if (_zoomStepped && modalWork) renderModalMedia();
   _zoomStepped = false;
+  // Closed with the X / Esc (not the Back button): step the history back too, so
+  // the zoom entry doesn't linger. The popstate this causes is swallowed below.
+  if (!fromPop && history.state && history.state._portfolio === "zoom") {
+    _suppressPop = true;
+    history.back();
+  }
 }
 
 // Scroll-wheel zoom anchored to cursor
@@ -1530,7 +1664,7 @@ let _zoomSwipeSX = 0, _zoomSwipeSY = 0, _zoomSwipeOK = false, _zoomMulti = false
 function _zoomAtFit() { return _zoomScale <= _zoomFitScale * 1.01; }
 
 // Keep arrow presses from starting a pan / pinch / swipe on the overlay
-["zoom-prev", "zoom-next"].forEach(id => {
+["zoom-prev", "zoom-next", "zoom-link-btn"].forEach(id => {
   const b = document.getElementById(id);
   b.addEventListener("mousedown", e => e.stopPropagation());
   b.addEventListener("touchstart", e => e.stopPropagation(), { passive: true });
@@ -1597,8 +1731,9 @@ function handleOverlayClick(e) { closeModal(); }
 
 // Hardware back button (Samsung/Android) — closes modal without leaving the page
 window.addEventListener("popstate", () => {
+  if (_suppressPop) { _suppressPop = false; syncUrl(); return; }
   if (document.getElementById("zoom-overlay").classList.contains("open")) {
-    closeZoom(); return;
+    closeZoom(true); return;
   }
   if (modalWork) {
     document.getElementById("modal-overlay").classList.remove("open");
