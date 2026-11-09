@@ -96,6 +96,7 @@ const PREVIEW_DIR      = path.join(__dirname, "w");
 const FULL_PREVIEW_DIR = path.join(FULL_PAGE_DIR, "w");
 const PREVIEW_MARKER   = "AUTO-GENERATED-WORK-PREVIEW";
 const OG_DESC_MAX = 200;                       // characters of description shown
+const OG_VIDEO_ENABLED = true;                 // false = previews of video works show the poster image only
 const OG_VIDEO_MAX_BYTES = 20 * 1024 * 1024;   // og:video only when the MP4 is this small
 const OG_BLUR_WIDTH = 600;                     // gated preview: size and blur strength
 const OG_BLUR_SIGMA = 28;
@@ -349,6 +350,7 @@ function probeVideo(file) {
       vcodec: v.codec_name, pix_fmt: v.pix_fmt,
       width: v.width || 0, height: v.height || 0,
       acodec: a ? a.codec_name : null,
+      aprofile: a ? (a.profile || "") : "",
     };
   } catch (_) { return null; }
 }
@@ -1050,61 +1052,78 @@ function excerpt(work) {
   return t;
 }
 
-// Preview image for an ordinary (public) work: the existing WebP thumbnail /
-// video poster, else the original if it's a web-friendly image. Returns
-// { url, width, height } or null.
-async function publicPreviewImage(w) {
+// Each attached item of a work gets its own preview page, so a link to slide 3
+// previews slide 3: w/<slug>.html for the first item and w/<slug>--<n>.html
+// for item n (1-based). "--" can't occur inside a slug, so it's unambiguous.
+function previewName(slug, i) { return i === 0 ? slug : slug + "--" + (i + 1); }
+
+// Preview image for item i of an ordinary (public) work: its existing WebP
+// thumbnail / video poster, else the original if it's a web-friendly image.
+// Returns { url, width, height } or null.
+async function publicPreviewImage(w, i) {
+  const file = w.allMedia[i];
+  const thumb = w.modalThumbs && w.modalThumbs[i];
   let rel = null;
-  if (w.thumbMedia) rel = "works/thumbs/" + w.thumbMedia;
-  else if (w.type === "image" && /\.(jpe?g|png|webp)$/i.test(w.primaryMedia)) rel = "works/" + w.primaryMedia;
+  if (thumb) rel = "works/thumbs/" + thumb;
+  else if (mediaType(file) === "image" && /\.(jpe?g|png|webp)$/i.test(file)) rel = "works/" + file;
   if (!rel) return null;
-  const file = path.join(__dirname, rel);
-  if (!fs.existsSync(file)) return null;
+  const abs = path.join(__dirname, rel);
+  if (!fs.existsSync(abs)) return null;
   let width = null, height = null;
-  if (sharp) { try { const m = await sharp(file).metadata(); width = m.width; height = m.height; } catch (_) {} }
+  if (sharp) { try { const m = await sharp(abs).metadata(); width = m.width; height = m.height; } catch (_) {} }
   return { url: absUrl(rel), width, height };
 }
 
-// Gated works: a small, heavily blurred copy of the image, saved next to the
-// stub (full/w/<slug>.preview.webp). The real image is never used in the
+// Gated works: a small, heavily blurred copy of the item's image, saved next to
+// the stub (full/w/<name>.preview.webp). The real image is never used in the
 // preview. No sharp -> no image at all (never fall back to the sharp original).
-async function gatedPreviewImage(w, dir) {
+async function gatedPreviewImage(w, i, dir) {
   if (!sharp) return null;
+  const file = w.allMedia[i];
+  const thumb = w.modalThumbs && w.modalThumbs[i];
   let src = null;
-  if (w.thumbMedia && fs.existsSync(path.join(__dirname, "works", "thumbs", w.thumbMedia)))
-    src = path.join(__dirname, "works", "thumbs", w.thumbMedia);
-  else if (w.type === "image" && fs.existsSync(path.join(__dirname, "works", w.primaryMedia)))
-    src = path.join(__dirname, "works", w.primaryMedia);
+  if (thumb && fs.existsSync(path.join(__dirname, "works", "thumbs", thumb)))
+    src = path.join(__dirname, "works", "thumbs", thumb);
+  else if (mediaType(file) === "image" && fs.existsSync(path.join(__dirname, "works", file)))
+    src = path.join(__dirname, "works", file);
   if (!src) return null;
-  const file = w.slug + ".preview.webp";
+  const out = previewName(w.slug, i) + ".preview.webp";
   try {
     const info = await sharp(src, { limitInputPixels: false })
       .resize(OG_BLUR_WIDTH, null, { withoutEnlargement: true })
-      .blur(OG_BLUR_SIGMA).webp({ quality: 70 }).toFile(path.join(dir, file));
-    return { url: SITE_URL + "/full/w/" + encodeURIComponent(file), width: info.width, height: info.height, file };
-  } catch (e) { logLine("  blurred preview FAILED for " + w.slug + ": " + (e.message || e)); return null; }
+      .blur(OG_BLUR_SIGMA).webp({ quality: 70 }).toFile(path.join(dir, out));
+    return { url: SITE_URL + "/full/w/" + encodeURIComponent(out), width: info.width, height: info.height, file: out };
+  } catch (e) { logLine("  blurred preview FAILED for " + out + ": " + (e.message || e)); return null; }
 }
 
-// og:video (plays inline in Discord): only for public video works whose
-// playable file is a small MP4.
-function publicPreviewVideo(w) {
-  if (w.type !== "video") return null;
+// og:video (plays inline in Discord): only for public video items whose
+// playable file is a small, conservative MP4 (H.264 + yuv420p + AAC-LC audio or
+// none). Anything fancier is left out — the poster image still shows.
+function publicPreviewVideo(w, i) {
+  if (!OG_VIDEO_ENABLED) return null;
+  const file = w.allMedia[i];
+  if (mediaType(file) !== "video") return null;
   let rel = null;
-  if (w.webMedia && w.webMedia[0]) rel = "works/thumbs/" + w.webMedia[0];
-  else if (/\.mp4$/i.test(w.primaryMedia)) rel = "works/" + w.primaryMedia;
+  const web = w.webMedia && w.webMedia[i];
+  if (web) rel = "works/thumbs/" + web;
+  else if (/\.mp4$/i.test(file)) rel = "works/" + file;
   if (!rel) return null;
-  const file = path.join(__dirname, rel);
-  let size; try { size = fs.statSync(file).size; } catch (_) { return null; }
+  const abs = path.join(__dirname, rel);
+  let size; try { size = fs.statSync(abs).size; } catch (_) { return null; }
   if (size > OG_VIDEO_MAX_BYTES) return null;
-  const pr = probeVideo(file);
-  return { url: absUrl(rel), width: pr ? pr.width : null, height: pr ? pr.height : null };
+  const pr = probeVideo(abs);
+  if (!pr) return null;                       // can't verify it -> don't offer it
+  if (pr.vcodec !== "h264" || (pr.pix_fmt && pr.pix_fmt !== "yuv420p")) return null;
+  if (pr.acodec && !(pr.acodec === "aac" && !/HE/i.test(pr.aprofile))) return null;
+  return { url: absUrl(rel), width: pr.width, height: pr.height };
 }
 
 function previewStubHtml(w, ctx) {
   const e = escAttr;
   const title = w.title;
   const desc  = excerpt(w);
-  const target = (w.gated ? "/full/" : "/") + "?work=" + encodeURIComponent(w.slug);
+  const target = (w.gated ? "/full/" : "/") + "?work=" + encodeURIComponent(w.slug) +
+                 (ctx.index > 0 ? "&m=" + (ctx.index + 1) : "");
   const m = [];
   m.push(`<meta name="robots" content="noindex, nofollow">`);
   m.push(`<link rel="canonical" href="${e(ctx.url)}">`);
@@ -1136,7 +1155,7 @@ function previewStubHtml(w, ctx) {
   m.push(`<meta name="twitter:description" content="${e(desc)}">`);
   if (ctx.image) m.push(`<meta name="twitter:image" content="${e(ctx.image.url)}">`);
   return `<!DOCTYPE html>
-<!-- ${PREVIEW_MARKER}: ${w.slug} -- do not edit; regenerated by generate-manifest.js -->
+<!-- ${PREVIEW_MARKER}: ${previewName(w.slug, ctx.index)} -- do not edit; regenerated by generate-manifest.js -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1161,19 +1180,22 @@ ${m.join("\n")}
 
 async function writePreviewStubs(works) {
   const keep = new Map([[PREVIEW_DIR, new Set()], [FULL_PREVIEW_DIR, new Set()]]);
-  let count = 0, blurred = 0;
+  let count = 0, slides = 0, blurred = 0;
   for (const w of works) {
     const gated = !!w.gated;
     const dir = gated ? FULL_PREVIEW_DIR : PREVIEW_DIR;
     fs.mkdirSync(dir, { recursive: true });
-    const url = SITE_URL + (gated ? "/full/w/" : "/w/") + w.slug;
-    const image = gated ? await gatedPreviewImage(w, dir) : await publicPreviewImage(w);
-    const video = gated ? null : publicPreviewVideo(w);
-    if (gated && image) { blurred++; keep.get(dir).add(image.file); }
-    const name = w.slug + ".html";
-    fs.writeFileSync(path.join(dir, name), previewStubHtml(w, { url, image, video }));
-    keep.get(dir).add(name);
-    count++;
+    const n = (w.allMedia && w.allMedia.length) || 1;
+    for (let i = 0; i < n; i++) {
+      const name = previewName(w.slug, i);
+      const url = SITE_URL + (gated ? "/full/w/" : "/w/") + name;
+      const image = gated ? await gatedPreviewImage(w, i, dir) : await publicPreviewImage(w, i);
+      const video = gated ? null : publicPreviewVideo(w, i);
+      if (gated && image) { blurred++; keep.get(dir).add(image.file); }
+      fs.writeFileSync(path.join(dir, name + ".html"), previewStubHtml(w, { url, image, video, index: i }));
+      keep.get(dir).add(name + ".html");
+      count++; if (i > 0) slides++;
+    }
   }
   // Remove stubs/previews for works that no longer exist (only files we made).
   for (const [dir, keepSet] of keep) {
@@ -1191,7 +1213,7 @@ async function writePreviewStubs(works) {
     }
     try { if (fs.readdirSync(dir).length === 0) fs.rmdirSync(dir); } catch (_) {}
   }
-  return { count, blurred };
+  return { count, slides, blurred };
 }
 
 function writeStubs(pages) {
@@ -1274,7 +1296,7 @@ async function build() {
     console.log("  "+span+" "+e.title+"  ("+ar+", "+e.allMedia.length+" file(s))"+thumb+gated);
   }
 
-  console.log("\nlink previews: " + previews.count + " file(s) in w/ and full/w/" + (previews.blurred ? " (" + previews.blurred + " blurred gated preview image(s))" : ""));
+  console.log("\nlink previews: " + previews.count + " page(s) in w/ and full/w/ (" + previews.slides + " for individual slides)" + (previews.blurred ? ", " + previews.blurred + " blurred gated preview image(s)" : ""));
 
   fs.writeFileSync(PAGES_OUT, JSON.stringify({generated:new Date().toISOString(),pages},null,2));
   writeStubs(pages);

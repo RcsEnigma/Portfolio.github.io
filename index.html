@@ -811,21 +811,33 @@ async function boot() {
 // ═══════════════════════════════════════════════════════════════
 //  SHAREABLE URLS
 //    /?tag=3D&tag=art                 grid with those filters
-//    /w/<slug>?m=2                    a work, on its 2nd attached item
-//    /w/<slug>?m=2&zoom=1             ...in the full-screen zoom view
-//  /w/<slug> is a tiny generated page that gives link previews their title /
-//  description / image and then forwards into /?work=<slug>. Gated works use
-//  /full/w/<slug>. The address bar always shows the preview-friendly form,
-//  so whatever you copy from it embeds properly.
+//    /w/<slug>                        a work (its first item)
+//    /w/<slug>--3                     ...on its 3rd attached item
+//    /w/<slug>--3?zoom=1              ...in the full-screen zoom view
+//  Each of those is a tiny generated page that gives link previews that exact
+//  item's title / description / image and then forwards into
+//  /?work=<slug>&m=3. Gated works use /full/w/... The address bar always shows
+//  the preview-friendly form, so whatever you copy from it embeds properly.
+//  (Old-style /?work=<slug>&m=3&zoom=1 links still work.)
 // ═══════════════════════════════════════════════════════════════
 function workSlug(w) { return w.slug || w.id; }
-function workPath(w) { return (w.gated ? "/full/w/" : "/w/") + encodeURIComponent(workSlug(w)); }
-function workUrlPath(w, idx, zoom) {
-  const q = new URLSearchParams();
-  if (idx > 0) q.set("m", String(idx + 1));        // 1-based; omitted for the first item
-  if (zoom) q.set("zoom", "1");
-  const qs = q.toString();
-  return workPath(w) + (qs ? "?" + qs : "");
+function workPath(w, idx) {
+  // item number is 1-based and only appears from the 2nd item on ("--" can't occur in a slug)
+  return (w.gated ? "/full/w/" : "/w/") + encodeURIComponent(workSlug(w)) + (idx > 0 ? "--" + (idx + 1) : "");
+}
+function workUrlPath(w, idx, zoom) { return workPath(w, idx) + (zoom ? "?zoom=1" : ""); }
+
+// What the address bar currently says, if it names a work (used by Back / Forward).
+function routeFromLocation() {
+  const m = location.pathname.match(/^\/(?:full\/)?w\/([^/]+)$/);
+  if (!m || !manifest) return null;
+  let slug = decodeURIComponent(m[1]), idx = 0;
+  const sm = slug.match(/^(.+)--(\d+)$/);
+  if (sm) { slug = sm[1]; idx = parseInt(sm[2], 10) - 1; }
+  const work = (manifest.works || []).find(w => workSlug(w) === slug);
+  if (!work) return null;
+  idx = Math.min(Math.max(idx, 0), (work.allMedia?.length || 1) - 1);
+  return { work, idx, zoom: new URLSearchParams(location.search).get("zoom") === "1" };
 }
 function gridUrlPath() {
   const q = new URLSearchParams();
@@ -1184,7 +1196,7 @@ function buildGrid() {
 // ═══════════════════════════════════════════════════════════════
 //  MODAL
 // ═══════════════════════════════════════════════════════════════
-function openModal(work, startIndex) {
+function openModal(work, startIndex, opts) {
   // Stepping between posts re-uses this function while the modal is already
   // open — in that case the existing history entry is kept (no extra push).
   const alreadyOpen = document.getElementById("modal-overlay").classList.contains("open");
@@ -1222,7 +1234,9 @@ function openModal(work, startIndex) {
 
   document.getElementById("modal-overlay").classList.add("open");
   document.body.style.overflow = "hidden";
-  if (!alreadyOpen) history.pushState({ _portfolio: "modal" }, "", workUrlPath(work, modalMediaIndex, false));
+  // opts.noPush: re-opening an entry that's already in history (Back / Forward)
+  if (!alreadyOpen && !(opts && opts.noPush))
+    history.pushState({ _portfolio: "modal" }, "", workUrlPath(work, modalMediaIndex, false));
   else syncUrl();
 }
 
@@ -1567,7 +1581,7 @@ function stepZoom(dir) {
   showZoomItem(modalMediaIndex);
 }
 
-function openZoom() {
+function openZoom(opts) {
   if (!modalWork) return;
   const src = modalWork.allMedia?.[modalMediaIndex];
   if (!src) return;
@@ -1596,7 +1610,8 @@ function openZoom() {
   document.getElementById("zoom-overlay").classList.add("open");
   // Zoom is its own history step (grid -> popup -> zoom): Back from zoom lands on
   // the popup, one more Back lands on the grid. The URL gains ?zoom=1.
-  history.pushState({ _portfolio: "zoom" }, "", workUrlPath(modalWork, modalMediaIndex, true));
+  if (!(opts && opts.noPush))
+    history.pushState({ _portfolio: "zoom" }, "", workUrlPath(modalWork, modalMediaIndex, true));
   showZoomItem(modalMediaIndex);
 }
 
@@ -1730,19 +1745,45 @@ function closeModal() {
 function handleOverlayClick(e) { closeModal(); }
 
 // Hardware back button (Samsung/Android) — closes modal without leaving the page
+// Hide the popup without touching history (used when the browser already moved it).
+function hideModalNoHistory() {
+  document.getElementById("modal-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+  document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
+  document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
+  modalWork = null;
+  resumeCarousel();
+}
+
+// Back AND Forward: show whatever the address bar now names.
+//   grid entry   -> no popup, no zoom
+//   popup entry  -> that work's popup, no zoom
+//   zoom entry   -> that work's popup with zoom open
+// (Moving through history never adds entries; these helpers use noPush.)
 window.addEventListener("popstate", () => {
   if (_suppressPop) { _suppressPop = false; syncUrl(); return; }
-  if (document.getElementById("zoom-overlay").classList.contains("open")) {
-    closeZoom(true); return;
+  const zoomOpen = document.getElementById("zoom-overlay").classList.contains("open");
+  const route = routeFromLocation();
+
+  if (!route) {                                   // landed on the grid
+    if (zoomOpen) closeZoom(true);
+    if (modalWork) hideModalNoHistory();
+    return;
   }
-  if (modalWork) {
-    document.getElementById("modal-overlay").classList.remove("open");
-    document.body.style.overflow = "";
-    document.querySelectorAll(".modal-slot video").forEach(v => v.pause());
-    document.querySelectorAll(".modal-slot").forEach(s => s.classList.remove("active"));
-    modalWork = null;
-    resumeCarousel();
+  // Back out of zoom into the same popup (also brings the popup up to date with
+  // any items browsed inside zoom).
+  if (zoomOpen && !route.zoom && modalWork === route.work) { closeZoom(true); return; }
+
+  if (modalWork !== route.work) {
+    if (zoomOpen) closeZoom(true);
+    openModal(route.work, route.idx, { noPush: true });
+  } else if (!zoomOpen && modalMediaIndex !== route.idx) {
+    modalMediaIndex = route.idx;
+    renderModalMedia();
   }
+  if (route.zoom && !document.getElementById("zoom-overlay").classList.contains("open") &&
+      (getMediaType(route.work.allMedia?.[route.idx]) || route.work.type) === "image")
+    openZoom({ noPush: true });
 });
 
 document.addEventListener("keydown", e => {

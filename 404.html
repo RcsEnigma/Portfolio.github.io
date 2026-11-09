@@ -18,7 +18,10 @@
 // /full/w/<name>): skip the dead end and open the gallery instead.
 (function () {
   var p = location.pathname;
-  if (/^\/full\/w\//.test(p)) location.replace("/full/");
+  // a slide link whose page doesn't exist (/w/name--7): fall back to the work itself
+  var slide = p.match(/^(\/(?:full\/)?w\/[^\/]+?)--\d+\/?$/);
+  if (slide) location.replace(slide[1]);
+  else if (/^\/full\/w\//.test(p)) location.replace("/full/");
   else if (/^\/w\//.test(p)) location.replace("/");
 })();
 </script>
