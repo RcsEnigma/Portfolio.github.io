@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-09T00:06:11.788Z",
+  "generated": "2026-11-23T04:16:45.470Z",
   "tags": [
     "2D",
     "3D",
@@ -394,6 +394,39 @@
         null
       ],
       "slug": "grungy-shower"
+    },
+    {
+      "id": "Alkahest",
+      "primaryMedia": "Alkahest_01.png",
+      "allMedia": [
+        "Alkahest_01.png"
+      ],
+      "type": "image",
+      "title": "Alkahest Cover",
+      "description": "Found yet another model on sketchfab ('Iblis\" by Juliko Banditto). Slight material modifications were made, along with post processing effects. Everything else was done afterwards.\n\nI like this piece because the title font was one I found a while back but couldn't find a proper use for until now. I also like this work because it uses a predominantly green palette, which I don't often do.",
+      "tags": [
+        "2D",
+        "3D",
+        "Graphic Design",
+        "Multimodal",
+        "Blender"
+      ],
+      "featured": false,
+      "date": "2025-11",
+      "link": "",
+      "aspectRatio": 0.773,
+      "gridSpan": "tall",
+      "thumbMedia": "Alkahest_01.webp",
+      "modalThumbs": [
+        "Alkahest_01.webp"
+      ],
+      "zoomMedia": [
+        "Alkahest_01_zoom.webp"
+      ],
+      "webMedia": [
+        null
+      ],
+      "slug": "alkahest"
     },
     {
       "id": "MagazineSix",

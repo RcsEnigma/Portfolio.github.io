@@ -1,0 +1,13 @@
+[title]
+Alkahest Cover
+
+[description]
+Found yet another model on sketchfab ('Iblis" by Juliko Banditto). Slight material modifications were made, along with post processing effects. Everything else was done afterwards.
+
+I like this piece because the title font was one I found a while back but couldn't find a proper use for until now. I also like this work because it uses a predominantly green palette, which I don't often do.
+
+[tags]
+2D, 3D, Graphic Design, Multimodal, Blender
+
+[date]
+2025-11

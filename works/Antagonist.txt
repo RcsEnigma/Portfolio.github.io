@@ -10,7 +10,7 @@ Concept art of the 'main big bad boss' of my Trepidation project. A tiny machine
 
 
 [tags]
-3D, Blender, Trepidation
+3D, Blender, Trepidation, 
 
 [date]
 2026-07
